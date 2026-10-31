@@ -1,6 +1,8 @@
 # KeyGlowMaster
 
 [![Release](https://img.shields.io/github/v/release/MusicCat-61/KeyGlowMaster?style=flat-square)](https://github.com/MusicCat-61/KeyGlowMaster/releases)
+[![Download](https://img.shields.io/badge/download-KGMaster.exe-2ea44f?style=flat-square)](https://github.com/MusicCat-61/KeyGlowMaster/releases/latest/download/KGMaster.exe)
+[![CI](https://github.com/MusicCat-61/KeyGlowMaster/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/MusicCat-61/KeyGlowMaster/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Windows%2010%20%7C%2011-0078D6?style=flat-square)](#)
 [![.NET](https://img.shields.io/badge/.NET-10-512BD4?style=flat-square)](https://dotnet.microsoft.com/download)
@@ -24,7 +26,7 @@ KeyGlowMaster — форк проекта [GutsV](https://github.com/gutsv-proje
 | 🎯 **Слоты цвета** | Три цвета для анимаций и отдельный применяемый цвет, у каждого свой предпросмотр |
 | ⌨️ **Живое превью** | Клавиатура на экране показывает цвет, который реально уходит в железо |
 | 😴 **Таймер сна** | Через 5 минут простоя подсветка плавно гаснет и возвращается при вводе |
-| ♻️ **Портативность** | Одна папка, запуск от администратора, автозапуск через Планировщик задач |
+| ♻️ **Портативность** | Один самодостаточный файл, запуск от администратора, автозапуск через Планировщик задач |
 
 ## Эффекты
 
@@ -65,9 +67,9 @@ KeyGlowMaster — форк проекта [GutsV](https://github.com/gutsv-proje
 
 ## Установка
 
-1. Скачайте последний релиз.
-2. Распакуйте папку в любое место (например, `C:\KeyGlowMaster`).
-3. Запустите **`KGMaster.exe`** от имени администратора — иначе не будет доступа к драйверу клавиатуры.
+1. Скачайте [**`KGMaster.exe`**](https://github.com/MusicCat-61/KeyGlowMaster/releases/latest/download/KGMaster.exe) — один самодостаточный файл, установщик и .NET Runtime не нужны.
+2. Положите его в постоянную папку, например `C:\KeyGlowMaster`.
+3. Запустите от имени администратора — иначе не будет доступа к драйверу клавиатуры.
 4. При первом запуске согласитесь на **режим службы**: приложение создаст задачу в Планировщике, чтобы Windows поднимала его с сохранённой подсветкой.
 
 > Желательно, чтобы оригинальный Control Center (`FnKey.exe`) был запущен: KeyGlowMaster опирается на драйверы, которые тот инициализирует.
@@ -88,12 +90,14 @@ dotnet build MusicCat.CLVKM.slnx -c Release
 
 ### Релизы
 
-Пуш тега запускает сборку и публикацию: [workflow](.github/workflows/release.yml) собирает самодостаточную версию под `win-x64` на `windows-latest`, упаковывает её в `KeyGlowMaster-<tag>-win-x64.zip` и прикрепляет архив к релизу с автоматически составленным списком изменений.
+Пуш тега запускает сборку и публикацию: [workflow](.github/workflows/release.yml) собирает самодостаточный однофайловый `KGMaster.exe` под `win-x64` на `windows-latest`, проставляет ему версию из тега и прикрепляет исполняемый файл вместе с контрольной суммой SHA-256 к релизу с автоматически составленным списком изменений. Скачивание — около 75 МБ: при первом запуске бандл распаковывает среду выполнения в `%TEMP%\.net\KGMaster` и дальше переиспользует её.
 
 ```powershell
-git tag v1.0.0
-git push origin v1.0.0
+git tag v1.0.1
+git push origin v1.0.1
 ```
+
+Каждый пуш в `main` запускает [CI workflow](.github/workflows/ci.yml) — только сборку решения, без тега и релиза.
 
 Состав решения: `MusicCat.CLVKM.Core` (модели, настройки, движок анимаций, погода), `MusicCat.CLVKM.Drivers` (Insyde / WMI), `MusicCat.CLVKM.UI` (оболочка WPF), плюс небольшая служба и консоль диагностики.
 

@@ -1,6 +1,8 @@
 # KeyGlowMaster
 
 [![Release](https://img.shields.io/github/v/release/MusicCat-61/KeyGlowMaster?style=flat-square)](https://github.com/MusicCat-61/KeyGlowMaster/releases)
+[![Download](https://img.shields.io/badge/download-KGMaster.exe-2ea44f?style=flat-square)](https://github.com/MusicCat-61/KeyGlowMaster/releases/latest/download/KGMaster.exe)
+[![CI](https://github.com/MusicCat-61/KeyGlowMaster/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/MusicCat-61/KeyGlowMaster/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Windows%2010%20%7C%2011-0078D6?style=flat-square)](#)
 [![.NET](https://img.shields.io/badge/.NET-10-512BD4?style=flat-square)](https://dotnet.microsoft.com/download)
@@ -24,7 +26,7 @@ KeyGlowMaster is a fork of the [GutsV project](https://github.com/gutsv-project/
 | 🎯 **Colour slots** | Three colours for animations plus a separate applied colour, each with its own preview |
 | ⌨️ **Live preview** | The keyboard on screen shows the colour that is actually being sent to the hardware |
 | 😴 **Sleep timer** | The backlight fades out after 5 minutes of idle time and comes back on input |
-| ♻️ **Portable** | Single folder, runs as administrator, auto-start through Task Scheduler |
+| ♻️ **Portable** | One self-contained executable, runs as administrator, auto-start through Task Scheduler |
 
 ## Effects
 
@@ -65,9 +67,9 @@ Tick **Turn off lighting when idle (5 min)** in the device card. After five minu
 
 ## Installation
 
-1. Download the latest release.
-2. Unpack the folder anywhere (for example `C:\KeyGlowMaster`).
-3. Run **`KGMaster.exe`** as administrator — the app needs it to talk to the keyboard driver.
+1. Download [**`KGMaster.exe`**](https://github.com/MusicCat-61/KeyGlowMaster/releases/latest/download/KGMaster.exe) — one self-contained file, no installer and no .NET runtime required.
+2. Keep it in a permanent folder, for example `C:\KeyGlowMaster`.
+3. Run it as administrator — the app needs it to talk to the keyboard driver.
 4. On the first run accept **Service Mode** to create a scheduled task, so Windows starts the app with the saved lighting.
 
 > The original Control Center (`FnKey.exe`) should be running: KeyGlowMaster relies on the drivers it initialises.
@@ -88,12 +90,14 @@ or run `publish.bat` to get a self-contained folder in `Build_Output`.
 
 ### Releases
 
-Pushing a version tag builds and publishes everything automatically — the [release workflow](.github/workflows/release.yml) compiles a self-contained `win-x64` build on `windows-latest`, packs it into `KeyGlowMaster-<tag>-win-x64.zip` and attaches the archive to a GitHub release with generated notes.
+Pushing a version tag builds and publishes the app — the [release workflow](.github/workflows/release.yml) publishes a self-contained single-file `KGMaster.exe` (win-x64) on `windows-latest`, stamps the tag into its file version and attaches the executable plus its SHA-256 checksum to a GitHub release with generated notes. The download is about 75 MB: on the first start the bundle unpacks its runtime into `%TEMP%\.net\KGMaster` and reuses it afterwards.
 
 ```powershell
-git tag v1.0.0
-git push origin v1.0.0
+git tag v1.0.1
+git push origin v1.0.1
 ```
+
+Every push to `main` runs the [CI workflow](.github/workflows/ci.yml), which only compiles the solution — no tag, no release.
 
 Layout: `MusicCat.CLVKM.Core` (models, settings, animation engine, weather), `MusicCat.CLVKM.Drivers` (Insyde / WMI), `MusicCat.CLVKM.UI` (WPF shell), plus a small service and a diagnostics console.
 

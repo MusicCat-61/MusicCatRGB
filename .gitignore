@@ -3,6 +3,7 @@
 [Bb]in/
 [Oo]bj/
 Build_Output/
+publish/
 *.exe
 *.dll
 *.pdb
