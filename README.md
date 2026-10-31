@@ -4,7 +4,7 @@
 [![Download](https://img.shields.io/badge/download-KGMaster.exe-2ea44f?style=flat-square)](https://github.com/MusicCat-61/KeyGlowMaster/releases/latest/download/KGMaster.exe)
 [![CI](https://github.com/MusicCat-61/KeyGlowMaster/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/MusicCat-61/KeyGlowMaster/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](LICENSE)
-[![Version](https://img.shields.io/badge/version-1.0.5.4-4CC2FF?style=flat-square)](https://github.com/MusicCat-61/KeyGlowMaster/releases/tag/v1.0.5.4)
+[![Version](https://img.shields.io/badge/version-1.0.5.5-4CC2FF?style=flat-square)](https://github.com/MusicCat-61/KeyGlowMaster/releases/tag/v1.0.5.5)
 [![Platform](https://img.shields.io/badge/platform-Windows%2010%20%7C%2011-0078D6?style=flat-square)](#)
 [![.NET](https://img.shields.io/badge/.NET-10-512BD4?style=flat-square)](https://dotnet.microsoft.com/download)
 
@@ -109,7 +109,27 @@ Both switches live in the title bar: `EN | RU` for the interface language and th
 
 Every run writes a plain-text log to `%LOCALAPPDATA%\MusicCat.CLVKM\logs\` — one file per day (`kgmaster-20261031.txt`), the last 14 are kept. The **Logs** button in the footer opens that folder; it is created on first use.
 
-The log records startup options, the driver handshake, effect switches, driver warnings and unhandled exceptions, which is usually enough to explain "the device is not found" or "an effect stopped".
+Each entry is tagged with a category, so the file can be followed with a filter:
+
+| Category | What it records |
+|---|---|
+| `[hotkey]` | Shortcut registration and every press: effect switched, animation started or stopped |
+| `[effect]` | Effect selection and start/stop, with brightness, speed and zone |
+| `[color]` | Colour-slot edits, the static colour sent to the keyboard and weather-location changes |
+| `[mode]` | Theme, language, driver mode, zone, brightness, speed, sleep timer and the state restored at startup |
+| `[driver]` | The driver handshake, plus the raw status codes the Insyde DLL answers with |
+
+```text
+2026-10-31 21:42:07.385 [INF] Driver connected: InsydeDriver (single-zone) after 1 attempt(s)
+2026-10-31 21:42:07.401 [INF] [effect] Animation started: Погодная подсветка (Weather Sync), brightness=100%, speed=1,5x, zone=All
+2026-10-31 21:42:07.427 [INF] [driver] Insyde: first frame statuses: SetDCHU_Data(103)=103, …
+```
+
+Sliders change their value hundreds of times per drag, so those entries are coalesced — the log keeps the value you settled on, not every pixel. Identical driver faults are reported once, then summarised, so a busy animation cannot flood the file.
+
+> `SetDCHU_Data(103)` answering `103` (and `WriteAppSettings` answering `1`) is normal on Insyde hardware: the vendor DLL echoes a status instead of returning 0. It is logged as information, not as an error.
+
+The log is UTF-8. Older tools that assume the system code page may show Cyrillic effect names incorrectly — Notepad, VS Code and `Get-Content -Encoding utf8` read it correctly.
 
 ## Building from source
 
@@ -126,8 +146,8 @@ or run `publish.bat` to get a self-contained folder in `Build_Output`.
 Pushing a version tag builds and publishes the app — the [release workflow](.github/workflows/release.yml) publishes a self-contained single-file `KGMaster.exe` (win-x64) on `windows-latest`, stamps the tag into its file version and attaches the executable plus its SHA-256 checksum to a GitHub release with generated notes. The download is about 75 MB: on the first start the bundle unpacks its runtime into `%TEMP%\.net\KGMaster` and reuses it afterwards.
 
 ```powershell
-git tag v1.0.5.4
-git push origin v1.0.5.4
+git tag v1.0.5.5
+git push origin v1.0.5.5
 ```
 
 Every push to `main` runs the [CI workflow](.github/workflows/ci.yml), which only compiles the solution — no tag, no release.

@@ -57,6 +57,16 @@ public partial class MainWindow : Window
         if (handle != IntPtr.Zero)
         {
             _globalHotKeys = new GlobalHotKeyManager(handle, HandleGlobalHotKey);
+
+            if (_globalHotKeys.Registered.Count > 0)
+            {
+                Logging.AppLog.Event("hotkey", $"Registered shortcuts: {string.Join(", ", _globalHotKeys.Registered)}");
+            }
+
+            foreach (var failure in _globalHotKeys.Failed)
+            {
+                Logging.AppLog.Warn("Hotkey not registered (already owned by another app?): {Shortcut}", failure);
+            }
         }
     }
 
@@ -72,17 +82,32 @@ public partial class MainWindow : Window
             case GlobalHotKeyAction.NextEffect:
                 if (vm.CycleAnimation(1))
                 {
+                    Logging.AppLog.Event("hotkey", $"Ctrl+Alt+PageUp → next effect: {vm.SelectedAnimation?.Name}");
                     ShowEffectToast(vm.SelectedAnimation);
                 }
+                else
+                {
+                    Logging.AppLog.Event("hotkey", "Ctrl+Alt+PageUp ignored (the lighting is not ready or asleep)");
+                }
+
                 break;
             case GlobalHotKeyAction.PreviousEffect:
                 if (vm.CycleAnimation(-1))
                 {
+                    Logging.AppLog.Event("hotkey", $"Ctrl+Alt+PageDown → previous effect: {vm.SelectedAnimation?.Name}");
                     ShowEffectToast(vm.SelectedAnimation);
                 }
+                else
+                {
+                    Logging.AppLog.Event("hotkey", "Ctrl+Alt+PageDown ignored (the lighting is not ready or asleep)");
+                }
+
                 break;
             case GlobalHotKeyAction.ToggleAnimation:
                 vm.ToggleAnimationCommand.Execute(null);
+                Logging.AppLog.Event(
+                    "hotkey",
+                    $"Ctrl+Alt+Enter → animation {(vm.IsAnimationRunning ? "on" : "off")}: {vm.SelectedAnimation?.Name}");
                 ShowStatusToast(
                     Loc.T(vm.IsAnimationRunning ? "Hotkey_AnimOn" : "Hotkey_AnimOff"),
                     vm.IsAnimationRunning ? vm.SelectedAnimation?.Name : null);
@@ -108,8 +133,14 @@ public partial class MainWindow : Window
 
     internal void UnregisterGlobalHotKeys()
     {
-        _globalHotKeys?.Dispose();
+        if (_globalHotKeys is null)
+        {
+            return;
+        }
+
+        _globalHotKeys.Dispose();
         _globalHotKeys = null;
+        Logging.AppLog.Event("hotkey", "Shortcuts unregistered");
     }
 
     private void TitleBar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)

@@ -33,7 +33,15 @@ internal sealed class GlobalHotKeyManager : IDisposable
     private readonly HwndSource _source;
     private readonly Action<GlobalHotKeyAction> _onHotKey;
     private readonly HashSet<int> _registeredIds = new();
+    private readonly List<string> _registered = new();
+    private readonly List<string> _failed = new();
     private bool _disposed;
+
+    /// <summary>Shortcuts that are now active, for the log.</summary>
+    public IReadOnlyList<string> Registered => _registered;
+
+    /// <summary>Shortcuts another app already owns; they stay inactive.</summary>
+    public IReadOnlyList<string> Failed => _failed;
 
     public GlobalHotKeyManager(IntPtr windowHandle, Action<GlobalHotKeyAction> onHotKey)
     {
@@ -54,10 +62,13 @@ internal sealed class GlobalHotKeyManager : IDisposable
         if (RegisterHotKey(_windowHandle, id, modifiers, virtualKey))
         {
             _registeredIds.Add(id);
+            _registered.Add(shortcut);
         }
         else
         {
-            Debug.WriteLine($"Could not register global hotkey {shortcut}. Win32 error: {Marshal.GetLastWin32Error()}");
+            var error = Marshal.GetLastWin32Error();
+            _failed.Add($"{shortcut} (Win32 error {error})");
+            Debug.WriteLine($"Could not register global hotkey {shortcut}. Win32 error: {error}");
         }
     }
 

@@ -4,7 +4,7 @@
 [![Download](https://img.shields.io/badge/download-KGMaster.exe-2ea44f?style=flat-square)](https://github.com/MusicCat-61/KeyGlowMaster/releases/latest/download/KGMaster.exe)
 [![CI](https://github.com/MusicCat-61/KeyGlowMaster/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/MusicCat-61/KeyGlowMaster/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](LICENSE)
-[![Version](https://img.shields.io/badge/version-1.0.5.4-4CC2FF?style=flat-square)](https://github.com/MusicCat-61/KeyGlowMaster/releases/tag/v1.0.5.4)
+[![Version](https://img.shields.io/badge/version-1.0.5.5-4CC2FF?style=flat-square)](https://github.com/MusicCat-61/KeyGlowMaster/releases/tag/v1.0.5.5)
 [![Platform](https://img.shields.io/badge/platform-Windows%2010%20%7C%2011-0078D6?style=flat-square)](#)
 [![.NET](https://img.shields.io/badge/.NET-10-512BD4?style=flat-square)](https://dotnet.microsoft.com/download)
 
@@ -109,7 +109,27 @@ KeyGlowMaster — форк проекта [GutsV](https://github.com/gutsv-proje
 
 Каждый запуск пишет обычный текстовый лог в `%LOCALAPPDATA%\MusicCat.CLVKM\logs\` — один файл на день (`kgmaster-20261031.txt`), хранятся последние 14. Кнопка **«Журнал»** в нижней панели открывает эту папку; она создаётся при первом обращении.
 
-В логе видны параметры запуска, подключение драйвера, переключение эффектов, предупреждения драйвера и необработанные исключения — обычно этого достаточно, чтобы понять «устройство не найдено» или «эффект остановился».
+Каждая запись помечена категорией — по ней удобно фильтровать файл:
+
+| Категория | Что попадает в лог |
+|---|---|
+| `[hotkey]` | Регистрация сочетаний и каждое нажатие: смена эффекта, запуск и остановка анимации |
+| `[effect]` | Выбор эффекта и старт/стоп, вместе с яркостью, скоростью и зоной |
+| `[color]` | Правка цветовых слотов, отправка статичного цвета на клавиатуру, смена города для погоды |
+| `[mode]` | Тема, язык, режим драйвера, зона, яркость, скорость, таймер сна и состояние, восстановленное при запуске |
+| `[driver]` | Подключение драйвера и «сырые» коды ответа DLL Insyde |
+
+```text
+2026-10-31 21:42:07.385 [INF] Driver connected: InsydeDriver (single-zone) after 1 attempt(s)
+2026-10-31 21:42:07.401 [INF] [effect] Animation started: Погодная подсветка (Weather Sync), brightness=100%, speed=1,5x, zone=All
+2026-10-31 21:42:07.427 [INF] [driver] Insyde: first frame statuses: SetDCHU_Data(103)=103, …
+```
+
+Ползунки меняют значение сотни раз за одно перетаскивание, поэтому такие записи склеиваются: в лог попадает то значение, на котором вы остановились, а не каждый пиксель. Одинаковые сбои драйвера пишутся один раз, дальше идут сводкой, — анимация не может залить файл.
+
+> Ответ `103` от `SetDCHU_Data(103)` (и `1` от `WriteAppSettings`) для Insyde — это норма: вендорная DLL возвращает эхо статуса, а не 0. Пишется как информация, а не как ошибка.
+
+Лог в UTF-8. Старые программы, которые читают в системной кодовой странице, могут показать русские названия эффектов некорректно — «Блокнот», VS Code и `Get-Content -Encoding utf8` читают правильно.
 
 ## Сборка из исходников
 
@@ -126,8 +146,8 @@ dotnet build MusicCat.CLVKM.slnx -c Release
 Пуш тега запускает сборку и публикацию: [workflow](.github/workflows/release.yml) собирает самодостаточный однофайловый `KGMaster.exe` под `win-x64` на `windows-latest`, проставляет ему версию из тега и прикрепляет исполняемый файл вместе с контрольной суммой SHA-256 к релизу с автоматически составленным списком изменений. Скачивание — около 75 МБ: при первом запуске бандл распаковывает среду выполнения в `%TEMP%\.net\KGMaster` и дальше переиспользует её.
 
 ```powershell
-git tag v1.0.5.4
-git push origin v1.0.5.4
+git tag v1.0.5.5
+git push origin v1.0.5.5
 ```
 
 Каждый пуш в `main` запускает [CI workflow](.github/workflows/ci.yml) — только сборку решения, без тега и релиза.

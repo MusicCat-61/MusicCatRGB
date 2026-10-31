@@ -341,9 +341,30 @@ public partial class MainViewModel : ObservableObject
 
         Loc.LanguageChanged += OnLanguageChanged;
         DriverDiagnostics.ErrorReported += OnDriverError;
+        DriverDiagnostics.NoteReported += OnDriverNote;
 
         InitializeAsync();
     }
+
+    private bool _loggingActive;
+
+    /// <summary>One line describing the state restored from settings.json.</summary>
+    private void LogRestoredState()
+    {
+        AppLog.Event(
+            "mode",
+            $"Restored: effect={SelectedAnimation?.Animation.Name ?? "-"}, " +
+            $"driverMode={DescribeDriverType()}, zone={SelectedZone}, sleepTimer={SleepTimerEnabled}, " +
+            $"brightness={Brightness:0.#}%, speed={AnimationSpeed:0.##}x, running={IsAnimationRunning}, " +
+            $"primary={HexColor}, secondary={SecondaryHexColor}, tertiary={TertiaryHexColor}, static={StaticHexColor}");
+    }
+
+    private string DescribeDriverType() => DriverType switch
+    {
+        1 => "Insyde",
+        2 => "WMI",
+        _ => "Auto"
+    };
 
     private async void InitializeAsync()
     {
@@ -397,17 +418,24 @@ public partial class MainViewModel : ObservableObject
             if (baseDriver is null)
             {
                 SetStatus("St_NotFound");
-                AppLog.Warn("Device not found after {Attempts} attempts (driver mode {Mode})", attempt, DriverType);
+                AppLog.Warn(
+                    "Device not found after {Attempts} attempts (driver mode {Mode})",
+                    attempt,
+                    DescribeDriverType());
                 return;
             }
-
-            AppLog.Info("Driver connected: {Driver} ({Zones})", baseDriver.GetType().Name, IsMultiZoneCapable ? "multi-zone" : "single-zone");
 
             SetStatus("St_AntiLag");
             _queue = new AsyncDriverQueue(baseDriver);
             await _queue.InitializeAsync();
 
             IsMultiZoneCapable = baseDriver.GetType().Name.Contains("Wmi");
+            AppLog.Info(
+                "Driver connected: {Driver} ({Zones}) after {Attempts} attempt(s)",
+                baseDriver.GetType().Name,
+                IsMultiZoneCapable ? "multi-zone" : "single-zone",
+                attempt + 1);
+
             if (!IsMultiZoneCapable)
             {
                 SelectedZone = Zone.All;
@@ -453,6 +481,11 @@ public partial class MainViewModel : ObservableObject
     /// </summary>
     private void RestoreSavedState()
     {
+        // Per-change logging starts here, once the saved values are being applied: the
+        // constructor writes the same properties from settings, and logging those would
+        // look like a burst of user edits.
+        _loggingActive = true;
+
         AnimationItem? saved = !string.IsNullOrEmpty(_currentSettings.LastAnimation)
             ? Animations.FirstOrDefault(item => item.Animation.Name == _currentSettings.LastAnimation)
             : null;
@@ -473,6 +506,8 @@ public partial class MainViewModel : ObservableObject
             IsAnimationRunning = false;
             _ = ApplyColorCore(announceStatus: false);
         }
+
+        LogRestoredState();
     }
 
     private void StartAnimation()
@@ -487,7 +522,10 @@ public partial class MainViewModel : ObservableObject
         _animationEngine.Start(SelectedAnimation.Animation);
         IsAnimationRunning = true;
         SetStatus("St_Running");
-        AppLog.Info("Animation started: {Effect}", SelectedAnimation.Animation.Name);
+        AppLog.Event(
+            "effect",
+            $"Animation started: {SelectedAnimation.Name} ({SelectedAnimation.Animation.Name}), " +
+            $"brightness={Brightness:0.#}%, speed={AnimationSpeed:0.##}x, zone={SelectedZone}");
         SaveSettings();
     }
 
@@ -496,7 +534,7 @@ public partial class MainViewModel : ObservableObject
         _animationEngine?.Stop();
         IsAnimationRunning = false;
         SetStatus("St_Stopped");
-        AppLog.Info("Animation stopped: {Effect}", SelectedAnimation?.Animation.Name ?? "-");
+        AppLog.Event("effect", $"Animation stopped: {SelectedAnimation?.Animation.Name ?? "-"}");
 
         SaveSettings();
 
@@ -678,6 +716,7 @@ public partial class MainViewModel : ObservableObject
         _currentSettings.WeatherCity = city;
         _currentSettings.WeatherLatitude = latitude;
         _currentSettings.WeatherLongitude = longitude;
+        AppLog.Event("mode", $"Weather location: {city} ({latitude:0.####}, {longitude:0.####})");
         SaveSettings();
     }
 
@@ -727,6 +766,9 @@ public partial class MainViewModel : ObservableObject
             // Dispatcher may be shutting down.
         }
     }
+
+    /// <summary>Benign driver answers (expected status codes) go to the log once each.</summary>
+    private void OnDriverNote(string message) => AppLog.Event("driver", message);
 
     private void ApplyWeatherSnapshot(WeatherSnapshot snapshot)
     {
@@ -824,6 +866,10 @@ public partial class MainViewModel : ObservableObject
         if (announceStatus)
         {
             SetStatus("St_Applied");
+            AppLog.Event(
+                "color",
+                $"Static colour sent to the keyboard: #{applied.R:X2}{applied.G:X2}{applied.B:X2} " +
+                $"(zone {zone}, brightness {Brightness:0.#}%)");
         }
     }
 
@@ -847,6 +893,11 @@ public partial class MainViewModel : ObservableObject
         OnPropertyChanged(nameof(ActiveBlue));
         OnPropertyChanged(nameof(ActiveHexColor));
         UpdateColorPreview();
+
+        if (_loggingActive)
+        {
+            AppLog.Event("mode", $"Colour slot selected: {value}");
+        }
     }
 
     public bool IsLightTheme => Theming.Theme.IsLight;
@@ -857,6 +908,7 @@ public partial class MainViewModel : ObservableObject
         Theming.Theme.Toggle();
         OnPropertyChanged(nameof(IsLightTheme));
         _currentSettings.Theme = Theming.Theme.CurrentCode;
+        AppLog.Event("mode", $"Theme: {Theming.Theme.CurrentCode}");
         SaveSettings();
     }
 
@@ -895,6 +947,11 @@ public partial class MainViewModel : ObservableObject
 
         _currentSettings.LastAnimation = value.Animation.Name;
 
+        if (_loggingActive)
+        {
+            AppLog.Event("effect", $"Effect selected: {value.Name} ({value.Animation.Name})");
+        }
+
         OnPropertyChanged(nameof(ShowTertiaryColor));
         OnPropertyChanged(nameof(ShowWeatherPanel));
 
@@ -928,18 +985,21 @@ public partial class MainViewModel : ObservableObject
         UpdateHexFromRgb();
         if (IsPrimaryActive) OnPropertyChanged(nameof(ActiveRed));
         SyncAnimationColors();
+        LogColorSlot("primary", Red, Green, Blue);
     }
 
     partial void OnGreenChanged(byte value)
     {
         UpdateHexFromRgb();
         SyncAnimationColors();
+        LogColorSlot("primary", Red, Green, Blue);
     }
 
     partial void OnBlueChanged(byte value)
     {
         UpdateHexFromRgb();
         SyncAnimationColors();
+        LogColorSlot("primary", Red, Green, Blue);
     }
 
     partial void OnSecondaryRedChanged(byte value)
@@ -948,6 +1008,7 @@ public partial class MainViewModel : ObservableObject
         UpdateTertiaryHexFromRgb();
         UpdateStaticHexFromRgb();
         if (IsSecondaryActive) OnPropertyChanged(nameof(ActiveRed));
+        LogColorSlot("secondary", SecondaryRed, SecondaryGreen, SecondaryBlue);
     }
 
     partial void OnSecondaryGreenChanged(byte value)
@@ -956,6 +1017,7 @@ public partial class MainViewModel : ObservableObject
         UpdateTertiaryHexFromRgb();
         UpdateStaticHexFromRgb();
         if (IsSecondaryActive) OnPropertyChanged(nameof(ActiveGreen));
+        LogColorSlot("secondary", SecondaryRed, SecondaryGreen, SecondaryBlue);
     }
 
     partial void OnSecondaryBlueChanged(byte value)
@@ -964,6 +1026,7 @@ public partial class MainViewModel : ObservableObject
         UpdateTertiaryHexFromRgb();
         UpdateStaticHexFromRgb();
         if (IsSecondaryActive) OnPropertyChanged(nameof(ActiveBlue));
+        LogColorSlot("secondary", SecondaryRed, SecondaryGreen, SecondaryBlue);
     }
 
     partial void OnHexColorChanged(string value)
@@ -986,6 +1049,7 @@ public partial class MainViewModel : ObservableObject
                 
                 SyncAnimationColors();
                 UpdateColorPreview();
+                LogColorSlot("primary", Red, Green, Blue);
             }
             catch
             {
@@ -1010,6 +1074,11 @@ public partial class MainViewModel : ObservableObject
         {
             _ = ApplyColorCore(announceStatus: false);
         }
+
+        if (_loggingActive)
+        {
+            AppLog.Coalesce("mode", "mode.brightness", () => $"Brightness: {Brightness:0.#}%");
+        }
     }
 
     partial void OnAnimationSpeedChanged(double value)
@@ -1019,7 +1088,28 @@ public partial class MainViewModel : ObservableObject
             _animationEngine.Speed = value;
         }
 
+        if (_loggingActive)
+        {
+            AppLog.Coalesce("mode", "mode.speed", () => $"Animation speed: {AnimationSpeed:0.##}x");
+        }
+
         SaveSettings();
+    }
+
+    partial void OnSelectedZoneChanged(Zone value)
+    {
+        if (_loggingActive)
+        {
+            AppLog.Event("mode", $"Active zone: {value}");
+        }
+    }
+
+    partial void OnDriverTypeChanged(int value)
+    {
+        if (_loggingActive)
+        {
+            AppLog.Event("mode", $"Driver mode: {DescribeDriverType()} (applies after a restart)");
+        }
     }
 
     private void OnLanguageChanged()
@@ -1044,6 +1134,7 @@ public partial class MainViewModel : ObservableObject
         ApplyWeatherSnapshot(WeatherService.Instance.Snapshot);
 
         _currentSettings.Language = Loc.CurrentCode;
+        AppLog.Event("mode", $"Language: {Loc.CurrentCode}");
         SaveSettings();
     }
 
@@ -1079,6 +1170,20 @@ public partial class MainViewModel : ObservableObject
         {
             PreviewColor = StaticColor;
         }
+    }
+
+    /// <summary>
+    /// Queues a colour-slot change. Slider drags change the value on every pixel, so the
+    /// entry is coalesced and only the value the user settles on is written to the log.
+    /// </summary>
+    private void LogColorSlot(string slot, byte red, byte green, byte blue)
+    {
+        if (!_loggingActive)
+        {
+            return;
+        }
+
+        AppLog.Coalesce("color", $"color.{slot}", () => $"Colour {slot}: #{red:X2}{green:X2}{blue:X2}");
     }
 
     private void OnFrameApplied(ColorRGB color, Zone zone)
@@ -1132,6 +1237,7 @@ public partial class MainViewModel : ObservableObject
             OnPropertyChanged(nameof(SecondaryColorBrush));
             
             SyncAnimationColors();
+            LogColorSlot("secondary", SecondaryRed, SecondaryGreen, SecondaryBlue);
         }
         catch
         {
@@ -1199,18 +1305,21 @@ public partial class MainViewModel : ObservableObject
     {
         UpdateStaticHexFromRgb();
         if (IsStaticActive) OnPropertyChanged(nameof(ActiveRed));
+        LogColorSlot("static", StaticRed, StaticGreen, StaticBlue);
     }
 
     partial void OnStaticGreenChanged(byte value)
     {
         UpdateStaticHexFromRgb();
         if (IsStaticActive) OnPropertyChanged(nameof(ActiveGreen));
+        LogColorSlot("static", StaticRed, StaticGreen, StaticBlue);
     }
 
     partial void OnStaticBlueChanged(byte value)
     {
         UpdateStaticHexFromRgb();
         if (IsStaticActive) OnPropertyChanged(nameof(ActiveBlue));
+        LogColorSlot("static", StaticRed, StaticGreen, StaticBlue);
     }
 
     partial void OnStaticHexColorChanged(string value)
@@ -1236,6 +1345,7 @@ public partial class MainViewModel : ObservableObject
             OnPropertyChanged(nameof(StaticColor));
             OnPropertyChanged(nameof(StaticColorBrush));
             UpdateColorPreview();
+            LogColorSlot("static", StaticRed, StaticGreen, StaticBlue);
         }
         catch
         {
@@ -1258,6 +1368,7 @@ public partial class MainViewModel : ObservableObject
         UpdateTertiaryHexFromRgb();
         UpdateStaticHexFromRgb();
         if (IsTertiaryActive) OnPropertyChanged(nameof(ActiveRed));
+        LogColorSlot("tertiary", TertiaryRed, TertiaryGreen, TertiaryBlue);
     }
 
     partial void OnTertiaryGreenChanged(byte value)
@@ -1265,6 +1376,7 @@ public partial class MainViewModel : ObservableObject
         UpdateTertiaryHexFromRgb();
         UpdateStaticHexFromRgb();
         if (IsTertiaryActive) OnPropertyChanged(nameof(ActiveGreen));
+        LogColorSlot("tertiary", TertiaryRed, TertiaryGreen, TertiaryBlue);
     }
 
     partial void OnTertiaryBlueChanged(byte value)
@@ -1272,6 +1384,7 @@ public partial class MainViewModel : ObservableObject
         UpdateTertiaryHexFromRgb();
         UpdateStaticHexFromRgb();
         if (IsTertiaryActive) OnPropertyChanged(nameof(ActiveBlue));
+        LogColorSlot("tertiary", TertiaryRed, TertiaryGreen, TertiaryBlue);
     }
 
     partial void OnTertiaryHexColorChanged(string value)
@@ -1298,6 +1411,7 @@ public partial class MainViewModel : ObservableObject
             if (IsTertiaryActive) OnPropertyChanged(nameof(ActiveHexColor));
             SyncAnimationColors();
             UpdateColorPreview();
+            LogColorSlot("tertiary", TertiaryRed, TertiaryGreen, TertiaryBlue);
         }
         catch
         {
@@ -1310,6 +1424,11 @@ public partial class MainViewModel : ObservableObject
         _currentSettings.SleepTimerEnabled = value;
         SaveSettings();
         UpdateIdleTimer();
+
+        if (_loggingActive)
+        {
+            AppLog.Event("mode", $"Sleep timer (idle backlight off): {(value ? "on" : "off")}");
+        }
 
         if (!value)
         {
@@ -1379,6 +1498,7 @@ public partial class MainViewModel : ObservableObject
         _isSleeping = true;
         IsAsleep = true;
         SetStatus("St_Sleeping");
+        AppLog.Event("mode", $"Idle sleep: backlight off ({SleepTimeout.TotalMinutes:0} min without input)");
 
         var from = OutputColor;
         _animationEngine?.Pause();
@@ -1405,6 +1525,7 @@ public partial class MainViewModel : ObservableObject
         _sleepTransition = true;
         _isSleeping = false;
         IsAsleep = false;
+        AppLog.Event("mode", "Input detected: backlight restored");
 
         try
         {

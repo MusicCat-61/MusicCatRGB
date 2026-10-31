@@ -68,11 +68,11 @@ public partial class App : System.Windows.Application
         Loc.LanguageChanged += OnLanguageChanged;
 
         Logging.AppLog.Info(
-            "Startup: tray={Tray}, language={Language}, theme={Theme}, driver={Driver}",
+            "Startup: tray={Tray}, language={Language}, theme={Theme}, driverMode={Driver}",
             e.Args.Contains("--tray"),
             Loc.CurrentCode,
             Theming.Theme.CurrentCode,
-            startupSettings.DriverType);
+            startupSettings.DriverType switch { 1 => "Insyde", 2 => "WMI", _ => "Auto" });
 
         const string appName = "MusicCat.CLVKM_SingleInstance_Mutex";
         bool createdNew;

@@ -60,14 +60,28 @@ public class InsydeDriver : IKeyboardController
             try
             {
                 // The Insyde path is single-zone, so every zone maps to "all zones" (0xF0).
+                //
+                // The DCHU entry points answer with a status echo rather than 0 on this
+                // hardware (103 for SetDCHU_Data, 1 for WriteAppSettings) while the write is
+                // applied anyway. Treating that as a failure (as we did between 1.0.3.4 and
+                // 1.0.5.4) aborted the sequence before the colour was pushed and spammed the
+                // log once per frame. All three calls now always run; their raw answers are
+                // recorded once on the first frame so a genuinely stuck driver is still
+                // diagnosable.
                 var dchuData = new byte[] { color.G, color.R, color.B, 0xF0 };
-                EnsureSuccess(SetDCHU_Data(103, dchuData, 4), "SetDCHU_Data(103)");
+                var dchuStatus = SetDCHU_Data(103, dchuData, 4);
 
                 var colorData = new byte[] { color.G, color.R, color.B };
-                EnsureSuccess(WriteAppSettings(2, 81, 3, colorData), "WriteAppSettings(2, 81)");
+                var colorStatus = WriteAppSettings(2, 81, 3, colorData);
 
                 var modeData = new byte[] { 0x08 };
-                EnsureSuccess(WriteAppSettings(2, 32, 1, modeData), "WriteAppSettings(2, 32)");
+                var modeStatus = WriteAppSettings(2, 32, 1, modeData);
+
+                DriverDiagnostics.Note(
+                    "Insyde",
+                    $"first frame statuses: SetDCHU_Data(103)={dchuStatus}, " +
+                    $"WriteAppSettings(2, 81)={colorStatus}, WriteAppSettings(2, 32)={modeStatus} " +
+                    "(status echoes, not failures - the vendor DLL answers non-zero even when the write applies)");
             }
             catch (Exception ex)
             {
@@ -75,14 +89,6 @@ public class InsydeDriver : IKeyboardController
                 DriverDiagnostics.Report("Insyde", ex);
             }
         });
-    }
-
-    private static void EnsureSuccess(int result, string operation)
-    {
-        if (result != 0)
-        {
-            throw new InvalidOperationException($"{operation} failed with code {result}.");
-        }
     }
 
     public Task ShutdownAsync()
