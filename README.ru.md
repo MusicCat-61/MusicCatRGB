@@ -4,6 +4,7 @@
 [![Download](https://img.shields.io/badge/download-KGMaster.exe-2ea44f?style=flat-square)](https://github.com/MusicCat-61/KeyGlowMaster/releases/latest/download/KGMaster.exe)
 [![CI](https://github.com/MusicCat-61/KeyGlowMaster/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/MusicCat-61/KeyGlowMaster/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](LICENSE)
+[![Version](https://img.shields.io/badge/version-1.0.5-4CC2FF?style=flat-square)](https://github.com/MusicCat-61/KeyGlowMaster/releases/tag/v1.0.5)
 [![Platform](https://img.shields.io/badge/platform-Windows%2010%20%7C%2011-0078D6?style=flat-square)](#)
 [![.NET](https://img.shields.io/badge/.NET-10-512BD4?style=flat-square)](https://dotnet.microsoft.com/download)
 
@@ -31,6 +32,7 @@ KeyGlowMaster — форк проекта [GutsV](https://github.com/gutsv-proje
 | 🎯 **Слоты цвета** | Три цвета для анимаций и отдельный применяемый цвет, у каждого свой предпросмотр |
 | ⌨️ **Живое превью** | Клавиатура на экране показывает цвет, который реально уходит в железо |
 | 😴 **Таймер сна** | Через 5 минут простоя подсветка плавно гаснет и возвращается при вводе |
+| 🎛 **Горячие клавиши** | Переключение эффектов и запуск анимации из любого приложения — окно открывать не нужно |
 | ♻️ **Портативность** | Один самодостаточный файл, запуск от администратора, автозапуск через Планировщик задач |
 
 ## Эффекты
@@ -71,6 +73,18 @@ KeyGlowMaster — форк проекта [GutsV](https://github.com/gutsv-proje
 
 Поставьте галочку **«Выключать подсветку при простое (5 мин)»** в карточке устройства. После пяти минут без мыши и клавиатуры подсветка за полсекунды уходит в ноль, анимация замирает, а слайдер яркости показывает `0%`. Любой ввод возвращает прежнее состояние коротким плавным разгоранием.
 
+## Горячие клавиши
+
+Сочетания работают глобально — окно может быть свёрнуто в трей, а фокус остаётся в текущей программе:
+
+| Сочетание | Действие |
+|---|---|
+| `Ctrl + Alt + Page Up` | Следующий эффект |
+| `Ctrl + Alt + Page Down` | Предыдущий эффект |
+| `Ctrl + Alt + Enter` | Включить или выключить анимацию |
+
+Каждое переключение подтверждается небольшой плашкой поверх всех окон в углу экрана: три секунды с названием и описанием эффекта либо *«Анимация включена»* / *«Анимация выключена»* для переключателя. Если анимация была выключена, перебор списка сразу запускает выбранный эффект. Сочетания регистрируются при запуске и снимаются при выходе из приложения.
+
 ## Установка
 
 1. Скачайте [**`KGMaster.exe`**](https://github.com/MusicCat-61/KeyGlowMaster/releases/latest/download/KGMaster.exe) — один самодостаточный файл, установщик и .NET Runtime не нужны.
@@ -99,8 +113,8 @@ dotnet build MusicCat.CLVKM.slnx -c Release
 Пуш тега запускает сборку и публикацию: [workflow](.github/workflows/release.yml) собирает самодостаточный однофайловый `KGMaster.exe` под `win-x64` на `windows-latest`, проставляет ему версию из тега и прикрепляет исполняемый файл вместе с контрольной суммой SHA-256 к релизу с автоматически составленным списком изменений. Скачивание — около 75 МБ: при первом запуске бандл распаковывает среду выполнения в `%TEMP%\.net\KGMaster` и дальше переиспользует её.
 
 ```powershell
-git tag v1.0.4
-git push origin v1.0.4
+git tag v1.0.5
+git push origin v1.0.5
 ```
 
 Каждый пуш в `main` запускает [CI workflow](.github/workflows/ci.yml) — только сборку решения, без тега и релиза.
@@ -119,3 +133,5 @@ git push origin v1.0.4
 KeyGlowMaster основан на **GutsV Colour** от [acerhizm](https://github.com/gutsv-project/Clevo-Monster-RGB-Controller) — драйверы, подход к анимациям и сама идея принадлежат ему. Форк сделал **MusicCat161**: переработанный интерфейс, темы Frost, локализация, новые эффекты, таймер сна и разные мелочи.
 
 Распространяется под лицензией MIT, см. [LICENSE](LICENSE).
+
+Связь и поддержка: [Telegram @music_cat1](https://t.me/music_cat1) · [донат](https://dalink.to/musiccat61).

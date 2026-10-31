@@ -4,6 +4,7 @@
 [![Download](https://img.shields.io/badge/download-KGMaster.exe-2ea44f?style=flat-square)](https://github.com/MusicCat-61/KeyGlowMaster/releases/latest/download/KGMaster.exe)
 [![CI](https://github.com/MusicCat-61/KeyGlowMaster/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/MusicCat-61/KeyGlowMaster/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](LICENSE)
+[![Version](https://img.shields.io/badge/version-1.0.5-4CC2FF?style=flat-square)](https://github.com/MusicCat-61/KeyGlowMaster/releases/tag/v1.0.5)
 [![Platform](https://img.shields.io/badge/platform-Windows%2010%20%7C%2011-0078D6?style=flat-square)](#)
 [![.NET](https://img.shields.io/badge/.NET-10-512BD4?style=flat-square)](https://dotnet.microsoft.com/download)
 
@@ -31,6 +32,7 @@ KeyGlowMaster is a fork of the [GutsV project](https://github.com/gutsv-project/
 | 🎯 **Colour slots** | Three colours for animations plus a separate applied colour, each with its own preview |
 | ⌨️ **Live preview** | The keyboard on screen shows the colour that is actually being sent to the hardware |
 | 😴 **Sleep timer** | The backlight fades out after 5 minutes of idle time and comes back on input |
+| 🎛 **Global hotkeys** | Switch effects and start or stop the animation from any app — no need to open the window |
 | ♻️ **Portable** | One self-contained executable, runs as administrator, auto-start through Task Scheduler |
 
 ## Effects
@@ -70,6 +72,18 @@ Zone count is detected automatically. On a single-zone keyboard the zone-based e
 ## Sleep timer
 
 Tick **Turn off lighting when idle (5 min)** in the device card. After five minutes without mouse or keyboard input the backlight fades to black in about half a second, the animation freezes and the brightness slider shows `0%`. Any input brings the previous state back with a short fade.
+
+## Hotkeys
+
+The shortcuts work globally — the window may stay hidden in the tray, the current app keeps the focus:
+
+| Shortcut | Action |
+|---|---|
+| `Ctrl + Alt + Page Up` | Next effect |
+| `Ctrl + Alt + Page Down` | Previous effect |
+| `Ctrl + Alt + Enter` | Start or stop the animation |
+
+Every switch is confirmed by a small always-on-top toast in the corner of the screen: it shows the effect name and description for three seconds, or *Animation on* / *Animation off* when the toggle was used. Cycling the list also starts the effect when nothing was running, so the keyboard follows the shortcut immediately. The shortcuts are registered at startup and released when the app exits.
 
 ## Installation
 
@@ -119,3 +133,5 @@ Layout: `MusicCat.CLVKM.Core` (models, settings, animation engine, weather), `Mu
 KeyGlowMaster is based on **GutsV Colour** by [acerhizm](https://github.com/gutsv-project/Clevo-Monster-RGB-Controller) — the drivers, the animation approach and the original idea are theirs. This fork was made by **MusicCat161** and adds a redesigned interface, Frost themes, localisation, new effects, the sleep timer and various small quality-of-life touches.
 
 Distributed under the MIT License, see [LICENSE](LICENSE).
+
+Contact and support: [Telegram @music_cat1](https://t.me/music_cat1) · [donate](https://dalink.to/musiccat61).
