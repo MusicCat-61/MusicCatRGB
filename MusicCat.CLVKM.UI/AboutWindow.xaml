@@ -70,6 +70,11 @@
                           Foreground="{DynamicResource AccentBrush}" TextDecorations="None"><Run Text="{DynamicResource About_Link}"/></Hyperlink>
             </TextBlock>
 
+            <TextBlock FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,8,0,0" TextWrapping="Wrap">
+                <Run Text="{DynamicResource About_MyRepo}"/><Run Text="&#160;"/><Hyperlink Click="MyRepo_Click"
+                          Foreground="{DynamicResource AccentBrush}" TextDecorations="None"><Run Text="{DynamicResource About_MyRepoLink}"/></Hyperlink>
+            </TextBlock>
+
             <TextBlock Margin="0,16,0,0" FontSize="12.5" Foreground="{DynamicResource TextSecondaryBrush}" TextWrapping="Wrap" LineHeight="19">
                 <Run Text="{DynamicResource About_Description}"/><Run Text=" "/><Run Text="{DynamicResource About_LicensePrefix}"/><Run Text="&#160;"/><Hyperlink Click="License_Click"
                           Foreground="{DynamicResource AccentBrush}" TextDecorations="None"><Run Text="{DynamicResource About_LicenseName}"/></Hyperlink><Run Text="."/>

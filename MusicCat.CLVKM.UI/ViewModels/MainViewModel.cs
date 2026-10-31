@@ -646,22 +646,7 @@ public partial class MainViewModel : ObservableObject
         SelectedCitySuggestion = null;
     }
 
-    [RelayCommand]
-    private void SetWeatherCity()
-    {
-        var city = (WeatherCityInput ?? string.Empty).Trim();
-        WeatherCityInput = city;
-        CloseCitySuggestions();
-
-        // Setting the city drops the cached place and the update throttle, so the next
-        // refresh geocodes it right away. The result arrives through WeatherService.Updated.
-        WeatherService.Instance.City = city;
-
-        PersistWeatherCity(city.Length == 0 ? null : city, null, null);
-        _ = WeatherService.Instance.RefreshAsync();
-    }
-
-    private void PersistWeatherCity(string? city, double? latitude, double? longitude)
+    private void PersistWeatherCity(string city, double latitude, double longitude)
     {
         _currentSettings.WeatherCity = city;
         _currentSettings.WeatherLatitude = latitude;

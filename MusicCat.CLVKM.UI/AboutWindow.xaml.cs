@@ -12,6 +12,7 @@ namespace MusicCat.CLVKM.UI;
 public partial class AboutWindow : Window
 {
     private const string RepositoryUrl = "https://github.com/gutsv-project/Clevo-Monster-RGB-Controller";
+    private const string MyRepositoryUrl = "https://github.com/MusicCat-61/KeyGlowMaster";
     private const string LicenseUrl = "https://opensource.org/license/mit";
 
     public AboutWindow()
@@ -40,6 +41,8 @@ public partial class AboutWindow : Window
     }
 
     private void Link_Click(object sender, RoutedEventArgs e) => OpenUrl(RepositoryUrl);
+
+    private void MyRepo_Click(object sender, RoutedEventArgs e) => OpenUrl(MyRepositoryUrl);
 
     private void License_Click(object sender, RoutedEventArgs e) => OpenUrl(LicenseUrl);
 

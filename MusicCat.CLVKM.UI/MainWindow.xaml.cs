@@ -124,13 +124,10 @@ public partial class MainWindow : Window
                 break;
 
             case Key.Enter:
+                // The city is chosen from the list: Enter takes the highlighted suggestion.
                 if (vm.IsCitySuggestionsOpen && vm.SelectedCitySuggestion is not null)
                 {
                     vm.SelectCitySuggestionCommand.Execute(vm.SelectedCitySuggestion);
-                }
-                else
-                {
-                    vm.SetWeatherCityCommand.Execute(null);
                 }
 
                 e.Handled = true;

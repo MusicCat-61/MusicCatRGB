@@ -96,6 +96,8 @@
     <sys:String x:Key="About_Developer">Modification developer: MusicCat161</sys:String>
     <sys:String x:Key="About_Based">Based on the repository:</sys:String>
     <sys:String x:Key="About_Link">gutsv-project/Clevo-Monster-RGB-Controller</sys:String>
+    <sys:String x:Key="About_MyRepo">My repository:</sys:String>
+    <sys:String x:Key="About_MyRepoLink">MusicCat-61/KeyGlowMaster</sys:String>
     <sys:String x:Key="About_Description">This project is a fork (an improved version) that includes bug fixes, a new interface and additional lighting modes.</sys:String>
     <sys:String x:Key="About_LicensePrefix">Distributed under the</sys:String>
     <sys:String x:Key="About_LicenseName">MIT License</sys:String>
@@ -135,7 +137,6 @@
     <sys:String x:Key="L_Weather">Weather</sys:String>
     <sys:String x:Key="L_WeatherCity">City</sys:String>
     <sys:String x:Key="L_WeatherHint">Start typing a city — suggestions will appear</sys:String>
-    <sys:String x:Key="L_WeatherSet">Set</sys:String>
     <sys:String x:Key="Wx_StatusConnecting">Checking the API…</sys:String>
     <sys:String x:Key="Wx_StatusUpdating">Updating…</sys:String>
     <sys:String x:Key="Wx_StatusOnline">API connection OK</sys:String>

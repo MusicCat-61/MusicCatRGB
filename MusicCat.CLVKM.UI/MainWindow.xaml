@@ -357,7 +357,6 @@
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
 
                             <TextBlock Grid.Column="0" Text="{DynamicResource L_WeatherCity}" FontSize="12"
@@ -369,11 +368,6 @@
                                      MaxLength="80" ToolTip="{DynamicResource L_WeatherHint}"
                                      PreviewKeyDown="CityBox_PreviewKeyDown"
                                      LostKeyboardFocus="CityBox_LostKeyboardFocus"/>
-
-                            <Button Grid.Column="2" Content="{DynamicResource L_WeatherSet}"
-                                    Command="{Binding SetWeatherCityCommand}"
-                                    Style="{StaticResource AccentButtonStyle}"
-                                    Height="30" Padding="14,0" Margin="8,0,0,0" FontSize="11"/>
                         </Grid>
 
                         <!-- City suggestions: names can exist in several regions -->
