@@ -17,6 +17,9 @@ WMI is used whenever it is available; if the WMI channel is disabled, the app au
 
 KeyGlowMaster is a fork of the [GutsV project](https://github.com/gutsv-project/Clevo-Monster-RGB-Controller): the interface was rebuilt from scratch, localisation, themes, new effects and small quality-of-life features were added. See [Credits](#credits--license).
 
+> [!WARNING]
+> **Use at your own risk.** The app has been tested, but its operation is not guaranteed. You take full responsibility for any risks of using it.
+
 ## What is inside
 
 | | |
@@ -112,6 +115,6 @@ Layout: `MusicCat.CLVKM.Core` (models, settings, animation engine, weather), `Mu
 
 ## Credits & license
 
-KeyGlowMaster is based on **GutsV Colour** by [acerhizm](https://github.com/gutsv-project/Clevo-Monster-RGB-Controller) — the drivers, the animation approach and the original idea are theirs. This fork was made by **MusicCat161** and adds a redesigned interface, Frost themes, localisation, new effects and the sleep timer.
+KeyGlowMaster is based on **GutsV Colour** by [acerhizm](https://github.com/gutsv-project/Clevo-Monster-RGB-Controller) — the drivers, the animation approach and the original idea are theirs. This fork was made by **MusicCat161** and adds a redesigned interface, Frost themes, localisation, new effects, the sleep timer and various small quality-of-life touches.
 
 Distributed under the MIT License, see [LICENSE](LICENSE).
