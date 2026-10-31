@@ -5,7 +5,7 @@
         xmlns:vm="clr-namespace:MusicCat.CLVKM.UI.ViewModels"
         xmlns:local="clr-namespace:MusicCat.CLVKM.UI"
         Title="KeyGlowMaster by MusicCat161"
-        Width="1120" Height="760" MinWidth="1020" MinHeight="700"
+        Width="1160" Height="830" MinWidth="1060" MinHeight="740"
         WindowStartupLocation="CenterScreen"
         WindowStyle="None" ResizeMode="CanResize"
         AllowsTransparency="False"
@@ -14,7 +14,8 @@
         FontFamily="Segoe UI Variable Text, Segoe UI"
         UseLayoutRounding="True"
         SnapsToDevicePixels="True"
-        TextOptions.TextFormattingMode="Ideal">
+        TextOptions.TextFormattingMode="Ideal"
+        FontSize="14">
 
     <shell:WindowChrome.WindowChrome>
         <shell:WindowChrome CaptionHeight="0" ResizeBorderThickness="6"
@@ -43,9 +44,9 @@
             <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="18,0,0,0" VerticalAlignment="Center">
                 <Image Source="{x:Static local:Branding.IconImage}" Width="18" Height="18"
                        RenderOptions.BitmapScalingMode="HighQuality"/>
-                <TextBlock Text="KEYGLOWMASTER" Margin="10,0,0,0" FontSize="13" FontWeight="SemiBold"
+                <TextBlock Text="KEYGLOWMASTER" Margin="10,0,0,0" FontSize="15" FontWeight="SemiBold"
                            VerticalAlignment="Center" Foreground="{DynamicResource TextPrimaryBrush}"/>
-                <TextBlock Text="by MusicCat161" Margin="8,0,0,0" FontSize="11"
+                <TextBlock Text="by MusicCat161" Margin="8,0,0,0" FontSize="15"
                            VerticalAlignment="Center" Foreground="{DynamicResource TextTertiaryBrush}"/>
             </StackPanel>
 
@@ -104,15 +105,15 @@
                 </Button>
                 <Button Style="{StaticResource IconButtonStyle}" Click="MinimizeClick"
                         ToolTip="{DynamicResource L_Minimize}">
-                    <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE921;" FontSize="12"/>
+                    <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE921;" FontSize="14"/>
                 </Button>
                 <Button Style="{StaticResource IconButtonStyle}" Click="MaximizeClick"
                         ToolTip="{DynamicResource L_Maximize}">
-                    <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE922;" FontSize="12"/>
+                    <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE922;" FontSize="14"/>
                 </Button>
                 <Button Style="{StaticResource IconButtonStyle}" Click="CloseClick"
                         ToolTip="{DynamicResource L_Close}">
-                    <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE8BB;" FontSize="12"/>
+                    <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE8BB;" FontSize="14"/>
                 </Button>
             </StackPanel>
         </Grid>
@@ -122,7 +123,7 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="18"/>
-                <ColumnDefinition Width="420"/>
+                <ColumnDefinition Width="450"/>
             </Grid.ColumnDefinitions>
 
             <!-- Left: preview + colour -->
@@ -144,7 +145,7 @@
                         <DockPanel>
                             <TextBlock Text="{DynamicResource L_Preview}" Style="{StaticResource SectionLabelStyle}" Margin="0"/>
                             <TextBlock DockPanel.Dock="Right" Text="{Binding StaticHexColor}" HorizontalAlignment="Right"
-                                       FontSize="11" FontFamily="Consolas, Cascadia Mono"
+                                       FontSize="16" FontFamily="Consolas, Cascadia Mono"
                                        Foreground="{DynamicResource TextTertiaryBrush}"/>
                         </DockPanel>
 
@@ -180,10 +181,10 @@
                         </Viewbox>
 
                         <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="2,10,0,0">
-                            <TextBlock Text="{Binding SelectedAnimation.Name}" FontSize="12" FontWeight="SemiBold"
+                            <TextBlock Text="{Binding SelectedAnimation.Name}" FontSize="15" FontWeight="SemiBold"
                                        Foreground="{DynamicResource TextSecondaryBrush}"/>
-                            <TextBlock Text="{Binding SelectedAnimation.Description}" FontSize="11" Margin="10,1,0,0"
-                                       Foreground="{DynamicResource TextTertiaryBrush}"/>
+                            <TextBlock Text="{Binding SelectedAnimation.Description}" FontSize="14" Margin="10,1,0,0"
+                                       Foreground="{DynamicResource TextSecondaryBrush}"/>
                         </StackPanel>
                     </Grid>
                 </Border>
@@ -216,9 +217,9 @@
                                     <Ellipse Width="20" Height="20" VerticalAlignment="Center"
                                              Fill="{Binding PrimaryColorBrush}" Stroke="#40FFFFFF" StrokeThickness="1"/>
                                     <StackPanel Margin="10,0,0,0" VerticalAlignment="Center">
-                                        <TextBlock Text="{DynamicResource L_PrimaryColor}" FontSize="11"
+                                        <TextBlock Text="{DynamicResource L_PrimaryColor}" FontSize="15"
                                                    Foreground="{DynamicResource TextSecondaryBrush}"/>
-                                        <TextBlock Text="{Binding HexColor}" FontSize="10" Margin="0,1,0,0"
+                                        <TextBlock Text="{Binding HexColor}" FontSize="14" Margin="0,1,0,0"
                                                    FontFamily="Consolas, Cascadia Mono"
                                                    Foreground="{DynamicResource TextTertiaryBrush}"/>
                                     </StackPanel>
@@ -241,9 +242,9 @@
                                     <Ellipse Width="20" Height="20" VerticalAlignment="Center"
                                              Fill="{Binding SecondaryColorBrush}" Stroke="#40FFFFFF" StrokeThickness="1"/>
                                     <StackPanel Margin="10,0,0,0" VerticalAlignment="Center">
-                                        <TextBlock Text="{DynamicResource L_SecondColor}" FontSize="11"
+                                        <TextBlock Text="{DynamicResource L_SecondColor}" FontSize="15"
                                                    Foreground="{DynamicResource TextSecondaryBrush}"/>
-                                        <TextBlock Text="{Binding SecondaryHexColor}" FontSize="10" Margin="0,1,0,0"
+                                        <TextBlock Text="{Binding SecondaryHexColor}" FontSize="14" Margin="0,1,0,0"
                                                    FontFamily="Consolas, Cascadia Mono"
                                                    Foreground="{DynamicResource TextTertiaryBrush}"/>
                                     </StackPanel>
@@ -271,9 +272,9 @@
                                 <Ellipse Width="20" Height="20" VerticalAlignment="Center"
                                          Fill="{Binding TertiaryColorBrush}" Stroke="#40FFFFFF" StrokeThickness="1"/>
                                 <StackPanel Margin="10,0,0,0" VerticalAlignment="Center">
-                                    <TextBlock Text="{DynamicResource L_ThirdColor}" FontSize="11"
+                                    <TextBlock Text="{DynamicResource L_ThirdColor}" FontSize="15"
                                                Foreground="{DynamicResource TextSecondaryBrush}"/>
-                                    <TextBlock Text="{Binding TertiaryHexColor}" FontSize="10" Margin="0,1,0,0"
+                                    <TextBlock Text="{Binding TertiaryHexColor}" FontSize="14" Margin="0,1,0,0"
                                                FontFamily="Consolas, Cascadia Mono"
                                                Foreground="{DynamicResource TextTertiaryBrush}"/>
                                 </StackPanel>
@@ -285,9 +286,9 @@
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="40"/>
                             </Grid.ColumnDefinitions>
-                            <TextBlock Text="R" FontSize="12" FontWeight="SemiBold" Foreground="#FFFF6B6B" VerticalAlignment="Center"/>
+                            <TextBlock Text="R" FontSize="14" FontWeight="SemiBold" Foreground="#FFFF6B6B" VerticalAlignment="Center"/>
                             <Slider Grid.Column="1" Minimum="0" Maximum="255" Value="{Binding ActiveRed}"/>
-                            <TextBlock Grid.Column="2" Text="{Binding ActiveRed}" HorizontalAlignment="Right" FontSize="12"
+                            <TextBlock Grid.Column="2" Text="{Binding ActiveRed}" HorizontalAlignment="Right" FontSize="14"
                                        Foreground="{DynamicResource TextTertiaryBrush}" VerticalAlignment="Center"/>
                         </Grid>
 
@@ -297,9 +298,9 @@
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="40"/>
                             </Grid.ColumnDefinitions>
-                            <TextBlock Text="G" FontSize="12" FontWeight="SemiBold" Foreground="#FF4ADE80" VerticalAlignment="Center"/>
+                            <TextBlock Text="G" FontSize="14" FontWeight="SemiBold" Foreground="#FF4ADE80" VerticalAlignment="Center"/>
                             <Slider Grid.Column="1" Minimum="0" Maximum="255" Value="{Binding ActiveGreen}"/>
-                            <TextBlock Grid.Column="2" Text="{Binding ActiveGreen}" HorizontalAlignment="Right" FontSize="12"
+                            <TextBlock Grid.Column="2" Text="{Binding ActiveGreen}" HorizontalAlignment="Right" FontSize="14"
                                        Foreground="{DynamicResource TextTertiaryBrush}" VerticalAlignment="Center"/>
                         </Grid>
                         <Grid Margin="0,0,0,12">
@@ -308,9 +309,9 @@
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="40"/>
                             </Grid.ColumnDefinitions>
-                            <TextBlock Text="B" FontSize="12" FontWeight="SemiBold" Foreground="#FF60CDFF" VerticalAlignment="Center"/>
+                            <TextBlock Text="B" FontSize="14" FontWeight="SemiBold" Foreground="#FF60CDFF" VerticalAlignment="Center"/>
                             <Slider Grid.Column="1" Minimum="0" Maximum="255" Value="{Binding ActiveBlue}"/>
-                            <TextBlock Grid.Column="2" Text="{Binding ActiveBlue}" HorizontalAlignment="Right" FontSize="12"
+                            <TextBlock Grid.Column="2" Text="{Binding ActiveBlue}" HorizontalAlignment="Right" FontSize="14"
                                        Foreground="{DynamicResource TextTertiaryBrush}" VerticalAlignment="Center"/>
                         </Grid>
 
@@ -330,7 +331,7 @@
                                      MaxLength="7" CharacterCasing="Upper" FontFamily="Consolas, Cascadia Mono"/>
                             <Button Grid.Column="3" Content="{DynamicResource L_Apply}" Command="{Binding ApplyColorCommand}"
                                     IsEnabled="{Binding IsReady}" Style="{StaticResource AccentButtonStyle}"
-                                    Height="34" Padding="18,0" Margin="10,0,0,0"/>
+                                    Height="40" Padding="18,0" Margin="10,0,0,0"/>
                         </Grid>
                     </StackPanel>
                 </Border>
@@ -359,7 +360,7 @@
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
 
-                            <TextBlock Grid.Column="0" Text="{DynamicResource L_WeatherCity}" FontSize="12"
+                            <TextBlock Grid.Column="0" Text="{DynamicResource L_WeatherCity}" FontSize="14"
                                        VerticalAlignment="Center" Margin="0,0,8,0"
                                        Foreground="{DynamicResource TextTertiaryBrush}"/>
 
@@ -415,7 +416,7 @@
                                     </ListBox.ItemContainerStyle>
                                     <ListBox.ItemTemplate>
                                         <DataTemplate>
-                                            <TextBlock Text="{Binding DisplayName}" FontSize="12" TextWrapping="Wrap"/>
+                                            <TextBlock Text="{Binding DisplayName}" FontSize="14" TextWrapping="Wrap"/>
                                         </DataTemplate>
                                     </ListBox.ItemTemplate>
                                 </ListBox>
@@ -423,12 +424,12 @@
                         </Popup>
 
                         <DockPanel Margin="0,10,0,0" LastChildFill="True">
-                            <TextBlock DockPanel.Dock="Right" Text="{Binding WeatherUpdatedText}" FontSize="10.5"
+                            <TextBlock DockPanel.Dock="Right" Text="{Binding WeatherUpdatedText}" FontSize="12.5"
                                        VerticalAlignment="Center" Margin="8,0,0,0"
                                        Foreground="{DynamicResource TextTertiaryBrush}"/>
                             <Ellipse Width="7" Height="7" Margin="0,0,6,0" VerticalAlignment="Center"
                                      Fill="{Binding WeatherStatusBrush}"/>
-                            <TextBlock Text="{Binding WeatherStatusText}" FontSize="11"
+                            <TextBlock Text="{Binding WeatherStatusText}" FontSize="15"
                                        VerticalAlignment="Center" TextTrimming="CharacterEllipsis"
                                        ToolTip="{Binding WeatherErrorText}">
                                 <TextBlock.Style>
@@ -456,15 +457,15 @@
                                 </Style>
                             </WrapPanel.Style>
 
-                            <TextBlock Text="{Binding WeatherTemperatureText}" FontSize="13" FontWeight="SemiBold"
+                            <TextBlock Text="{Binding WeatherTemperatureText}" FontSize="15" FontWeight="SemiBold"
                                        Foreground="{DynamicResource TextPrimaryBrush}"/>
-                            <TextBlock Text="·" Margin="7,0" FontSize="13"
+                            <TextBlock Text="·" Margin="7,0" FontSize="15"
                                        Foreground="{DynamicResource TextTertiaryBrush}"/>
-                            <TextBlock Text="{Binding WeatherConditionText}" FontSize="13"
+                            <TextBlock Text="{Binding WeatherConditionText}" FontSize="15"
                                        Foreground="{DynamicResource TextPrimaryBrush}"/>
-                            <TextBlock Text="·" Margin="7,0" FontSize="13"
+                            <TextBlock Text="·" Margin="7,0" FontSize="15"
                                        Foreground="{DynamicResource TextTertiaryBrush}"/>
-                            <TextBlock Text="{Binding WeatherWindText}" FontSize="12" VerticalAlignment="Center"
+                            <TextBlock Text="{Binding WeatherWindText}" FontSize="14" VerticalAlignment="Center"
                                        Foreground="{DynamicResource TextSecondaryBrush}"/>
                         </WrapPanel>
                     </StackPanel>
@@ -493,7 +494,7 @@
                                     </Style>
                                 </Ellipse.Style>
                             </Ellipse>
-                            <TextBlock Text="{Binding StatusText}" FontSize="12" TextWrapping="Wrap"
+                            <TextBlock Text="{Binding StatusText}" FontSize="15" TextWrapping="Wrap"
                                        ToolTip="{Binding DriverErrorText}">
                                 <TextBlock.Style>
                                     <Style TargetType="TextBlock">
@@ -516,7 +517,7 @@
                         </ComboBox>
 
                         <DockPanel Margin="0,14,0,2">
-                            <TextBlock DockPanel.Dock="Right" VerticalAlignment="Center" FontSize="11"
+                            <TextBlock DockPanel.Dock="Right" VerticalAlignment="Center" FontSize="15"
                                        Foreground="{DynamicResource TextTertiaryBrush}">
                                 <TextBlock.Style>
                                     <Style TargetType="TextBlock">
@@ -564,7 +565,7 @@
                             </ComboBox.Style>
                         </ComboBox>
 
-                        <TextBlock Text="{DynamicResource L_ZoneHint}" FontSize="10.5" Margin="0,12,0,0"
+                        <TextBlock Text="{DynamicResource L_ZoneHint}" FontSize="13.5" Margin="0,12,0,0"
                                    Foreground="{DynamicResource TextTertiaryBrush}" TextWrapping="Wrap"/>
 
                         <CheckBox Content="{DynamicResource L_SleepTimer}" IsChecked="{Binding SleepTimerEnabled}"
@@ -584,7 +585,7 @@
                                    Margin="0,0,0,4"/>
 
                         <ListBox Grid.Row="1" ItemsSource="{Binding Animations}" SelectedItem="{Binding SelectedAnimation}"
-                                 Background="Transparent" BorderThickness="0" Padding="0" MinHeight="200"
+                                 Background="Transparent" BorderThickness="0" Padding="0" MinHeight="170"
                                  VerticalAlignment="Stretch"
                                  ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                                  ScrollViewer.VerticalScrollBarVisibility="Auto"
@@ -597,12 +598,12 @@
                             <ListBox.ItemTemplate>
                                 <DataTemplate>
                                     <StackPanel>
-                                        <TextBlock Text="{Binding Name}" FontSize="12" FontWeight="SemiBold"
+                                        <TextBlock Text="{Binding Name}" FontSize="15" FontWeight="SemiBold"
                                                    TextWrapping="Wrap" TextAlignment="Center"
-                                                   MaxHeight="30" TextTrimming="CharacterEllipsis"/>
-                                        <TextBlock Text="{Binding Description}" FontSize="10" Opacity="0.7"
+                                                   MaxHeight="38" TextTrimming="CharacterEllipsis"/>
+                                        <TextBlock Text="{Binding Description}" FontSize="14" Opacity="0.9"
                                                    Margin="0,3,0,0" TextWrapping="Wrap" TextAlignment="Center"
-                                                   MaxHeight="26" TextTrimming="CharacterEllipsis"/>
+                                                   MaxHeight="34" TextTrimming="CharacterEllipsis"/>
                                     </StackPanel>
                                 </DataTemplate>
                             </ListBox.ItemTemplate>
@@ -621,15 +622,15 @@
                                     </Style>
                                 </Grid.Style>
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="118"/>
+                                    <ColumnDefinition Width="152"/>
                                     <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="44"/>
+                                    <ColumnDefinition Width="52"/>
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Text="{DynamicResource L_AnimSpeed}" Style="{StaticResource ValueLabelStyle}" Margin="0,0,8,0"/>
                                 <Slider Grid.Column="1" Minimum="0.2" Maximum="3.0" Value="{Binding AnimationSpeed}"
                                         IsSnapToTickEnabled="True" TickFrequency="0.1"/>
                                 <TextBlock Grid.Column="2" Text="{Binding AnimationSpeed, StringFormat={}{0:F1}x}"
-                                           Style="{StaticResource ValueLabelStyle}" HorizontalAlignment="Right" FontSize="12"/>
+                                           Style="{StaticResource ValueLabelStyle}" HorizontalAlignment="Right" FontSize="15"/>
                             </Grid>
 
                             <Button Command="{Binding ToggleAnimationCommand}" Height="46" IsEnabled="{Binding IsReady}">
@@ -655,9 +656,9 @@
             <Button HorizontalAlignment="Left" VerticalAlignment="Center" Click="AboutClick"
                     Style="{StaticResource SubtleButtonStyle}" Padding="10,4">
                 <StackPanel Orientation="Horizontal">
-                    <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE946;" FontSize="13"
+                    <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE946;" FontSize="15"
                                Foreground="{DynamicResource TextTertiaryBrush}" VerticalAlignment="Center"/>
-                    <TextBlock Text="{DynamicResource L_About}" FontSize="11" Margin="8,0,0,0"
+                    <TextBlock Text="{DynamicResource L_About}" FontSize="15" Margin="8,0,0,0"
                                Foreground="{DynamicResource TextTertiaryBrush}" VerticalAlignment="Center"/>
                 </StackPanel>
             </Button>

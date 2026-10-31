@@ -17,6 +17,8 @@ namespace MusicCat.CLVKM.UI;
 
 public partial class MainWindow : Window
 {
+    private GlobalHotKeyManager? _globalHotKeys;
+
     public MainWindow()
     {
         InitializeComponent();
@@ -36,12 +38,68 @@ public partial class MainWindow : Window
         base.OnSourceInitialized(e);
 
         WindowBackdrop.TryApplyMica(this, !Theming.Theme.IsLight);
+        EnsureGlobalHotKeysRegistered();
 
         // Keep the native Mica tint in sync when the user flips the theme.
         Theming.Theme.Changed += OnThemeChanged;
     }
 
     private void OnThemeChanged() => WindowBackdrop.SetDarkMode(this, !Theming.Theme.IsLight);
+
+    internal void EnsureGlobalHotKeysRegistered()
+    {
+        if (_globalHotKeys is not null)
+        {
+            return;
+        }
+
+        var handle = new System.Windows.Interop.WindowInteropHelper(this).Handle;
+        if (handle != IntPtr.Zero)
+        {
+            _globalHotKeys = new GlobalHotKeyManager(handle, HandleGlobalHotKey);
+        }
+    }
+
+    private void HandleGlobalHotKey(GlobalHotKeyAction action)
+    {
+        if (DataContext is not ViewModels.MainViewModel vm)
+        {
+            return;
+        }
+
+        switch (action)
+        {
+            case GlobalHotKeyAction.NextEffect:
+                if (vm.CycleAnimation(1))
+                {
+                    ShowEffectToast(vm.SelectedAnimation);
+                }
+                break;
+            case GlobalHotKeyAction.PreviousEffect:
+                if (vm.CycleAnimation(-1))
+                {
+                    ShowEffectToast(vm.SelectedAnimation);
+                }
+                break;
+            case GlobalHotKeyAction.ToggleAnimation:
+                vm.ToggleAnimationCommand.Execute(null);
+                break;
+        }
+    }
+
+    private static void ShowEffectToast(ViewModels.AnimationItem? animation)
+    {
+        if (animation is not null && System.Windows.Application.Current is App app)
+        {
+            app.ShowEffectToast(animation.Name, animation.Description);
+        }
+    }
+
+    internal void UnregisterGlobalHotKeys()
+    {
+        _globalHotKeys?.Dispose();
+        _globalHotKeys = null;
+    }
 
     private void TitleBar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
@@ -188,6 +246,8 @@ public partial class MainWindow : Window
     {
         if (App.IsExplicitExit)
         {
+            UnregisterGlobalHotKeys();
+
             if (DataContext is ViewModels.MainViewModel vm)
             {
                 await vm.ShutdownCommand.ExecuteAsync(null);

@@ -4,6 +4,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Interop;
 using System.Windows.Threading;
 using Microsoft.Win32;
 using MusicCat.CLVKM.Core.Settings;
@@ -16,6 +17,7 @@ public partial class App : System.Windows.Application
     private System.Windows.Forms.NotifyIcon? _notifyIcon;
     private System.Windows.Forms.ToolStripMenuItem? _menuOpen;
     private System.Windows.Forms.ToolStripMenuItem? _menuExit;
+    private EffectToastWindow? _effectToast;
 
     private string _trayKey = "Tray_Ready";
     private object?[] _trayArgs = Array.Empty<object?>();
@@ -35,6 +37,20 @@ public partial class App : System.Windows.Application
         IsExplicitExit = true;
         _notifyIcon?.Dispose();
         base.OnSessionEnding(e);
+    }
+
+    protected override void OnExit(ExitEventArgs e)
+    {
+        if (MainWindow is MusicCat.CLVKM.UI.MainWindow mainWindow)
+        {
+            mainWindow.UnregisterGlobalHotKeys();
+        }
+
+        _effectToast?.Close();
+        _effectToast = null;
+        _notifyIcon?.Dispose();
+        _mutex?.Dispose();
+        base.OnExit(e);
     }
 
     protected override async void OnStartup(StartupEventArgs e)
@@ -86,6 +102,10 @@ public partial class App : System.Windows.Application
 
         var mainWindow = new MainWindow();
         MainWindow = mainWindow;
+
+        // The app may stay hidden in the tray, so create its HWND before registering global hotkeys.
+        _ = new WindowInteropHelper(mainWindow).EnsureHandle();
+        mainWindow.EnsureGlobalHotKeysRegistered();
 
         if (startInTray)
         {
@@ -300,6 +320,12 @@ public partial class App : System.Windows.Application
 
         _notifyIcon.ContextMenuStrip = contextMenu;
         _notifyIcon.DoubleClick += (_, _) => ShowWindow();
+    }
+
+    internal void ShowEffectToast(string name, string description)
+    {
+        _effectToast ??= new EffectToastWindow();
+        _effectToast.ShowEffect(name, description);
     }
 
     private void SetTrayText(string key, params object?[] args)

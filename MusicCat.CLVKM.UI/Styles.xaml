@@ -11,14 +11,14 @@
     </Style>
 
     <Style x:Key="SectionLabelStyle" TargetType="TextBlock">
-        <Setter Property="FontSize" Value="11"/>
+        <Setter Property="FontSize" Value="15"/>
         <Setter Property="FontWeight" Value="SemiBold"/>
         <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
         <Setter Property="Margin" Value="0,0,0,8"/>
     </Style>
 
     <Style x:Key="ValueLabelStyle" TargetType="TextBlock">
-        <Setter Property="FontSize" Value="11"/>
+        <Setter Property="FontSize" Value="14"/>
         <Setter Property="Foreground" Value="{DynamicResource TextTertiaryBrush}"/>
         <Setter Property="VerticalAlignment" Value="Center"/>
     </Style>
@@ -27,7 +27,7 @@
     <Style x:Key="AccentButtonStyle" TargetType="Button">
         <Setter Property="Background" Value="{DynamicResource AccentBrush}"/>
         <Setter Property="Foreground" Value="{DynamicResource OnAccentBrush}"/>
-        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="FontSize" Value="15"/>
         <Setter Property="FontWeight" Value="SemiBold"/>
         <Setter Property="Padding" Value="16,9"/>
         <Setter Property="Cursor" Value="Hand"/>
@@ -60,7 +60,7 @@
     <Style x:Key="SubtleButtonStyle" TargetType="Button">
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
-        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="FontSize" Value="15"/>
         <Setter Property="Padding" Value="12,7"/>
         <Setter Property="Cursor" Value="Hand"/>
         <Setter Property="Template">
@@ -115,11 +115,11 @@
 
     <!-- Language switcher segment -->
     <Style x:Key="LangButtonStyle" TargetType="Button">
-        <Setter Property="Width" Value="42"/>
-        <Setter Property="Height" Value="24"/>
+        <Setter Property="Width" Value="46"/>
+        <Setter Property="Height" Value="28"/>
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="Foreground" Value="{DynamicResource TextTertiaryBrush}"/>
-        <Setter Property="FontSize" Value="11"/>
+        <Setter Property="FontSize" Value="13"/>
         <Setter Property="FontWeight" Value="SemiBold"/>
         <Setter Property="Cursor" Value="Hand"/>
         <Setter Property="Template">
@@ -185,7 +185,8 @@
         <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
         <Setter Property="BorderBrush" Value="{DynamicResource ControlBorderBrush}"/>
         <Setter Property="BorderThickness" Value="1"/>
-        <Setter Property="Padding" Value="8,5"/>
+        <Setter Property="Padding" Value="10,6"/>
+        <Setter Property="FontSize" Value="14"/>
         <Setter Property="CaretBrush" Value="{DynamicResource TextPrimaryBrush}"/>
         <Setter Property="SelectionBrush" Value="{DynamicResource AccentBrush}"/>
         <Setter Property="Template">
@@ -215,8 +216,8 @@
         <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
         <Setter Property="BorderBrush" Value="{DynamicResource ControlBorderBrush}"/>
         <Setter Property="BorderThickness" Value="1"/>
-        <Setter Property="Padding" Value="10,7"/>
-        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="Padding" Value="10,8"/>
+        <Setter Property="FontSize" Value="15"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="ComboBox">
@@ -273,8 +274,8 @@
 
     <Style TargetType="ComboBoxItem">
         <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
-        <Setter Property="Padding" Value="10,7"/>
-        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="Padding" Value="10,8"/>
+        <Setter Property="FontSize" Value="15"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="ComboBoxItem">
@@ -299,8 +300,8 @@
     <!-- ============================== Animation cards ============================== -->
     <Style x:Key="AnimationCardStyle" TargetType="ListBoxItem">
         <Setter Property="Margin" Value="4"/>
-        <Setter Property="Padding" Value="8,7"/>
-        <Setter Property="Height" Value="76"/>
+        <Setter Property="Padding" Value="9,8"/>
+        <Setter Property="Height" Value="96"/>
         <Setter Property="Cursor" Value="Hand"/>
         <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
         <Setter Property="Template">
@@ -423,13 +424,13 @@
     <!-- ============================== CheckBox ============================== -->
     <Style TargetType="CheckBox">
         <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
-        <Setter Property="FontSize" Value="11"/>
+        <Setter Property="FontSize" Value="14.5"/>
         <Setter Property="Cursor" Value="Hand"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="CheckBox">
                     <StackPanel Orientation="Horizontal" Background="Transparent">
-                        <Border x:Name="Box" Width="16" Height="16" CornerRadius="4" BorderThickness="1"
+                        <Border x:Name="Box" Width="20" Height="20" CornerRadius="5" BorderThickness="1"
                                 VerticalAlignment="Center"
                                 Background="{DynamicResource ControlBackgroundBrush}"
                                 BorderBrush="{DynamicResource ControlBorderBrush}">
@@ -437,7 +438,7 @@
                                   StrokeThickness="2" Visibility="Collapsed"
                                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
-                        <ContentPresenter Margin="8,0,0,0" VerticalAlignment="Center"/>
+                        <ContentPresenter Margin="10,0,0,0" VerticalAlignment="Center"/>
                     </StackPanel>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">

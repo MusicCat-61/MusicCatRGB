@@ -11,7 +11,7 @@
         Background="Transparent"
         ShowInTaskbar="False"
         Topmost="True"
-        FontFamily="Segoe UI Variable Text, Segoe UI">
+        FontFamily="Segoe UI Variable Text, Segoe UI" FontSize="14">
 
     <Border Background="{DynamicResource DialogBackgroundBrush}" BorderBrush="{DynamicResource CardBorderBrush}" BorderThickness="1" CornerRadius="10" Margin="14">
         <Border.Effect>
@@ -34,7 +34,7 @@
                 </Grid.ColumnDefinitions>
 
                 <TextBlock x:Name="TitleText" Text="KeyGlowMaster"
-                           Foreground="{DynamicResource TextPrimaryBrush}" FontWeight="SemiBold" FontSize="14"
+                           Foreground="{DynamicResource TextPrimaryBrush}" FontWeight="SemiBold" FontSize="16"
                            VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
 
                 <Button Grid.Column="1" Click="BtnNo_Click" Cursor="Hand" Width="28" Height="28"
@@ -59,7 +59,7 @@
 
             <!-- Message -->
             <TextBlock x:Name="MessageText" Grid.Row="1" Text=""
-                       Foreground="{DynamicResource TextSecondaryBrush}" TextWrapping="Wrap" FontSize="13" LineHeight="20"
+                       Foreground="{DynamicResource TextSecondaryBrush}" TextWrapping="Wrap" FontSize="15" LineHeight="23"
                        Margin="20,14,20,22"/>
 
             <!-- Buttons -->

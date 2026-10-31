@@ -1,0 +1,32 @@
+<Window x:Class="MusicCat.CLVKM.UI.EffectToastWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Width="500" Height="160"
+        WindowStyle="None" ResizeMode="NoResize"
+        ShowInTaskbar="False" ShowActivated="False" Topmost="True"
+        AllowsTransparency="True" Background="Transparent"
+        WindowStartupLocation="Manual" Focusable="False">
+    <Border Background="{DynamicResource WindowBackgroundBrush}"
+            BorderBrush="{DynamicResource CardBorderBrush}" BorderThickness="1"
+            CornerRadius="12" Padding="18">
+        <Border.Effect>
+            <DropShadowEffect Color="#99000000" BlurRadius="24" ShadowDepth="5" Opacity="0.55"/>
+        </Border.Effect>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="4"/>
+                <ColumnDefinition Width="14"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Border Grid.Column="0" Background="{DynamicResource AccentBrush}" CornerRadius="2"/>
+            <StackPanel Grid.Column="2" VerticalAlignment="Center">
+                <TextBlock x:Name="EffectNameText" FontSize="20" FontWeight="SemiBold"
+                           Foreground="{DynamicResource TextPrimaryBrush}"
+                           TextWrapping="Wrap" MaxHeight="48" TextTrimming="CharacterEllipsis"/>
+                <TextBlock x:Name="EffectDescriptionText" Margin="0,8,0,0" FontSize="15"
+                           Foreground="{DynamicResource TextSecondaryBrush}"
+                           TextWrapping="Wrap" MaxHeight="56" TextTrimming="CharacterEllipsis"/>
+            </StackPanel>
+        </Grid>
+    </Border>
+</Window>

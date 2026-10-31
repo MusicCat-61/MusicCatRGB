@@ -99,6 +99,8 @@
     <sys:String x:Key="About_Link">gutsv-project/Clevo-Monster-RGB-Controller</sys:String>
     <sys:String x:Key="About_MyRepo">My repository:</sys:String>
     <sys:String x:Key="About_MyRepoLink">MusicCat-61/KeyGlowMaster</sys:String>
+    <sys:String x:Key="About_Donate">Support the project</sys:String>
+    <sys:String x:Key="About_TelegramLabel">Telegram:</sys:String>
     <sys:String x:Key="About_Description">This project is a fork (an improved version) that includes bug fixes, a new interface and additional lighting modes.</sys:String>
     <sys:String x:Key="About_LicensePrefix">Distributed under the</sys:String>
     <sys:String x:Key="About_LicenseName">MIT License</sys:String>

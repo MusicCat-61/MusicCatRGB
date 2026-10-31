@@ -510,6 +510,34 @@ public partial class MainViewModel : ObservableObject
         }
     }
 
+    /// <summary>Cycles the effect list from a global hotkey.</summary>
+    public bool CycleAnimation(int direction)
+    {
+        if (!IsReady || _animationEngine is null || IsAsleep || Animations.Count == 0 || direction == 0)
+        {
+            return false;
+        }
+
+        int step = Math.Sign(direction);
+        int currentIndex = SelectedAnimation is null ? -1 : Animations.IndexOf(SelectedAnimation);
+        if (currentIndex < 0)
+        {
+            currentIndex = step < 0 ? 0 : -1;
+        }
+
+        int nextIndex = (currentIndex + step + Animations.Count) % Animations.Count;
+        bool wasRunning = IsAnimationRunning;
+        SelectedAnimation = Animations[nextIndex];
+
+        // A shortcut should immediately apply the chosen effect, even from static-light mode.
+        if (!wasRunning)
+        {
+            StartAnimation();
+        }
+
+        return true;
+    }
+
     // ───────────────────────────── Weather effect ─────────────────────────────
 
     private void InitializeWeather()
