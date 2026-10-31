@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading;
@@ -52,45 +53,46 @@ public enum WeatherCondition
 /// <summary>One place returned by the city search, with its exact coordinates.</summary>
 public sealed record CitySuggestion(
     string Name,
+    string District,
     string Region,
     string Country,
     double Latitude,
-    double Longitude,
-    int? Population = null)
+    double Longitude)
 {
-    /// <summary>"Миллерово, Ростовская область, Россия" — region is skipped when it repeats the name.</summary>
+    /// <summary>
+    /// "Миллерово, Миллеровский район, Ростовская область, Россия" — parts that are
+    /// empty or repeat an earlier one (e.g. region "Москва" for the city of Moscow) are skipped.
+    /// </summary>
     public string DisplayName
     {
         get
         {
             var parts = new List<string> { Name };
 
-            if (!string.IsNullOrWhiteSpace(Region) && !string.Equals(Region, Name, StringComparison.OrdinalIgnoreCase))
-            {
-                parts.Add(Region);
-            }
-
-            if (!string.IsNullOrWhiteSpace(Country))
-            {
-                parts.Add(Country);
-            }
+            Add(District);
+            Add(Region);
+            Add(Country);
 
             return string.Join(", ", parts);
-        }
-    }
 
-    /// <summary>Population and coordinates — the tie-breaker when a name exists several times.</summary>
-    public string Description
-    {
-        get
-        {
-            var coordinates = string.Create(
-                CultureInfo.InvariantCulture,
-                $"{Latitude:F4}, {Longitude:F4}");
+            void Add(string? value)
+            {
+                var text = (value ?? string.Empty).Trim();
+                if (text.Length == 0)
+                {
+                    return;
+                }
 
-            return Population is int population and > 0
-                ? $"{population.ToString("N0", CultureInfo.CurrentCulture)} · {coordinates}"
-                : coordinates;
+                foreach (var part in parts)
+                {
+                    if (string.Equals(part, text, StringComparison.OrdinalIgnoreCase))
+                    {
+                        return;
+                    }
+                }
+
+                parts.Add(text);
+            }
         }
     }
 }
@@ -271,6 +273,134 @@ public sealed class WeatherService
             return Array.Empty<CitySuggestion>();
         }
 
+        var limit = Math.Clamp(count, 1, 20);
+
+        try
+        {
+            var fromPhoton = await SearchPhotonAsync(text, limit, cancellationToken).ConfigureAwait(false);
+            if (fromPhoton.Count > 0)
+            {
+                return fromPhoton;
+            }
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            throw;
+        }
+        catch
+        {
+            // Photon unreachable - the Open-Meteo geocoder still gives usable (district-less) results.
+        }
+
+        return await SearchOpenMeteoAsync(text, limit, cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// OSM/Photon autocomplete: unlike the Open-Meteo geocoder it knows the district
+    /// ("Миллеровский район" vs "Куйбышевский район"), which is what tells same-named
+    /// villages apart.
+    /// </summary>
+    private async Task<List<CitySuggestion>> SearchPhotonAsync(string query, int limit, CancellationToken cancellationToken)
+    {
+        string language;
+        lock (_sync)
+        {
+            language = _language;
+        }
+
+        // Photon only supports default/de/en/fr; "default" returns local names, which
+        // is what a Russian UI wants.
+        var languageParameter = string.Equals(language, "en", StringComparison.OrdinalIgnoreCase)
+            ? "&lang=en"
+            : string.Empty;
+
+        var url = string.Create(
+            CultureInfo.InvariantCulture,
+            $"https://photon.komoot.io/api/?q={Uri.EscapeDataString(query)}&limit={limit}&osm_tag=place{languageParameter}");
+
+        var json = await _http.GetStringAsync(url, cancellationToken).ConfigureAwait(false);
+
+        using var document = JsonDocument.Parse(json);
+        if (!document.RootElement.TryGetProperty("features", out var features) ||
+            features.ValueKind != JsonValueKind.Array)
+        {
+            return new List<CitySuggestion>();
+        }
+
+        var found = new List<(int Rank, CitySuggestion Suggestion)>();
+        var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var feature in features.EnumerateArray())
+        {
+            if (!feature.TryGetProperty("properties", out var properties))
+            {
+                continue;
+            }
+
+            var placeType = properties.TryGetProperty("osm_value", out var placeValue) ? placeValue.GetString() : null;
+            var rank = placeType switch
+            {
+                "city" => 0,
+                "town" => 1,
+                "village" => 2,
+                "hamlet" => 3,
+                "locality" => 4,
+                "isolated_dwelling" => 5,
+                _ => -1
+            };
+
+            if (rank < 0)
+            {
+                continue;
+            }
+
+            var name = ReadString(properties, "name");
+            if (name.Length == 0)
+            {
+                continue;
+            }
+
+            if (!feature.TryGetProperty("geometry", out var geometry) ||
+                !geometry.TryGetProperty("coordinates", out var coordinates) ||
+                coordinates.ValueKind != JsonValueKind.Array ||
+                coordinates.GetArrayLength() < 2)
+            {
+                continue;
+            }
+
+            var longitude = coordinates[0].GetDouble();
+            var latitude = coordinates[1].GetDouble();
+
+            var key = string.Create(CultureInfo.InvariantCulture, $"{name}|{latitude:F3}|{longitude:F3}");
+            if (!seen.Add(key))
+            {
+                continue;
+            }
+
+            var district = ReadString(properties, "county");
+            if (district.Length == 0)
+            {
+                district = ReadString(properties, "district");
+            }
+
+            found.Add((rank, new CitySuggestion(
+                name,
+                district,
+                ReadString(properties, "state"),
+                ReadString(properties, "country"),
+                latitude,
+                longitude)));
+        }
+
+        return found
+            .OrderBy(item => item.Rank)
+            .Take(limit)
+            .Select(item => item.Suggestion)
+            .ToList();
+    }
+
+    private async Task<IReadOnlyList<CitySuggestion>> SearchOpenMeteoAsync(string query, int limit, CancellationToken cancellationToken)
+    {
         string language;
         lock (_sync)
         {
@@ -279,7 +409,7 @@ public sealed class WeatherService
 
         var url = string.Create(
             CultureInfo.InvariantCulture,
-            $"https://geocoding-api.open-meteo.com/v1/search?name={Uri.EscapeDataString(text)}&count={Math.Clamp(count, 1, 20)}&format=json&language={Uri.EscapeDataString(language)}");
+            $"https://geocoding-api.open-meteo.com/v1/search?name={Uri.EscapeDataString(query)}&count={limit}&format=json&language={Uri.EscapeDataString(language)}");
 
         var json = await _http.GetStringAsync(url, cancellationToken).ConfigureAwait(false);
 
@@ -309,22 +439,23 @@ public sealed class WeatherService
 
             var region = item.TryGetProperty("admin1", out var admin) ? admin.GetString() ?? string.Empty : string.Empty;
             var country = item.TryGetProperty("country", out var countryElement) ? countryElement.GetString() ?? string.Empty : string.Empty;
-            var population = item.TryGetProperty("population", out var populationElement) &&
-                             populationElement.ValueKind == JsonValueKind.Number
-                ? populationElement.GetInt32()
-                : (int?)null;
 
             suggestions.Add(new CitySuggestion(
                 name,
+                string.Empty,
                 region,
                 country,
                 latitude.GetDouble(),
-                longitude.GetDouble(),
-                population));
+                longitude.GetDouble()));
         }
 
         return suggestions;
     }
+
+    private static string ReadString(JsonElement element, string property) =>
+        element.TryGetProperty(property, out var value) && value.ValueKind == JsonValueKind.String
+            ? value.GetString() ?? string.Empty
+            : string.Empty;
 
     /// <summary>Uses an exact place from the suggestion list, skipping a second geocode.</summary>
     public void SelectCity(CitySuggestion suggestion)

@@ -421,21 +421,7 @@
                                     </ListBox.ItemContainerStyle>
                                     <ListBox.ItemTemplate>
                                         <DataTemplate>
-                                            <StackPanel>
-                                                <TextBlock Text="{Binding DisplayName}" FontSize="12" TextWrapping="Wrap"/>
-                                                <TextBlock Text="{Binding Description}" FontSize="10" Margin="0,1,0,0">
-                                                    <TextBlock.Style>
-                                                        <Style TargetType="TextBlock">
-                                                            <Setter Property="Foreground" Value="{DynamicResource TextTertiaryBrush}"/>
-                                                            <Style.Triggers>
-                                                                <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" Value="True">
-                                                                    <Setter Property="Foreground" Value="#CCFFFFFF"/>
-                                                                </DataTrigger>
-                                                            </Style.Triggers>
-                                                        </Style>
-                                                    </TextBlock.Style>
-                                                </TextBlock>
-                                            </StackPanel>
+                                            <TextBlock Text="{Binding DisplayName}" FontSize="12" TextWrapping="Wrap"/>
                                         </DataTemplate>
                                     </ListBox.ItemTemplate>
                                 </ListBox>
