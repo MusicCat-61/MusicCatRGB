@@ -140,6 +140,7 @@
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="*"/>
                             <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
 
                         <DockPanel>
@@ -186,6 +187,11 @@
                             <TextBlock Text="{Binding SelectedAnimation.Description}" FontSize="14" Margin="10,1,0,0"
                                        Foreground="{DynamicResource TextSecondaryBrush}"/>
                         </StackPanel>
+
+                        <!-- Shortcut reminder, same size as the section label above -->
+                        <TextBlock Grid.Row="3" Text="{DynamicResource L_HotkeysHint}" FontSize="15"
+                                   Margin="2,8,0,0" TextWrapping="Wrap"
+                                   Foreground="{DynamicResource TextSecondaryBrush}"/>
                     </Grid>
                 </Border>
 

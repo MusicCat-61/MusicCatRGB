@@ -35,6 +35,7 @@
     <sys:String x:Key="Desc_Garland">Chaotic warm flashes and burn-outs</sys:String>
     <sys:String x:Key="L_SleepTimer">Turn off lighting when idle (5 min)</sys:String>
     <sys:String x:Key="L_Preview">Preview</sys:String>
+    <sys:String x:Key="L_HotkeysHint">Ctrl + Alt + Page Up / Page Down — switch the effect · Ctrl + Alt + Enter — start or stop the animation</sys:String>
 
     <!-- Status line -->
     <sys:String x:Key="St_Init">Initializing engine…</sys:String>
