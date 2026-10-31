@@ -124,10 +124,47 @@
     <sys:String x:Key="L_PrimaryColor">Primary</sys:String>
     <sys:String x:Key="Anim_WeatherSync">Weather Sync</sys:String>
     <sys:String x:Key="Anim_DualBreathe">Dual Breathe</sys:String>
-    <sys:String x:Key="Desc_WeatherSync">Colour follows the weather (Open-Meteo)</sys:String>
+    <sys:String x:Key="Desc_WeatherSync">Colour follows the weather in your city</sys:String>
     <sys:String x:Key="Desc_DualBreathe">Two overlapping sine waves</sys:String>
     <sys:String x:Key="L_EditPrimary">Edit primary colour</sys:String>
     <sys:String x:Key="L_EditSecondary">Edit second colour</sys:String>
     <sys:String x:Key="L_SecondColorTip">Used by Two-Color Fade and Zone Gradient</sys:String>
+
+    <!-- Weather effect (shown only while the weather animation is selected) -->
+    <sys:String x:Key="L_Weather">Weather</sys:String>
+    <sys:String x:Key="L_WeatherCity">City</sys:String>
+    <sys:String x:Key="L_WeatherHint">Enter a city — the lighting follows its weather</sys:String>
+    <sys:String x:Key="L_WeatherSet">Set</sys:String>
+    <sys:String x:Key="Wx_StatusConnecting">Checking the API…</sys:String>
+    <sys:String x:Key="Wx_StatusUpdating">Updating…</sys:String>
+    <sys:String x:Key="Wx_StatusOnline">API connection OK</sys:String>
+    <sys:String x:Key="Wx_StatusOffline">No connection to the API</sys:String>
+    <sys:String x:Key="Wx_StatusNoCity">City not set</sys:String>
+    <sys:String x:Key="Wx_StatusCityNotFound">City not found</sys:String>
+    <sys:String x:Key="Wx_Updated">updated {0}</sys:String>
+    <sys:String x:Key="Wx_TemperatureValue">{0} °C</sys:String>
+    <sys:String x:Key="Wx_WindValue">wind {0}, {1:F0} km/h</sys:String>
+    <sys:String x:Key="Wx_WindSpeedOnly">wind {0:F0} km/h</sys:String>
+    <sys:String x:Key="Wx_Clear">Clear</sys:String>
+    <sys:String x:Key="Wx_MainlyClear">Mainly clear</sys:String>
+    <sys:String x:Key="Wx_PartlyCloudy">Partly cloudy</sys:String>
+    <sys:String x:Key="Wx_Overcast">Overcast</sys:String>
+    <sys:String x:Key="Wx_Fog">Fog</sys:String>
+    <sys:String x:Key="Wx_Drizzle">Drizzle</sys:String>
+    <sys:String x:Key="Wx_Rain">Rain</sys:String>
+    <sys:String x:Key="Wx_FreezingRain">Freezing rain</sys:String>
+    <sys:String x:Key="Wx_Snow">Snow</sys:String>
+    <sys:String x:Key="Wx_RainShowers">Rain showers</sys:String>
+    <sys:String x:Key="Wx_SnowShowers">Snow showers</sys:String>
+    <sys:String x:Key="Wx_Thunderstorm">Thunderstorm</sys:String>
+    <sys:String x:Key="Wx_Unknown">Unknown</sys:String>
+    <sys:String x:Key="Wx_DirN">N</sys:String>
+    <sys:String x:Key="Wx_DirNE">NE</sys:String>
+    <sys:String x:Key="Wx_DirE">E</sys:String>
+    <sys:String x:Key="Wx_DirSE">SE</sys:String>
+    <sys:String x:Key="Wx_DirS">S</sys:String>
+    <sys:String x:Key="Wx_DirSW">SW</sys:String>
+    <sys:String x:Key="Wx_DirW">W</sys:String>
+    <sys:String x:Key="Wx_DirNW">NW</sys:String>
 
 </ResourceDictionary>

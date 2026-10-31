@@ -1,5 +1,6 @@
 using System;
 using System.Collections.ObjectModel;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Media;
@@ -10,6 +11,7 @@ using MusicCat.CLVKM.Core.Animations;
 using MusicCat.CLVKM.Core.Drivers;
 using MusicCat.CLVKM.Core.Interfaces;
 using MusicCat.CLVKM.Core.Models;
+using MusicCat.CLVKM.Core.Services;
 using MusicCat.CLVKM.Core.Settings;
 using MusicCat.CLVKM.Drivers;
 using MusicCat.CLVKM.UI.Localization;
@@ -93,6 +95,41 @@ public partial class MainViewModel : ObservableObject
     private DispatcherTimer? _idleTimer;
     private bool _isSleeping;
     private bool _sleepTransition;
+
+    // --- Weather effect (only visible while the weather animation is selected) ---
+
+    private static readonly SolidColorBrush WeatherUnknownBrush = FrozenBrush(0x9A, 0xA0, 0xAB);
+    private static readonly SolidColorBrush WeatherOnlineBrush = FrozenBrush(0x4A, 0xDE, 0x80);
+    private static readonly SolidColorBrush WeatherOfflineBrush = FrozenBrush(0xE8, 0x11, 0x23);
+    private static readonly SolidColorBrush WeatherPendingBrush = FrozenBrush(0xF2, 0xC9, 0x4C);
+
+    private static readonly string[] WeatherDirectionKeys =
+    {
+        "Wx_DirN", "Wx_DirNE", "Wx_DirE", "Wx_DirSE",
+        "Wx_DirS", "Wx_DirSW", "Wx_DirW", "Wx_DirNW"
+    };
+
+    private DispatcherTimer? _weatherTimer;
+
+    [ObservableProperty] private string _weatherCityInput = string.Empty;
+    [ObservableProperty] private string _weatherStatusText = string.Empty;
+    [ObservableProperty] private string _weatherUpdatedText = string.Empty;
+    [ObservableProperty] private string _weatherTemperatureText = string.Empty;
+    [ObservableProperty] private string _weatherConditionText = string.Empty;
+    [ObservableProperty] private string _weatherWindText = string.Empty;
+    [ObservableProperty] private string _weatherErrorText = string.Empty;
+    [ObservableProperty] private bool _hasWeatherData;
+    [ObservableProperty] private SolidColorBrush _weatherStatusBrush = WeatherUnknownBrush;
+
+    /// <summary>The weather block is only shown while the weather effect is selected.</summary>
+    public bool ShowWeatherPanel => SelectedAnimation?.Animation is WeatherSyncAnimation;
+
+    private static SolidColorBrush FrozenBrush(byte red, byte green, byte blue)
+    {
+        var brush = new SolidColorBrush(Color.FromRgb(red, green, blue));
+        brush.Freeze();
+        return brush;
+    }
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(PreviewColorBrush))]
@@ -282,6 +319,7 @@ public partial class MainViewModel : ObservableObject
         SetStatus("St_Init");
         BuildAnimations();
         UpdateIdleTimer();
+        InitializeWeather();
 
         // Show a selection in the UI even before the driver is ready, without
         // overwriting the animation name we are going to restore later.
@@ -472,6 +510,135 @@ public partial class MainViewModel : ObservableObject
         }
     }
 
+    // ───────────────────────────── Weather effect ─────────────────────────────
+
+    private void InitializeWeather()
+    {
+        WeatherService.Instance.Language = Loc.CurrentCode;
+        WeatherService.Instance.City = _currentSettings.WeatherCity ?? string.Empty;
+        WeatherService.Instance.Updated += OnWeatherUpdated;
+
+        WeatherCityInput = WeatherService.Instance.City;
+        ApplyWeatherSnapshot(WeatherService.Instance.Snapshot);
+
+        // Keeps the API-link status and the readings fresh while the panel is open.
+        _weatherTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(30) };
+        _weatherTimer.Tick += OnWeatherTick;
+        _weatherTimer.Start();
+    }
+
+    [RelayCommand]
+    private void SetWeatherCity()
+    {
+        var city = (WeatherCityInput ?? string.Empty).Trim();
+        WeatherCityInput = city;
+
+        // Setting the city drops the cached place and the update throttle, so the next
+        // refresh geocodes it right away. The result arrives through WeatherService.Updated.
+        WeatherService.Instance.City = city;
+
+        _currentSettings.WeatherCity = city.Length == 0 ? null : city;
+        SaveSettings();
+
+        _ = WeatherService.Instance.RefreshAsync();
+    }
+
+    private void OnWeatherTick(object? sender, EventArgs e)
+    {
+        if (ShowWeatherPanel)
+        {
+            _ = WeatherService.Instance.RefreshAsync();
+        }
+    }
+
+    private void OnWeatherUpdated(object? sender, WeatherSnapshot snapshot)
+    {
+        var app = System.Windows.Application.Current;
+        if (app is null)
+        {
+            return;
+        }
+
+        try
+        {
+            app.Dispatcher.Invoke(() => ApplyWeatherSnapshot(snapshot));
+        }
+        catch
+        {
+            // Dispatcher may be shutting down.
+        }
+    }
+
+    private void ApplyWeatherSnapshot(WeatherSnapshot snapshot)
+    {
+        WeatherStatusText = DescribeWeatherState(snapshot);
+        WeatherStatusBrush = snapshot.State switch
+        {
+            WeatherState.Ready => WeatherOnlineBrush,
+            WeatherState.Offline or WeatherState.CityNotFound => WeatherOfflineBrush,
+            WeatherState.Updating => WeatherPendingBrush,
+            _ => WeatherUnknownBrush
+        };
+
+        WeatherErrorText = snapshot.Error ?? string.Empty;
+        HasWeatherData = snapshot.TemperatureC is not null;
+
+        WeatherTemperatureText = snapshot.TemperatureC is double temperature
+            ? Loc.F("Wx_TemperatureValue", FormatSigned(temperature))
+            : string.Empty;
+
+        WeatherConditionText = snapshot.Condition == WeatherCondition.Unknown
+            ? string.Empty
+            : Loc.T($"Wx_{snapshot.Condition}");
+
+        WeatherWindText = FormatWind(snapshot);
+
+        WeatherUpdatedText = snapshot.UpdatedUtc == default
+            ? string.Empty
+            : Loc.F("Wx_Updated", snapshot.UpdatedUtc.ToLocalTime().ToString("HH:mm", CultureInfo.CurrentCulture));
+    }
+
+    private static string DescribeWeatherState(WeatherSnapshot snapshot)
+    {
+        var text = snapshot.State switch
+        {
+            WeatherState.Ready => Loc.T("Wx_StatusOnline"),
+            WeatherState.Offline => Loc.T("Wx_StatusOffline"),
+            WeatherState.CityNotFound => Loc.T("Wx_StatusCityNotFound"),
+            WeatherState.NoCity => Loc.T("Wx_StatusNoCity"),
+            WeatherState.Updating => Loc.T("Wx_StatusUpdating"),
+            _ => Loc.T("Wx_StatusConnecting")
+        };
+
+        return string.IsNullOrEmpty(snapshot.City) ? text : $"{text} · {snapshot.City}";
+    }
+
+    private static string FormatSigned(double value) =>
+        string.Format(CultureInfo.CurrentCulture, "{0:+0;-0;0}", (int)Math.Round(value, MidpointRounding.AwayFromZero));
+
+    private static string FormatWind(WeatherSnapshot snapshot)
+    {
+        if (snapshot.WindSpeedKmh is not double speed)
+        {
+            return string.Empty;
+        }
+
+        var direction = snapshot.WindDirectionDegrees is double degrees
+            ? Loc.T(WeatherDirectionKey(degrees))
+            : string.Empty;
+
+        return direction.Length == 0
+            ? Loc.F("Wx_WindSpeedOnly", speed)
+            : Loc.F("Wx_WindValue", direction, speed);
+    }
+
+    private static string WeatherDirectionKey(double degrees)
+    {
+        var normalized = ((degrees % 360) + 360) % 360;
+        var index = (int)Math.Round(normalized / 45.0, MidpointRounding.AwayFromZero) % 8;
+        return WeatherDirectionKeys[index];
+    }
+
     [RelayCommand]
     private async Task ApplyColor() => await ApplyColorCore(announceStatus: true);
 
@@ -550,6 +717,7 @@ public partial class MainViewModel : ObservableObject
     private async Task Shutdown()
     {
         _idleTimer?.Stop();
+        _weatherTimer?.Stop();
         SaveSettings();
         if (_queue is not null)
         {
@@ -567,6 +735,13 @@ public partial class MainViewModel : ObservableObject
         _currentSettings.LastAnimation = value.Animation.Name;
 
         OnPropertyChanged(nameof(ShowTertiaryColor));
+        OnPropertyChanged(nameof(ShowWeatherPanel));
+
+        if (ShowWeatherPanel)
+        {
+            // Show the current readings immediately and check the API link.
+            _ = WeatherService.Instance.RefreshAsync();
+        }
 
         if (!ShowTertiaryColor && ActiveSlot == ColorSlot.Tertiary)
         {
@@ -702,6 +877,10 @@ public partial class MainViewModel : ObservableObject
 
         OnPropertyChanged(nameof(IsEnglish));
         OnPropertyChanged(nameof(IsRussian));
+
+        // Localised city names and weather texts follow the UI language.
+        WeatherService.Instance.Language = Loc.CurrentCode;
+        ApplyWeatherSnapshot(WeatherService.Instance.Snapshot);
 
         _currentSettings.Language = Loc.CurrentCode;
         SaveSettings();
@@ -1115,6 +1294,10 @@ public partial class MainViewModel : ObservableObject
             _currentSettings.LastAnimation = SelectedAnimation.Animation.Name;
         }
 
+        _currentSettings.WeatherCity = WeatherService.Instance.City.Length == 0
+            ? null
+            : WeatherService.Instance.City;
+
         SettingsManager.Save(_currentSettings);
     }
 
@@ -1136,6 +1319,10 @@ public partial class MainViewModel : ObservableObject
         _currentSettings.IsStartupEnabled = false;
         _currentSettings.IsAnimationActive = false;
         _currentSettings.LastAnimation = null;
+
+        WeatherCityInput = string.Empty;
+        WeatherService.Instance.City = string.Empty;
+        _currentSettings.WeatherCity = null;
 
         // Settings file is deleted by App.RemoveDataAndStartup; the reset fields above
         // make sure a later save cannot resurrect the old state.

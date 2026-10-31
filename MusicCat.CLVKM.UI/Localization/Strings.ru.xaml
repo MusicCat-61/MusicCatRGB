@@ -124,10 +124,47 @@
     <sys:String x:Key="L_PrimaryColor">Основной</sys:String>
     <sys:String x:Key="Anim_WeatherSync">Погодная подсветка</sys:String>
     <sys:String x:Key="Anim_DualBreathe">Двойное дыхание</sys:String>
-    <sys:String x:Key="Desc_WeatherSync">Цвет по погоде (Open-Meteo)</sys:String>
+    <sys:String x:Key="Desc_WeatherSync">Цвет по погоде в выбранном городе</sys:String>
     <sys:String x:Key="Desc_DualBreathe">Две наложенные синусоиды</sys:String>
     <sys:String x:Key="L_EditPrimary">Редактировать основной цвет</sys:String>
     <sys:String x:Key="L_EditSecondary">Редактировать второй цвет</sys:String>
     <sys:String x:Key="L_SecondColorTip">Используется в «Переливе двух цветов» и «Градиенте по зонам»</sys:String>
+
+    <!-- Weather effect (shown only while the weather animation is selected) -->
+    <sys:String x:Key="L_Weather">Погода</sys:String>
+    <sys:String x:Key="L_WeatherCity">Город</sys:String>
+    <sys:String x:Key="L_WeatherHint">Введите город — подсветка будет следовать его погоде</sys:String>
+    <sys:String x:Key="L_WeatherSet">Задать</sys:String>
+    <sys:String x:Key="Wx_StatusConnecting">Проверка связи с API…</sys:String>
+    <sys:String x:Key="Wx_StatusUpdating">Обновление…</sys:String>
+    <sys:String x:Key="Wx_StatusOnline">Связь с API есть</sys:String>
+    <sys:String x:Key="Wx_StatusOffline">Нет связи с API</sys:String>
+    <sys:String x:Key="Wx_StatusNoCity">Город не задан</sys:String>
+    <sys:String x:Key="Wx_StatusCityNotFound">Город не найден</sys:String>
+    <sys:String x:Key="Wx_Updated">обновлено {0}</sys:String>
+    <sys:String x:Key="Wx_TemperatureValue">{0} °C</sys:String>
+    <sys:String x:Key="Wx_WindValue">ветер {0}, {1:F0} км/ч</sys:String>
+    <sys:String x:Key="Wx_WindSpeedOnly">ветер {0:F0} км/ч</sys:String>
+    <sys:String x:Key="Wx_Clear">Ясно</sys:String>
+    <sys:String x:Key="Wx_MainlyClear">Преимущественно ясно</sys:String>
+    <sys:String x:Key="Wx_PartlyCloudy">Переменная облачность</sys:String>
+    <sys:String x:Key="Wx_Overcast">Пасмурно</sys:String>
+    <sys:String x:Key="Wx_Fog">Туман</sys:String>
+    <sys:String x:Key="Wx_Drizzle">Морось</sys:String>
+    <sys:String x:Key="Wx_Rain">Дождь</sys:String>
+    <sys:String x:Key="Wx_FreezingRain">Ледяной дождь</sys:String>
+    <sys:String x:Key="Wx_Snow">Снег</sys:String>
+    <sys:String x:Key="Wx_RainShowers">Ливневый дождь</sys:String>
+    <sys:String x:Key="Wx_SnowShowers">Снегопад</sys:String>
+    <sys:String x:Key="Wx_Thunderstorm">Гроза</sys:String>
+    <sys:String x:Key="Wx_Unknown">Неизвестно</sys:String>
+    <sys:String x:Key="Wx_DirN">С</sys:String>
+    <sys:String x:Key="Wx_DirNE">СВ</sys:String>
+    <sys:String x:Key="Wx_DirE">В</sys:String>
+    <sys:String x:Key="Wx_DirSE">ЮВ</sys:String>
+    <sys:String x:Key="Wx_DirS">Ю</sys:String>
+    <sys:String x:Key="Wx_DirSW">ЮЗ</sys:String>
+    <sys:String x:Key="Wx_DirW">З</sys:String>
+    <sys:String x:Key="Wx_DirNW">СЗ</sys:String>
 
 </ResourceDictionary>

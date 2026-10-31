@@ -130,6 +130,7 @@
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
                 <Border Grid.Row="0" Style="{StaticResource CardStyle}" Padding="14" Margin="0,0,0,12">
@@ -331,6 +332,96 @@
                                     IsEnabled="{Binding IsReady}" Style="{StaticResource AccentButtonStyle}"
                                     Height="34" Padding="18,0" Margin="10,0,0,0"/>
                         </Grid>
+                    </StackPanel>
+                </Border>
+
+                <!-- Weather effect: city + API link + current readings (weather effect only) -->
+                <Border Grid.Row="2" Margin="0,12,0,0">
+                    <Border.Style>
+                        <Style TargetType="Border" BasedOn="{StaticResource CardStyle}">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Setter Property="Padding" Value="14,12,14,12"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ShowWeatherPanel}" Value="True">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+
+                    <StackPanel>
+                        <TextBlock Text="{DynamicResource L_Weather}" Style="{StaticResource SectionLabelStyle}"
+                                   Margin="0,0,0,6"/>
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Grid.Column="0" Text="{DynamicResource L_WeatherCity}" FontSize="12"
+                                       VerticalAlignment="Center" Margin="0,0,8,0"
+                                       Foreground="{DynamicResource TextTertiaryBrush}"/>
+
+                            <TextBox Grid.Column="1" Text="{Binding WeatherCityInput, UpdateSourceTrigger=PropertyChanged}"
+                                     MaxLength="80" ToolTip="{DynamicResource L_WeatherHint}">
+                                <TextBox.InputBindings>
+                                    <KeyBinding Key="Enter" Command="{Binding SetWeatherCityCommand}"/>
+                                </TextBox.InputBindings>
+                            </TextBox>
+
+                            <Button Grid.Column="2" Content="{DynamicResource L_WeatherSet}"
+                                    Command="{Binding SetWeatherCityCommand}"
+                                    Style="{StaticResource AccentButtonStyle}"
+                                    Height="30" Padding="14,0" Margin="8,0,0,0" FontSize="11"/>
+                        </Grid>
+
+                        <DockPanel Margin="0,10,0,0" LastChildFill="True">
+                            <TextBlock DockPanel.Dock="Right" Text="{Binding WeatherUpdatedText}" FontSize="10.5"
+                                       VerticalAlignment="Center" Margin="8,0,0,0"
+                                       Foreground="{DynamicResource TextTertiaryBrush}"/>
+                            <Ellipse Width="7" Height="7" Margin="0,0,6,0" VerticalAlignment="Center"
+                                     Fill="{Binding WeatherStatusBrush}"/>
+                            <TextBlock Text="{Binding WeatherStatusText}" FontSize="11"
+                                       VerticalAlignment="Center" TextTrimming="CharacterEllipsis"
+                                       ToolTip="{Binding WeatherErrorText}">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding WeatherErrorText}" Value="">
+                                                <Setter Property="ToolTipService.IsEnabled" Value="False"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </DockPanel>
+
+                        <WrapPanel Margin="0,6,0,0">
+                            <WrapPanel.Style>
+                                <Style TargetType="WrapPanel">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding HasWeatherData}" Value="True">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </WrapPanel.Style>
+
+                            <TextBlock Text="{Binding WeatherTemperatureText}" FontSize="13" FontWeight="SemiBold"
+                                       Foreground="{DynamicResource TextPrimaryBrush}"/>
+                            <TextBlock Text="·" Margin="7,0" FontSize="13"
+                                       Foreground="{DynamicResource TextTertiaryBrush}"/>
+                            <TextBlock Text="{Binding WeatherConditionText}" FontSize="13"
+                                       Foreground="{DynamicResource TextPrimaryBrush}"/>
+                            <TextBlock Text="·" Margin="7,0" FontSize="13"
+                                       Foreground="{DynamicResource TextTertiaryBrush}"/>
+                            <TextBlock Text="{Binding WeatherWindText}" FontSize="12" VerticalAlignment="Center"
+                                       Foreground="{DynamicResource TextSecondaryBrush}"/>
+                        </WrapPanel>
                     </StackPanel>
                 </Border>
             </Grid>

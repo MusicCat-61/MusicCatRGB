@@ -37,6 +37,9 @@ public class AppSettings
 
     // Turn the backlight off after 5 minutes of idle time
     public bool SleepTimerEnabled { get; set; }
+
+    // City the weather effect follows (null/empty = not configured yet)
+    public string? WeatherCity { get; set; }
 }
 
 public static class SettingsManager

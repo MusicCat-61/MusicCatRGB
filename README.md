@@ -45,7 +45,7 @@ KeyGlowMaster is a fork of the [GutsV project](https://github.com/gutsv-project/
 | Audio Sync | Lighting reacts to the music playing on the system |
 | System Monitor | Colour driven by CPU load and ACPI temperature |
 | Ambient (Screen Sync) | Colour sampled from the screen edges |
-| Weather Sync | Live weather colours (rain — blue, sun — yellow, clouds — grey, snow — white) |
+| Weather Sync | Live weather colours for the city set in the panel (rain — blue, sun — yellow, clouds — grey, snow — white) |
 | Dual Breathe | Two layered sine waves with different periods for a complex rhythm |
 
 ## How the colour model works
@@ -105,7 +105,7 @@ Layout: `MusicCat.CLVKM.Core` (models, settings, animation engine, weather), `Mu
 
 - **Device not found** — start the original Control Center first, then restart KeyGlowMaster. In the driver box you can also force *Insyde* or *WMI* instead of auto-detect.
 - **Auto-start does nothing** — open the app as administrator and accept *Service Mode* again; the old scheduled task may have been removed by a cleanup.
-- **Weather stays grey** — the effect needs internet access. It tries Open-Meteo first and falls back to `api.met.no`; if both are unreachable the lighting stays neutral until the next attempt in a couple of minutes.
+- **Weather stays grey** — open the **Weather** panel (it appears when the weather effect is selected), enter a city and press *Set*. A wrong name shows *City not found*. The effect needs internet access: it tries Open-Meteo first and falls back to `api.met.no`; if both are unreachable the dot next to the status turns red and the lighting stays neutral until the next attempt in a couple of minutes.
 - **Light goes off by itself** — uncheck the sleep timer.
 
 ## Credits & license
