@@ -10,6 +10,8 @@
 
 ![KeyGlowMaster](assets/preview-en.png)
 
+*English interface · the Russian one is below on the [Russian page](README.ru.md).*
+
 **English** · [Русский](README.ru.md)
 
 A small, fast replacement for the stock Control Center on Clevo-based laptops — including Monster Notebook and the Chinese brands built on these barebones. Written in C# on .NET 10 + WPF, it talks to the keyboard through the Insyde DCHU or WMI interfaces — no drivers of its own, no background services, no installer.
@@ -84,6 +86,10 @@ The shortcuts work globally — the window may stay hidden in the tray, the curr
 | `Ctrl + Alt + Enter` | Start or stop the animation |
 
 Every switch is confirmed by a small always-on-top toast in the corner of the screen: it shows the effect name and description for three seconds, or *Animation on* / *Animation off* when the toggle was used. Cycling the list also starts the effect when nothing was running, so the keyboard follows the shortcut immediately. The shortcuts are registered at startup and released when the app exits.
+
+![Hotkey toasts](assets/toast-en.png)
+
+*The effect toast, then the animation toggle in both states.*
 
 ## Installation
 
