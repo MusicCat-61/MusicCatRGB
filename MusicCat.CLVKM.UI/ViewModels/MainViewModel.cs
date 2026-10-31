@@ -2,6 +2,7 @@ using System;
 using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Media;
 using System.Windows.Threading;
@@ -110,6 +111,9 @@ public partial class MainViewModel : ObservableObject
     };
 
     private DispatcherTimer? _weatherTimer;
+    private DispatcherTimer? _citySearchTimer;
+    private CancellationTokenSource? _citySearchCts;
+    private bool _applyingCity;
 
     [ObservableProperty] private string _weatherCityInput = string.Empty;
     [ObservableProperty] private string _weatherStatusText = string.Empty;
@@ -119,7 +123,11 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty] private string _weatherWindText = string.Empty;
     [ObservableProperty] private string _weatherErrorText = string.Empty;
     [ObservableProperty] private bool _hasWeatherData;
+    [ObservableProperty] private bool _isCitySuggestionsOpen;
+    [ObservableProperty] private CitySuggestion? _selectedCitySuggestion;
     [ObservableProperty] private SolidColorBrush _weatherStatusBrush = WeatherUnknownBrush;
+
+    public ObservableCollection<CitySuggestion> CitySuggestions { get; } = new();
 
     /// <summary>The weather block is only shown while the weather effect is selected.</summary>
     public bool ShowWeatherPanel => SelectedAnimation?.Animation is WeatherSyncAnimation;
@@ -515,7 +523,10 @@ public partial class MainViewModel : ObservableObject
     private void InitializeWeather()
     {
         WeatherService.Instance.Language = Loc.CurrentCode;
-        WeatherService.Instance.City = _currentSettings.WeatherCity ?? string.Empty;
+        WeatherService.Instance.RestoreCity(
+            _currentSettings.WeatherCity ?? string.Empty,
+            _currentSettings.WeatherLatitude,
+            _currentSettings.WeatherLongitude);
         WeatherService.Instance.Updated += OnWeatherUpdated;
 
         WeatherCityInput = WeatherService.Instance.City;
@@ -525,6 +536,114 @@ public partial class MainViewModel : ObservableObject
         _weatherTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(30) };
         _weatherTimer.Tick += OnWeatherTick;
         _weatherTimer.Start();
+
+        // Typing in the city box is debounced before the suggestion lookup goes out.
+        _citySearchTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(350) };
+        _citySearchTimer.Tick += OnCitySearchTick;
+    }
+
+    partial void OnWeatherCityInputChanged(string value)
+    {
+        if (_applyingCity)
+        {
+            return;
+        }
+
+        _citySearchTimer?.Stop();
+
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            CloseCitySuggestions();
+            return;
+        }
+
+        _citySearchTimer?.Start();
+    }
+
+    private void OnCitySearchTick(object? sender, EventArgs e)
+    {
+        _citySearchTimer?.Stop();
+        _ = SearchCitySuggestionsAsync();
+    }
+
+    private async Task SearchCitySuggestionsAsync()
+    {
+        var query = (WeatherCityInput ?? string.Empty).Trim();
+        if (query.Length < 2)
+        {
+            CloseCitySuggestions();
+            return;
+        }
+
+        _citySearchCts?.Cancel();
+        _citySearchCts = new CancellationTokenSource();
+        var token = _citySearchCts.Token;
+
+        try
+        {
+            var results = await WeatherService.Instance.SearchCitiesAsync(query, 8, token);
+            if (token.IsCancellationRequested)
+            {
+                return;
+            }
+
+            CitySuggestions.Clear();
+            foreach (var suggestion in results)
+            {
+                CitySuggestions.Add(suggestion);
+            }
+
+            SelectedCitySuggestion = CitySuggestions.FirstOrDefault();
+            IsCitySuggestionsOpen = CitySuggestions.Count > 0;
+        }
+        catch (OperationCanceledException)
+        {
+            // Superseded by a newer query.
+        }
+        catch
+        {
+            CloseCitySuggestions();
+        }
+    }
+
+    [RelayCommand]
+    private void SelectCitySuggestion(CitySuggestion? suggestion)
+    {
+        if (suggestion is null)
+        {
+            return;
+        }
+
+        _applyingCity = true;
+        WeatherCityInput = suggestion.DisplayName;
+        _applyingCity = false;
+        CloseCitySuggestions();
+
+        // The exact coordinates from the suggestion are pinned, so the weather comes from
+        // the right place even when the name exists in several regions.
+        WeatherService.Instance.SelectCity(suggestion);
+        PersistWeatherCity(suggestion.DisplayName, suggestion.Latitude, suggestion.Longitude);
+        _ = WeatherService.Instance.RefreshAsync();
+    }
+
+    /// <summary>Moves the highlighted suggestion (used by the arrow keys in the city box).</summary>
+    public void MoveCitySuggestionSelection(int delta)
+    {
+        if (CitySuggestions.Count == 0)
+        {
+            return;
+        }
+
+        var index = SelectedCitySuggestion is null ? -1 : CitySuggestions.IndexOf(SelectedCitySuggestion);
+        index = Math.Clamp(index + delta, 0, CitySuggestions.Count - 1);
+        SelectedCitySuggestion = CitySuggestions[index];
+        IsCitySuggestionsOpen = true;
+    }
+
+    public void CloseCitySuggestions()
+    {
+        IsCitySuggestionsOpen = false;
+        SelectedCitySuggestion = null;
     }
 
     [RelayCommand]
@@ -532,15 +651,22 @@ public partial class MainViewModel : ObservableObject
     {
         var city = (WeatherCityInput ?? string.Empty).Trim();
         WeatherCityInput = city;
+        CloseCitySuggestions();
 
         // Setting the city drops the cached place and the update throttle, so the next
         // refresh geocodes it right away. The result arrives through WeatherService.Updated.
         WeatherService.Instance.City = city;
 
-        _currentSettings.WeatherCity = city.Length == 0 ? null : city;
-        SaveSettings();
-
+        PersistWeatherCity(city.Length == 0 ? null : city, null, null);
         _ = WeatherService.Instance.RefreshAsync();
+    }
+
+    private void PersistWeatherCity(string? city, double? latitude, double? longitude)
+    {
+        _currentSettings.WeatherCity = city;
+        _currentSettings.WeatherLatitude = latitude;
+        _currentSettings.WeatherLongitude = longitude;
+        SaveSettings();
     }
 
     private void OnWeatherTick(object? sender, EventArgs e)
@@ -618,7 +744,7 @@ public partial class MainViewModel : ObservableObject
 
     private static string FormatWind(WeatherSnapshot snapshot)
     {
-        if (snapshot.WindSpeedKmh is not double speed)
+        if (snapshot.WindSpeedMs is not double speed)
         {
             return string.Empty;
         }
@@ -718,6 +844,8 @@ public partial class MainViewModel : ObservableObject
     {
         _idleTimer?.Stop();
         _weatherTimer?.Stop();
+        _citySearchTimer?.Stop();
+        _citySearchCts?.Cancel();
         SaveSettings();
         if (_queue is not null)
         {
@@ -1321,8 +1449,11 @@ public partial class MainViewModel : ObservableObject
         _currentSettings.LastAnimation = null;
 
         WeatherCityInput = string.Empty;
+        CloseCitySuggestions();
         WeatherService.Instance.City = string.Empty;
         _currentSettings.WeatherCity = null;
+        _currentSettings.WeatherLatitude = null;
+        _currentSettings.WeatherLongitude = null;
 
         // Settings file is deleted by App.RemoveDataAndStartup; the reset fields above
         // make sure a later save cannot resurrect the old state.

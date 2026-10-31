@@ -364,18 +364,83 @@
                                        VerticalAlignment="Center" Margin="0,0,8,0"
                                        Foreground="{DynamicResource TextTertiaryBrush}"/>
 
-                            <TextBox Grid.Column="1" Text="{Binding WeatherCityInput, UpdateSourceTrigger=PropertyChanged}"
-                                     MaxLength="80" ToolTip="{DynamicResource L_WeatherHint}">
-                                <TextBox.InputBindings>
-                                    <KeyBinding Key="Enter" Command="{Binding SetWeatherCityCommand}"/>
-                                </TextBox.InputBindings>
-                            </TextBox>
+                            <TextBox x:Name="CityBox" Grid.Column="1"
+                                     Text="{Binding WeatherCityInput, UpdateSourceTrigger=PropertyChanged}"
+                                     MaxLength="80" ToolTip="{DynamicResource L_WeatherHint}"
+                                     PreviewKeyDown="CityBox_PreviewKeyDown"
+                                     LostKeyboardFocus="CityBox_LostKeyboardFocus"/>
 
                             <Button Grid.Column="2" Content="{DynamicResource L_WeatherSet}"
                                     Command="{Binding SetWeatherCityCommand}"
                                     Style="{StaticResource AccentButtonStyle}"
                                     Height="30" Padding="14,0" Margin="8,0,0,0" FontSize="11"/>
                         </Grid>
+
+                        <!-- City suggestions: names can exist in several regions -->
+                        <Popup x:Name="CityPopup" PlacementTarget="{Binding ElementName=CityBox}" Placement="Bottom"
+                               IsOpen="{Binding IsCitySuggestionsOpen, Mode=TwoWay}" StaysOpen="False"
+                               AllowsTransparency="True" PopupAnimation="Fade"
+                               Width="{Binding ActualWidth, ElementName=CityBox}">
+                            <Border Background="{DynamicResource DialogBackgroundBrush}"
+                                    BorderBrush="{DynamicResource CardBorderBrush}" BorderThickness="1"
+                                    CornerRadius="6" Margin="0,4,0,0">
+                                <Border.Effect>
+                                    <DropShadowEffect Color="Black" BlurRadius="16" ShadowDepth="4" Opacity="0.45"/>
+                                </Border.Effect>
+
+                                <ListBox x:Name="CitySuggestionsList" ItemsSource="{Binding CitySuggestions}"
+                                         SelectedItem="{Binding SelectedCitySuggestion, Mode=TwoWay}"
+                                         Background="Transparent" BorderThickness="0" MaxHeight="230"
+                                         ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                         MouseLeftButtonUp="CitySuggestions_MouseLeftButtonUp">
+                                    <ListBox.ItemContainerStyle>
+                                        <Style TargetType="ListBoxItem">
+                                            <Setter Property="Padding" Value="10,6"/>
+                                            <Setter Property="Cursor" Value="Hand"/>
+                                            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+                                            <Setter Property="Template">
+                                                <Setter.Value>
+                                                    <ControlTemplate TargetType="ListBoxItem">
+                                                        <Border x:Name="Bd" Background="Transparent" CornerRadius="4"
+                                                                Padding="{TemplateBinding Padding}">
+                                                            <ContentPresenter/>
+                                                        </Border>
+                                                        <ControlTemplate.Triggers>
+                                                            <Trigger Property="IsMouseOver" Value="True">
+                                                                <Setter TargetName="Bd" Property="Background" Value="{DynamicResource ControlHoverBrush}"/>
+                                                            </Trigger>
+                                                            <Trigger Property="IsSelected" Value="True">
+                                                                <Setter TargetName="Bd" Property="Background" Value="{DynamicResource AccentBrush}"/>
+                                                                <Setter Property="Foreground" Value="{DynamicResource OnAccentBrush}"/>
+                                                            </Trigger>
+                                                        </ControlTemplate.Triggers>
+                                                    </ControlTemplate>
+                                                </Setter.Value>
+                                            </Setter>
+                                        </Style>
+                                    </ListBox.ItemContainerStyle>
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <StackPanel>
+                                                <TextBlock Text="{Binding DisplayName}" FontSize="12" TextWrapping="Wrap"/>
+                                                <TextBlock Text="{Binding Description}" FontSize="10" Margin="0,1,0,0">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Setter Property="Foreground" Value="{DynamicResource TextTertiaryBrush}"/>
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" Value="True">
+                                                                    <Setter Property="Foreground" Value="#CCFFFFFF"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
+                            </Border>
+                        </Popup>
 
                         <DockPanel Margin="0,10,0,0" LastChildFill="True">
                             <TextBlock DockPanel.Dock="Right" Text="{Binding WeatherUpdatedText}" FontSize="10.5"

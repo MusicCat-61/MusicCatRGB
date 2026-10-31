@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using System.Reflection;
 using System.Windows;
 using System.Windows.Input;
 using MusicCat.CLVKM.UI.Localization;
@@ -17,6 +18,25 @@ public partial class AboutWindow : Window
     {
         InitializeComponent();
         Title = Loc.T("About_Title");
+        VersionText.Text = Loc.F("About_Version", AppVersion);
+    }
+
+    /// <summary>Assembly informational version without the "+commit" build metadata.</summary>
+    private static string AppVersion
+    {
+        get
+        {
+            var assembly = typeof(AboutWindow).Assembly;
+            var informational = assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
+
+            if (!string.IsNullOrWhiteSpace(informational))
+            {
+                var plus = informational.IndexOf('+');
+                return plus >= 0 ? informational[..plus] : informational;
+            }
+
+            return assembly.GetName().Version?.ToString(3) ?? "1.0.0";
+        }
     }
 
     private void Link_Click(object sender, RoutedEventArgs e) => OpenUrl(RepositoryUrl);

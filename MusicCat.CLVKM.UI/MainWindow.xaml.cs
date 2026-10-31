@@ -3,6 +3,7 @@ using System.Windows;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Threading;
 using MusicCat.CLVKM.UI.Interop;
 using MusicCat.CLVKM.UI.Localization;
 
@@ -10,6 +11,7 @@ using ButtonBase = System.Windows.Controls.Primitives.ButtonBase;
 using Slider = System.Windows.Controls.Slider;
 using TextBox = System.Windows.Controls.TextBox;
 using Color = System.Windows.Media.Color;
+using KeyEventArgs = System.Windows.Input.KeyEventArgs;
 
 namespace MusicCat.CLVKM.UI;
 
@@ -99,6 +101,74 @@ public partial class MainWindow : Window
     {
         var about = new AboutWindow { Owner = this };
         about.ShowDialog();
+    }
+
+    /// <summary>Arrow keys walk the city suggestions, Enter takes the highlighted one.</summary>
+    private void CityBox_PreviewKeyDown(object sender, KeyEventArgs e)
+    {
+        if (DataContext is not ViewModels.MainViewModel vm)
+        {
+            return;
+        }
+
+        switch (e.Key)
+        {
+            case Key.Down when vm.CitySuggestions.Count > 0:
+                vm.MoveCitySuggestionSelection(1);
+                e.Handled = true;
+                break;
+
+            case Key.Up when vm.CitySuggestions.Count > 0:
+                vm.MoveCitySuggestionSelection(-1);
+                e.Handled = true;
+                break;
+
+            case Key.Enter:
+                if (vm.IsCitySuggestionsOpen && vm.SelectedCitySuggestion is not null)
+                {
+                    vm.SelectCitySuggestionCommand.Execute(vm.SelectedCitySuggestion);
+                }
+                else
+                {
+                    vm.SetWeatherCityCommand.Execute(null);
+                }
+
+                e.Handled = true;
+                break;
+
+            case Key.Escape:
+                vm.CloseCitySuggestions();
+                e.Handled = true;
+                break;
+        }
+    }
+
+    private void CitySuggestions_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+    {
+        if (DataContext is ViewModels.MainViewModel vm && vm.SelectedCitySuggestion is not null)
+        {
+            vm.SelectCitySuggestionCommand.Execute(vm.SelectedCitySuggestion);
+        }
+    }
+
+    private void CityBox_LostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+    {
+        if (DataContext is not ViewModels.MainViewModel vm)
+        {
+            return;
+        }
+
+        // A click on a suggestion moves focus into the popup; only close when focus
+        // really left both the box and the list (Tab, a click on another control, …).
+        Dispatcher.BeginInvoke(DispatcherPriority.Input, new Action(() =>
+        {
+            if (!CityPopup.IsOpen || CityPopup.IsKeyboardFocusWithin || CityBox.IsKeyboardFocusWithin)
+            {
+                return;
+            }
+
+            vm.CloseCitySuggestions();
+        }));
     }
 
     private void CleanClick(object sender, RoutedEventArgs e)

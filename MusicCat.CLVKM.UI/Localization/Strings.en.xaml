@@ -99,6 +99,7 @@
     <sys:String x:Key="About_Description">This project is a fork (an improved version) that includes bug fixes, a new interface and additional lighting modes.</sys:String>
     <sys:String x:Key="About_LicensePrefix">Distributed under the</sys:String>
     <sys:String x:Key="About_LicenseName">MIT License</sys:String>
+    <sys:String x:Key="About_Version">Version {0}</sys:String>
 
     <!-- New effects -->
     <sys:String x:Key="Anim_DayNight">Day / Night</sys:String>
@@ -133,7 +134,7 @@
     <!-- Weather effect (shown only while the weather animation is selected) -->
     <sys:String x:Key="L_Weather">Weather</sys:String>
     <sys:String x:Key="L_WeatherCity">City</sys:String>
-    <sys:String x:Key="L_WeatherHint">Enter a city — the lighting follows its weather</sys:String>
+    <sys:String x:Key="L_WeatherHint">Start typing a city — suggestions will appear</sys:String>
     <sys:String x:Key="L_WeatherSet">Set</sys:String>
     <sys:String x:Key="Wx_StatusConnecting">Checking the API…</sys:String>
     <sys:String x:Key="Wx_StatusUpdating">Updating…</sys:String>
@@ -143,8 +144,8 @@
     <sys:String x:Key="Wx_StatusCityNotFound">City not found</sys:String>
     <sys:String x:Key="Wx_Updated">updated {0}</sys:String>
     <sys:String x:Key="Wx_TemperatureValue">{0} °C</sys:String>
-    <sys:String x:Key="Wx_WindValue">wind {0}, {1:F0} km/h</sys:String>
-    <sys:String x:Key="Wx_WindSpeedOnly">wind {0:F0} km/h</sys:String>
+    <sys:String x:Key="Wx_WindValue">wind {0}, {1:F1} m/s</sys:String>
+    <sys:String x:Key="Wx_WindSpeedOnly">wind {0:F1} m/s</sys:String>
     <sys:String x:Key="Wx_Clear">Clear</sys:String>
     <sys:String x:Key="Wx_MainlyClear">Mainly clear</sys:String>
     <sys:String x:Key="Wx_PartlyCloudy">Partly cloudy</sys:String>

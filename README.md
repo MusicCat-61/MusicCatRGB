@@ -1,4 +1,4 @@
-# KeyGlowMaster
+﻿# KeyGlowMaster
 
 [![Release](https://img.shields.io/github/v/release/MusicCat-61/KeyGlowMaster?style=flat-square)](https://github.com/MusicCat-61/KeyGlowMaster/releases)
 [![Download](https://img.shields.io/badge/download-KGMaster.exe-2ea44f?style=flat-square)](https://github.com/MusicCat-61/KeyGlowMaster/releases/latest/download/KGMaster.exe)
@@ -9,9 +9,9 @@
 
 ![KeyGlowMaster](assets/preview-en.png)
 
-**English** · [Русский](README.ru.md)
+**English** В· [Р СѓСЃСЃРєРёР№](README.ru.md)
 
-A small, fast replacement for the stock Control Center on Clevo / Monster Notebook laptops. Written in C# on .NET 10 + WPF, it talks to the keyboard through the Insyde DCHU or WMI interfaces — no drivers of its own, no background services, no installer.
+A small, fast replacement for the stock Control Center on Clevo / Monster Notebook laptops. Written in C# on .NET 10 + WPF, it talks to the keyboard through the Insyde DCHU or WMI interfaces вЂ” no drivers of its own, no background services, no installer.
 
 KeyGlowMaster is a fork of the [GutsV project](https://github.com/gutsv-project/Clevo-Monster-RGB-Controller): the interface was rebuilt from scratch, localisation, themes, new effects and small quality-of-life features were added. See [Credits](#credits--license).
 
@@ -19,14 +19,14 @@ KeyGlowMaster is a fork of the [GutsV project](https://github.com/gutsv-project/
 
 | | |
 |---|---|
-| 🪟 **Mica window** | Native Windows 11 backdrop, no system frame, custom title bar |
-| 🌗 **Frost themes** | Light and dark palettes, switched on the fly from the title bar |
-| 🌐 **Two languages** | English and Russian, switchable without a restart, follows the system language on first run |
-| 🎨 **15 effects** | From calm breathing to a chaotic Soviet garland — list below |
-| 🎯 **Colour slots** | Three colours for animations plus a separate applied colour, each with its own preview |
-| ⌨️ **Live preview** | The keyboard on screen shows the colour that is actually being sent to the hardware |
-| 😴 **Sleep timer** | The backlight fades out after 5 minutes of idle time and comes back on input |
-| ♻️ **Portable** | One self-contained executable, runs as administrator, auto-start through Task Scheduler |
+| рџЄџ **Mica window** | Native Windows 11 backdrop, no system frame, custom title bar |
+| рџЊ— **Frost themes** | Light and dark palettes, switched on the fly from the title bar |
+| рџЊђ **Two languages** | English and Russian, switchable without a restart, follows the system language on first run |
+| рџЋЁ **15 effects** | From calm breathing to a chaotic Soviet garland вЂ” list below |
+| рџЋЇ **Colour slots** | Three colours for animations plus a separate applied colour, each with its own preview |
+| вЊЁпёЏ **Live preview** | The keyboard on screen shows the colour that is actually being sent to the hardware |
+| рџґ **Sleep timer** | The backlight fades out after 5 minutes of idle time and comes back on input |
+| в™»пёЏ **Portable** | One self-contained executable, runs as administrator, auto-start through Task Scheduler |
 
 ## Effects
 
@@ -39,27 +39,27 @@ KeyGlowMaster is a fork of the [GutsV project](https://github.com/gutsv-project/
 | Strobe blink | Sharp on/off blinking |
 | Wave | Travelling colour wave across the three zones |
 | Zone Gradient | Three zones, three picked colours, the palette scrolls across the keyboard |
-| Random Neon | A new neon shade every 2–5 seconds |
-| Day / Night | Warm in the morning, white by day, deep blue at night — follows the clock |
+| Random Neon | A new neon shade every 2вЂ“5 seconds |
+| Day / Night | Warm in the morning, white by day, deep blue at night вЂ” follows the clock |
 | Soviet garland | Chaotic warm flashes, dim-outs and burn-outs of old filament bulbs |
 | Audio Sync | Lighting reacts to the music playing on the system |
 | System Monitor | Colour driven by CPU load and ACPI temperature |
 | Ambient (Screen Sync) | Colour sampled from the screen edges |
-| Weather Sync | Live weather colours for the city set in the panel (rain — blue, sun — yellow, clouds — grey, snow — white) |
+| Weather Sync | Live weather colours for the city set in the panel (rain вЂ” blue, sun вЂ” yellow, clouds вЂ” grey, snow вЂ” white) |
 | Dual Breathe | Two layered sine waves with different periods for a complex rhythm |
 
 ## How the colour model works
 
 There are **four** colours in the app, and they are not the same thing:
 
-- **Colour** — the applied colour. Press *Apply colour* and the keyboard switches to it; it is what the preview shows when no effect is running.
-- **Primary / Second colour / Third colour** — the palette used by effects. Click a swatch and the RGB sliders start editing that slot; the applied colour stays untouched.
+- **Colour** вЂ” the applied colour. Press *Apply colour* and the keyboard switches to it; it is what the preview shows when no effect is running.
+- **Primary / Second colour / Third colour** вЂ” the palette used by effects. Click a swatch and the RGB sliders start editing that slot; the applied colour stays untouched.
 
 The third swatch only appears for *Zone Gradient*, the only effect that needs three zones. Values are stored in `%LOCALAPPDATA%\MusicCat.CLVKM\settings.json`.
 
 ## Zones
 
-Zone count is detected automatically. On a single-zone keyboard the zone-based effects (*Wave*, *Zone Gradient*) fall back to one colour — the app warns about it in the device panel.
+Zone count is detected automatically. On a single-zone keyboard the zone-based effects (*Wave*, *Zone Gradient*) fall back to one colour вЂ” the app warns about it in the device panel.
 
 ## Sleep timer
 
@@ -67,9 +67,9 @@ Tick **Turn off lighting when idle (5 min)** in the device card. After five minu
 
 ## Installation
 
-1. Download [**`KGMaster.exe`**](https://github.com/MusicCat-61/KeyGlowMaster/releases/latest/download/KGMaster.exe) — one self-contained file, no installer and no .NET runtime required.
+1. Download [**`KGMaster.exe`**](https://github.com/MusicCat-61/KeyGlowMaster/releases/latest/download/KGMaster.exe) вЂ” one self-contained file, no installer and no .NET runtime required.
 2. Keep it in a permanent folder, for example `C:\KeyGlowMaster`.
-3. Run it as administrator — the app needs it to talk to the keyboard driver.
+3. Run it as administrator вЂ” the app needs it to talk to the keyboard driver.
 4. On the first run accept **Service Mode** to create a scheduled task, so Windows starts the app with the saved lighting.
 
 > The original Control Center (`FnKey.exe`) should be running: KeyGlowMaster relies on the drivers it initialises.
@@ -90,26 +90,26 @@ or run `publish.bat` to get a self-contained folder in `Build_Output`.
 
 ### Releases
 
-Pushing a version tag builds and publishes the app — the [release workflow](.github/workflows/release.yml) publishes a self-contained single-file `KGMaster.exe` (win-x64) on `windows-latest`, stamps the tag into its file version and attaches the executable plus its SHA-256 checksum to a GitHub release with generated notes. The download is about 75 MB: on the first start the bundle unpacks its runtime into `%TEMP%\.net\KGMaster` and reuses it afterwards.
+Pushing a version tag builds and publishes the app вЂ” the [release workflow](.github/workflows/release.yml) publishes a self-contained single-file `KGMaster.exe` (win-x64) on `windows-latest`, stamps the tag into its file version and attaches the executable plus its SHA-256 checksum to a GitHub release with generated notes. The download is about 75 MB: on the first start the bundle unpacks its runtime into `%TEMP%\.net\KGMaster` and reuses it afterwards.
 
 ```powershell
-git tag v1.0.1
-git push origin v1.0.1
+git tag v1.0.2
+git push origin v1.0.2
 ```
 
-Every push to `main` runs the [CI workflow](.github/workflows/ci.yml), which only compiles the solution — no tag, no release.
+Every push to `main` runs the [CI workflow](.github/workflows/ci.yml), which only compiles the solution вЂ” no tag, no release.
 
 Layout: `MusicCat.CLVKM.Core` (models, settings, animation engine, weather), `MusicCat.CLVKM.Drivers` (Insyde / WMI), `MusicCat.CLVKM.UI` (WPF shell), plus a small service and a diagnostics console.
 
 ## Troubleshooting
 
-- **Device not found** — start the original Control Center first, then restart KeyGlowMaster. In the driver box you can also force *Insyde* or *WMI* instead of auto-detect.
-- **Auto-start does nothing** — open the app as administrator and accept *Service Mode* again; the old scheduled task may have been removed by a cleanup.
-- **Weather stays grey** — open the **Weather** panel (it appears when the weather effect is selected), enter a city and press *Set*. A wrong name shows *City not found*. The effect needs internet access: it tries Open-Meteo first and falls back to `api.met.no`; if both are unreachable the dot next to the status turns red and the lighting stays neutral until the next attempt in a couple of minutes.
-- **Light goes off by itself** — uncheck the sleep timer.
+- **Device not found** вЂ” start the original Control Center first, then restart KeyGlowMaster. In the driver box you can also force *Insyde* or *WMI* instead of auto-detect.
+- **Auto-start does nothing** вЂ” open the app as administrator and accept *Service Mode* again; the old scheduled task may have been removed by a cleanup.
+- **Weather stays grey** вЂ” open the **Weather** panel (it appears when the weather effect is selected), start typing a city and pick one of the suggestions (the same name can exist in several regions), then press *Set*. A wrong name shows *City not found*. The effect needs internet access: it tries Open-Meteo first and falls back to `api.met.no`; if both are unreachable the dot next to the status turns red and the lighting stays neutral until the next attempt in a couple of minutes.
+- **Light goes off by itself** вЂ” uncheck the sleep timer.
 
 ## Credits & license
 
-KeyGlowMaster is based on **GutsV Colour** by [acerhizm](https://github.com/gutsv-project/Clevo-Monster-RGB-Controller) — the drivers, the animation approach and the original idea are theirs. This fork was made by **MusicCat161** and adds a redesigned interface, Frost themes, localisation, new effects and the sleep timer.
+KeyGlowMaster is based on **GutsV Colour** by [acerhizm](https://github.com/gutsv-project/Clevo-Monster-RGB-Controller) вЂ” the drivers, the animation approach and the original idea are theirs. This fork was made by **MusicCat161** and adds a redesigned interface, Frost themes, localisation, new effects and the sleep timer.
 
 Distributed under the MIT License, see [LICENSE](LICENSE).

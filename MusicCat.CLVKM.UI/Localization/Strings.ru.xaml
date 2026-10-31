@@ -99,6 +99,7 @@
     <sys:String x:Key="About_Description">Этот проект является форком (доработанной версией) и включает в себя исправления ошибок, новый интерфейс и дополнительные режимы подсветки.</sys:String>
     <sys:String x:Key="About_LicensePrefix">Распространяется под лицензией</sys:String>
     <sys:String x:Key="About_LicenseName">MIT</sys:String>
+    <sys:String x:Key="About_Version">Версия {0}</sys:String>
 
     <!-- New effects -->
     <sys:String x:Key="Anim_DayNight">Время суток</sys:String>
@@ -133,7 +134,7 @@
     <!-- Weather effect (shown only while the weather animation is selected) -->
     <sys:String x:Key="L_Weather">Погода</sys:String>
     <sys:String x:Key="L_WeatherCity">Город</sys:String>
-    <sys:String x:Key="L_WeatherHint">Введите город — подсветка будет следовать его погоде</sys:String>
+    <sys:String x:Key="L_WeatherHint">Начните вводить город — появятся подсказки</sys:String>
     <sys:String x:Key="L_WeatherSet">Задать</sys:String>
     <sys:String x:Key="Wx_StatusConnecting">Проверка связи с API…</sys:String>
     <sys:String x:Key="Wx_StatusUpdating">Обновление…</sys:String>
@@ -143,8 +144,8 @@
     <sys:String x:Key="Wx_StatusCityNotFound">Город не найден</sys:String>
     <sys:String x:Key="Wx_Updated">обновлено {0}</sys:String>
     <sys:String x:Key="Wx_TemperatureValue">{0} °C</sys:String>
-    <sys:String x:Key="Wx_WindValue">ветер {0}, {1:F0} км/ч</sys:String>
-    <sys:String x:Key="Wx_WindSpeedOnly">ветер {0:F0} км/ч</sys:String>
+    <sys:String x:Key="Wx_WindValue">ветер {0}, {1:F1} м/с</sys:String>
+    <sys:String x:Key="Wx_WindSpeedOnly">ветер {0:F1} м/с</sys:String>
     <sys:String x:Key="Wx_Clear">Ясно</sys:String>
     <sys:String x:Key="Wx_MainlyClear">Преимущественно ясно</sys:String>
     <sys:String x:Key="Wx_PartlyCloudy">Переменная облачность</sys:String>

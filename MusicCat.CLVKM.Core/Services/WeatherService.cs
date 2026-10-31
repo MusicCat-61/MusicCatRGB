@@ -1,7 +1,9 @@
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Net.Http;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 using MusicCat.CLVKM.Core.Models;
 
@@ -47,6 +49,52 @@ public enum WeatherCondition
     Thunderstorm
 }
 
+/// <summary>One place returned by the city search, with its exact coordinates.</summary>
+public sealed record CitySuggestion(
+    string Name,
+    string Region,
+    string Country,
+    double Latitude,
+    double Longitude,
+    int? Population = null)
+{
+    /// <summary>"Миллерово, Ростовская область, Россия" — region is skipped when it repeats the name.</summary>
+    public string DisplayName
+    {
+        get
+        {
+            var parts = new List<string> { Name };
+
+            if (!string.IsNullOrWhiteSpace(Region) && !string.Equals(Region, Name, StringComparison.OrdinalIgnoreCase))
+            {
+                parts.Add(Region);
+            }
+
+            if (!string.IsNullOrWhiteSpace(Country))
+            {
+                parts.Add(Country);
+            }
+
+            return string.Join(", ", parts);
+        }
+    }
+
+    /// <summary>Population and coordinates — the tie-breaker when a name exists several times.</summary>
+    public string Description
+    {
+        get
+        {
+            var coordinates = string.Create(
+                CultureInfo.InvariantCulture,
+                $"{Latitude:F4}, {Longitude:F4}");
+
+            return Population is int population and > 0
+                ? $"{population.ToString("N0", CultureInfo.CurrentCulture)} · {coordinates}"
+                : coordinates;
+        }
+    }
+}
+
 /// <summary>Immutable snapshot of the last weather lookup.</summary>
 public sealed record WeatherSnapshot
 {
@@ -61,8 +109,8 @@ public sealed record WeatherSnapshot
 
     public bool IsDay { get; init; } = true;
 
-    /// <summary>Wind speed in km/h.</summary>
-    public double? WindSpeedKmh { get; init; }
+    /// <summary>Wind speed in metres per second.</summary>
+    public double? WindSpeedMs { get; init; }
 
     /// <summary>Direction the wind comes from, in degrees (0 = north).</summary>
     public double? WindDirectionDegrees { get; init; }
@@ -205,6 +253,124 @@ public sealed class WeatherService
                 return _color;
             }
         }
+    }
+
+    /// <summary>
+    /// Looks up places for the typed text (Open-Meteo geocoder). Used by the suggestion
+    /// list so a name that exists in several regions — "Миллерово" in Rostov and in
+    /// Kuybyshev, for example — can be picked exactly.
+    /// </summary>
+    public async Task<IReadOnlyList<CitySuggestion>> SearchCitiesAsync(
+        string query,
+        int count = 8,
+        CancellationToken cancellationToken = default)
+    {
+        var text = (query ?? string.Empty).Trim();
+        if (text.Length < 2)
+        {
+            return Array.Empty<CitySuggestion>();
+        }
+
+        string language;
+        lock (_sync)
+        {
+            language = _language;
+        }
+
+        var url = string.Create(
+            CultureInfo.InvariantCulture,
+            $"https://geocoding-api.open-meteo.com/v1/search?name={Uri.EscapeDataString(text)}&count={Math.Clamp(count, 1, 20)}&format=json&language={Uri.EscapeDataString(language)}");
+
+        var json = await _http.GetStringAsync(url, cancellationToken).ConfigureAwait(false);
+
+        using var document = JsonDocument.Parse(json);
+        if (!document.RootElement.TryGetProperty("results", out var results) ||
+            results.ValueKind != JsonValueKind.Array)
+        {
+            return Array.Empty<CitySuggestion>();
+        }
+
+        var suggestions = new List<CitySuggestion>();
+        foreach (var item in results.EnumerateArray())
+        {
+            var name = item.TryGetProperty("name", out var nameElement) ? nameElement.GetString() : null;
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                continue;
+            }
+
+            if (!item.TryGetProperty("latitude", out var latitude) ||
+                !item.TryGetProperty("longitude", out var longitude) ||
+                latitude.ValueKind != JsonValueKind.Number ||
+                longitude.ValueKind != JsonValueKind.Number)
+            {
+                continue;
+            }
+
+            var region = item.TryGetProperty("admin1", out var admin) ? admin.GetString() ?? string.Empty : string.Empty;
+            var country = item.TryGetProperty("country", out var countryElement) ? countryElement.GetString() ?? string.Empty : string.Empty;
+            var population = item.TryGetProperty("population", out var populationElement) &&
+                             populationElement.ValueKind == JsonValueKind.Number
+                ? populationElement.GetInt32()
+                : (int?)null;
+
+            suggestions.Add(new CitySuggestion(
+                name,
+                region,
+                country,
+                latitude.GetDouble(),
+                longitude.GetDouble(),
+                population));
+        }
+
+        return suggestions;
+    }
+
+    /// <summary>Uses an exact place from the suggestion list, skipping a second geocode.</summary>
+    public void SelectCity(CitySuggestion suggestion)
+    {
+        if (suggestion is null)
+        {
+            return;
+        }
+
+        ApplyCity(suggestion.DisplayName, suggestion.Latitude, suggestion.Longitude);
+    }
+
+    /// <summary>Restores a saved city; stored coordinates are used when they exist.</summary>
+    public void RestoreCity(string name, double? latitude, double? longitude)
+    {
+        var trimmed = (name ?? string.Empty).Trim();
+        if (trimmed.Length == 0)
+        {
+            City = string.Empty;
+            return;
+        }
+
+        if (latitude is double lat && longitude is double lon)
+        {
+            ApplyCity(trimmed, lat, lon);
+        }
+        else
+        {
+            City = trimmed;
+        }
+    }
+
+    private void ApplyCity(string name, double latitude, double longitude)
+    {
+        WeatherSnapshot snapshot;
+
+        lock (_sync)
+        {
+            _city = name;
+            _location = new Location(name, latitude, longitude, name);
+            _lastAttemptUtc = DateTime.MinValue;
+            _snapshot = new WeatherSnapshot { State = WeatherState.Updating };
+            snapshot = _snapshot;
+        }
+
+        RaiseUpdated(snapshot);
     }
 
     /// <summary>
@@ -408,7 +574,7 @@ public sealed class WeatherService
     private async Task<WeatherSnapshot> FetchFromOpenMeteoAsync(Location location)
     {
         const string currentQuery =
-            "current=weather_code,is_day,temperature_2m,wind_speed_10m,wind_direction_10m&wind_speed_unit=kmh&timezone=auto";
+            "current=weather_code,is_day,temperature_2m,wind_speed_10m,wind_direction_10m&wind_speed_unit=ms&timezone=auto";
 
         var url = string.Create(
             CultureInfo.InvariantCulture,
@@ -429,7 +595,7 @@ public sealed class WeatherService
             TemperatureC = ReadDouble(current, "temperature_2m"),
             Condition = ConditionFromWeatherCode(code),
             IsDay = isDay,
-            WindSpeedKmh = ReadDouble(current, "wind_speed_10m"),
+            WindSpeedMs = ReadDouble(current, "wind_speed_10m"),
             WindDirectionDegrees = ReadDouble(current, "wind_direction_10m"),
             Provider = "open-meteo",
             UpdatedUtc = DateTime.UtcNow
@@ -455,7 +621,7 @@ public sealed class WeatherService
             ? symbolCode.GetString() ?? string.Empty
             : string.Empty;
 
-        // met.no reports wind speed in m/s.
+        // met.no already reports wind speed in m/s.
         var windMs = ReadDouble(details, "wind_speed");
 
         return new WeatherSnapshot
@@ -465,7 +631,7 @@ public sealed class WeatherService
             TemperatureC = ReadDouble(details, "air_temperature"),
             Condition = ConditionFromSymbol(symbol),
             IsDay = !symbol.EndsWith("_night", StringComparison.OrdinalIgnoreCase),
-            WindSpeedKmh = windMs is null ? null : windMs * 3.6,
+            WindSpeedMs = windMs,
             WindDirectionDegrees = ReadDouble(details, "wind_from_direction"),
             Provider = "met.no",
             UpdatedUtc = DateTime.UtcNow

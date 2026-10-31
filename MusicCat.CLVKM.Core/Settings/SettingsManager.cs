@@ -40,6 +40,10 @@ public class AppSettings
 
     // City the weather effect follows (null/empty = not configured yet)
     public string? WeatherCity { get; set; }
+
+    // Exact place picked from the suggestions (null when the name was typed by hand)
+    public double? WeatherLatitude { get; set; }
+    public double? WeatherLongitude { get; set; }
 }
 
 public static class SettingsManager
