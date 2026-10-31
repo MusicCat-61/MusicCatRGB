@@ -11,7 +11,9 @@
 
 **English** · [Русский](README.ru.md)
 
-A small, fast replacement for the stock Control Center on Clevo / Monster Notebook laptops. Written in C# on .NET 10 + WPF, it talks to the keyboard through the Insyde DCHU or WMI interfaces — no drivers of its own, no background services, no installer.
+A small, fast replacement for the stock Control Center on Clevo-based laptops — including Monster Notebook and the Chinese brands built on these barebones. Written in C# on .NET 10 + WPF, it talks to the keyboard through the Insyde DCHU or WMI interfaces — no drivers of its own, no background services, no installer.
+
+WMI is used whenever it is available; if the WMI channel is disabled, the app automatically falls back to `InsydeDCHU.dll`. On other barebones (Tongfang, for example) the device will most likely not be found.
 
 KeyGlowMaster is a fork of the [GutsV project](https://github.com/gutsv-project/Clevo-Monster-RGB-Controller): the interface was rebuilt from scratch, localisation, themes, new effects and small quality-of-life features were added. See [Credits](#credits--license).
 
