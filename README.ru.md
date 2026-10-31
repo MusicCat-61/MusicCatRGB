@@ -1,5 +1,10 @@
 # KeyGlowMaster
 
+[![Release](https://img.shields.io/github/v/release/MusicCat-61/KeyGlowMaster?style=flat-square)](https://github.com/MusicCat-61/KeyGlowMaster/releases)
+[![License](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](LICENSE)
+[![Platform](https://img.shields.io/badge/platform-Windows%2010%20%7C%2011-0078D6?style=flat-square)](#)
+[![.NET](https://img.shields.io/badge/.NET-10-512BD4?style=flat-square)](https://dotnet.microsoft.com/download)
+
 ![KeyGlowMaster](assets/preview-ru.png)
 
 [English](README.md) · **Русский**
@@ -80,6 +85,15 @@ dotnet build MusicCat.CLVKM.slnx -c Release
 ```
 
 Либо запустите `publish.bat` — получите самодостаточную папку в `Build_Output`.
+
+### Релизы
+
+Пуш тега запускает сборку и публикацию: [workflow](.github/workflows/release.yml) собирает самодостаточную версию под `win-x64` на `windows-latest`, упаковывает её в `KeyGlowMaster-<tag>-win-x64.zip` и прикрепляет архив к релизу с автоматически составленным списком изменений.
+
+```powershell
+git tag v1.0.0
+git push origin v1.0.0
+```
 
 Состав решения: `MusicCat.CLVKM.Core` (модели, настройки, движок анимаций, погода), `MusicCat.CLVKM.Drivers` (Insyde / WMI), `MusicCat.CLVKM.UI` (оболочка WPF), плюс небольшая служба и консоль диагностики.
 
