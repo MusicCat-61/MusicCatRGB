@@ -49,6 +49,8 @@
     <sys:String x:Key="St_Sleeping">Подсветка выключена (простой)</sys:String>
     <sys:String x:Key="St_NotFound">Устройство не найдено. Проверьте, что Control Center запущен, и перезапустите программу.</sys:String>
     <sys:String x:Key="St_Failed">Ошибка инициализации: {0}</sys:String>
+    <sys:String x:Key="Hotkey_AnimOn">Анимация включена</sys:String>
+    <sys:String x:Key="Hotkey_AnimOff">Анимация выключена</sys:String>
 
     <!-- Tray -->
     <sys:String x:Key="Tray_Ready">KeyGlowMaster</sys:String>

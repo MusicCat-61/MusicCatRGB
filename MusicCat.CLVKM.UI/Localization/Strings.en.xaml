@@ -49,6 +49,8 @@
     <sys:String x:Key="St_Sleeping">Lighting off (idle)</sys:String>
     <sys:String x:Key="St_NotFound">Device not found. Check that Control Center is running, then restart.</sys:String>
     <sys:String x:Key="St_Failed">Initialization failed: {0}</sys:String>
+    <sys:String x:Key="Hotkey_AnimOn">Animation on</sys:String>
+    <sys:String x:Key="Hotkey_AnimOff">Animation off</sys:String>
 
     <!-- Tray -->
     <sys:String x:Key="Tray_Ready">KeyGlowMaster</sys:String>

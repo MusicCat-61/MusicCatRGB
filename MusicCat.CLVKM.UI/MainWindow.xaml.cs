@@ -83,6 +83,9 @@ public partial class MainWindow : Window
                 break;
             case GlobalHotKeyAction.ToggleAnimation:
                 vm.ToggleAnimationCommand.Execute(null);
+                ShowStatusToast(
+                    Loc.T(vm.IsAnimationRunning ? "Hotkey_AnimOn" : "Hotkey_AnimOff"),
+                    vm.IsAnimationRunning ? vm.SelectedAnimation?.Name : null);
                 break;
         }
     }
@@ -92,6 +95,14 @@ public partial class MainWindow : Window
         if (animation is not null && System.Windows.Application.Current is App app)
         {
             app.ShowEffectToast(animation.Name, animation.Description);
+        }
+    }
+
+    private static void ShowStatusToast(string text, string? detail)
+    {
+        if (System.Windows.Application.Current is App app)
+        {
+            app.ShowEffectToast(text, detail ?? string.Empty);
         }
     }
 

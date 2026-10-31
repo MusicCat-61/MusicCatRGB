@@ -24,6 +24,9 @@ public partial class EffectToastWindow : Window
     {
         EffectNameText.Text = name;
         EffectDescriptionText.Text = description;
+        EffectDescriptionText.Visibility = string.IsNullOrWhiteSpace(description)
+            ? Visibility.Collapsed
+            : Visibility.Visible;
 
         Rect workArea = SystemParameters.WorkArea;
         Left = workArea.Right - Width - 24;
