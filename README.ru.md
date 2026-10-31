@@ -93,8 +93,8 @@ dotnet build MusicCat.CLVKM.slnx -c Release
 Пуш тега запускает сборку и публикацию: [workflow](.github/workflows/release.yml) собирает самодостаточный однофайловый `KGMaster.exe` под `win-x64` на `windows-latest`, проставляет ему версию из тега и прикрепляет исполняемый файл вместе с контрольной суммой SHA-256 к релизу с автоматически составленным списком изменений. Скачивание — около 75 МБ: при первом запуске бандл распаковывает среду выполнения в `%TEMP%\.net\KGMaster` и дальше переиспользует её.
 
 ```powershell
-git tag v1.0.3.2
-git push origin v1.0.3.2
+git tag v1.0.3.3
+git push origin v1.0.3.3
 ```
 
 Каждый пуш в `main` запускает [CI workflow](.github/workflows/ci.yml) — только сборку решения, без тега и релиза.

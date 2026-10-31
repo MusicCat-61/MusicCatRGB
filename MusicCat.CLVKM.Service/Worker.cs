@@ -1,10 +1,13 @@
+using System;
+using System.Runtime.Versioning;
+using System.Threading;
+using System.Threading.Tasks;
 using MusicCat.CLVKM.Core.Animations;
-using MusicCat.CLVKM.Core.Drivers;
 using MusicCat.CLVKM.Core.Interfaces;
 using MusicCat.CLVKM.Core.Models;
 using MusicCat.CLVKM.Core.Settings;
 using MusicCat.CLVKM.Drivers;
-using System.Runtime.Versioning;
+using MusicCat.CLVKM.Drivers.Wmi;
 
 namespace MusicCat.CLVKM.Service;
 
@@ -14,6 +17,7 @@ public class Worker : BackgroundService
     private readonly ILogger<Worker> _logger;
     private IKeyboardController? _driver;
     private AnimationEngine? _engine;
+    private IAnimation? _animation;
 
     public Worker(ILogger<Worker> logger)
     {
@@ -24,106 +28,148 @@ public class Worker : BackgroundService
     {
         _logger.LogInformation("KeyGlowMaster Service starting...");
 
-        // 1. Load Settings
         var settings = SettingsManager.Load();
-        
+
         try
         {
-            // 2. Init Driver
-            var baseDriver = await DeviceManager.CreateDriverAsync(settings.DriverType);
-            if (baseDriver == null)
+            // DeviceManager initialises the driver it returns (WMI first, then Insyde).
+            _driver = await DeviceManager.CreateDriverAsync(settings.DriverType);
+            if (_driver is null)
             {
-                _logger.LogError("KeyGlowMaster Service: No supported device found.");
+                _logger.LogError("No supported device found.");
                 return;
             }
 
-            // Drivers should already be platform attribute marked, but double check
-            if (OperatingSystem.IsWindows())
-            {
-                 // No queue needed for simple service loop really, but safe to use
-                 // However, AsyncQueue does a Loop inside. 
-                 // AnimationEngine DOES a Loop inside.
-                 // We need to coordinate.
-                 
-                _driver = baseDriver;
-                if (_driver is MusicCat.CLVKM.Drivers.Wmi.WmiDriver wmi) await wmi.InitializeAsync();
-                
-                // 3. Apply Config
-                // If animation was running
-                if (!string.IsNullOrEmpty(settings.LastAnimation))
-                {
-                    _logger.LogInformation($"Restoring Animation: {settings.LastAnimation}");
-                    
-                    _engine = new AnimationEngine(_driver);
-                    
-                    // Match name to instance
-                    IAnimation? anim = GetAnimationByName(settings.LastAnimation);
-                    
-                    // Warning: AudioSync in Service (Session 0) might fail or be silent.
-                    // We allow it, but catch errors.
-                    
-                    if (anim != null)
-                    {
-                         try 
-                         {
-                             // Engine.Start is async void or fire/forget usually? 
-                             // No, Engine.Start marks _currentAnimation.
-                             // But Engine doesn't have its own thread loop? 
-                             // Wait, AnimationEngine.Start just sets the variable. 
-                             // AnimationEngine.RunLoopAsync is the main loop.
-                             
-                             // Actually looking at AnimationEngine.cs:
-                             // Start() sets _cancellationTokenSource and calls RunLoopAsync().
-                             // RunLoopAsync is async void (fire and forget) internally? 
-                             // Let's check AnimationEngine implementation memory.
-                             // Assuming it runs on its own Task.
-                             
-                             _engine.Start(anim);
-                         } 
-                         catch (Exception ex)
-                         {
-                             _logger.LogError($"Failed to start animation: {ex.Message}");
-                         }
-                    }
-                }
-                else
-                {
-                    // Static Color
-                    _logger.LogInformation($"Restoring Static Color: R{settings.Red} G{settings.Green} B{settings.Blue}");
-                    await _driver.SetColorAsync(Zone.All, new ColorRGB(settings.Red, settings.Green, settings.Blue));
-                }
-            }
+            await RestoreLightingAsync(settings);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Fatal error in KeyGlowMaster Service");
         }
 
-        // Keep service alive
-        while (!stoppingToken.IsCancellationRequested)
+        try
         {
-            await Task.Delay(1000, stoppingToken);
+            await Task.Delay(Timeout.Infinite, stoppingToken);
         }
-        
-        // Cleanup
-        _engine?.Stop();
-        if (_driver is IDisposable d) d.Dispose();
+        catch (OperationCanceledException)
+        {
+            // The service is stopping.
+        }
+
+        StopAnimation();
+
+        if (_driver is IDisposable disposable)
+        {
+            disposable.Dispose();
+        }
     }
 
-    private IAnimation? GetAnimationByName(string name)
+    private async Task RestoreLightingAsync(AppSettings settings)
     {
-        // Simple factory
-        return name switch
+        var brightness = (float)Math.Clamp(settings.Brightness / 100.0, 0.0, 1.0);
+        var animation = ResolveAnimation(settings.LastAnimation);
+
+        if (animation is not null)
         {
-            "Breathing" => new BreatheAnimation(),
-            "Neon Pulse" => new FreshBreatheAnimation(),
-            "Spectrum Cycle" => new ColorTransformAnimation(),
-            "Strobe Blink" => new PulsatingBlinkAnimation(),
-            "Wave" => new ColorShiftAnimation(),
-            "System Monitor" => new SystemMonitorAnimation(),
-            // Audio Sync implies Session issues, skip or try
-            "Audio Sync (Spectrum)" => null, // Disable for service to avoid crash
-            _ => null
-        };
+            ApplyAnimationColors(animation, settings);
+            ApplyAnimationZoneMode(animation);
+
+            _engine = new AnimationEngine(_driver!)
+            {
+                Speed = settings.AnimationSpeed <= 0.1 ? 1.0 : settings.AnimationSpeed,
+                Brightness = brightness
+            };
+
+            _animation = animation;
+            _engine.Start(animation);
+
+            _logger.LogInformation("Restored animation: {Animation}", animation.Name);
+            return;
+        }
+
+        // No animation (or one the service cannot run): fall back to the applied colour.
+        var color = settings.HasStaticColor
+            ? new ColorRGB(settings.StaticRed, settings.StaticGreen, settings.StaticBlue)
+            : new ColorRGB(settings.Red, settings.Green, settings.Blue);
+
+        color = color.ApplyBrightness(brightness);
+
+        _logger.LogInformation("Restored static colour: R{Red} G{Green} B{Blue}", color.R, color.G, color.B);
+        await _driver!.SetColorAsync(Zone.All, color);
+    }
+
+    /// <summary>
+    /// Resolves the effect saved by the UI through the shared catalog, so effects added
+    /// later (Garland, Weather, …) are restored without touching this service.
+    /// </summary>
+    private IAnimation? ResolveAnimation(string? name)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            return null;
+        }
+
+        if (AnimationCatalog.RequiresInteractiveSession(name))
+        {
+            _logger.LogWarning(
+                "Animation '{Animation}' needs an interactive desktop session; restoring the static colour instead.",
+                name);
+            return null;
+        }
+
+        var animation = AnimationCatalog.CreateByName(name);
+        if (animation is null)
+        {
+            _logger.LogWarning("Unknown animation '{Animation}'; restoring the static colour instead.", name);
+        }
+
+        return animation;
+    }
+
+    private static void ApplyAnimationColors(IAnimation animation, AppSettings settings)
+    {
+        if (animation is not IColorAwareAnimation aware)
+        {
+            return;
+        }
+
+        aware.Primary = new ColorRGB(settings.Red, settings.Green, settings.Blue);
+        aware.Secondary = new ColorRGB(settings.SecondaryRed, settings.SecondaryGreen, settings.SecondaryBlue);
+
+        if (animation is ZoneGradientAnimation gradient)
+        {
+            gradient.Tertiary = new ColorRGB(settings.TertiaryRed, settings.TertiaryGreen, settings.TertiaryBlue);
+        }
+    }
+
+    private void ApplyAnimationZoneMode(IAnimation animation)
+    {
+        var singleZone = _driver is not WmiDriver;
+
+        switch (animation)
+        {
+            case ColorShiftAnimation wave:
+                wave.SingleZone = singleZone;
+                break;
+            case GarlandAnimation garland:
+                garland.SingleZone = singleZone;
+                break;
+            case ZoneGradientAnimation gradient:
+                gradient.SingleZone = singleZone;
+                break;
+        }
+    }
+
+    private void StopAnimation()
+    {
+        _engine?.Stop();
+        _engine = null;
+
+        if (_animation is IDisposable disposable)
+        {
+            disposable.Dispose();
+        }
+
+        _animation = null;
     }
 }

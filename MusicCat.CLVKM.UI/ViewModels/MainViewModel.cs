@@ -433,21 +433,11 @@ public partial class MainViewModel : ObservableObject
     private void BuildAnimations()
     {
         Animations.Clear();
-        Animations.Add(new AnimationItem(new BreatheAnimation()));
-        Animations.Add(new AnimationItem(new FreshBreatheAnimation()));
-        Animations.Add(new AnimationItem(new TwoColorFadeAnimation()));
-        Animations.Add(new AnimationItem(new ColorTransformAnimation()));
-        Animations.Add(new AnimationItem(new PulsatingBlinkAnimation()));
-        Animations.Add(new AnimationItem(new ColorShiftAnimation()));
-        Animations.Add(new AnimationItem(new ZoneGradientAnimation()));
-        Animations.Add(new AnimationItem(new RandomNeonAnimation()));
-        Animations.Add(new AnimationItem(new DayNightAnimation()));
-        Animations.Add(new AnimationItem(new GarlandAnimation()));
-        Animations.Add(new AnimationItem(new AudioSyncAnimation()));
-        Animations.Add(new AnimationItem(new SystemMonitorAnimation()));
-        Animations.Add(new AnimationItem(new AmbientLightingAnimation()));
-        Animations.Add(new AnimationItem(new WeatherSyncAnimation()));
-        Animations.Add(new AnimationItem(new DualBreatheAnimation()));
+
+        foreach (var animation in AnimationCatalog.CreateAll())
+        {
+            Animations.Add(new AnimationItem(animation));
+        }
     }
 
     /// <summary>
