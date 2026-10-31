@@ -19,6 +19,7 @@ public static class AnimationCatalog
         ("Neon Pulse", () => new FreshBreatheAnimation()),
         ("Two-Color Fade", () => new TwoColorFadeAnimation()),
         ("Spectrum Cycle", () => new ColorTransformAnimation()),
+        ("Rainbow", () => new RainbowAnimation()),
         ("Strobe Blink", () => new PulsatingBlinkAnimation()),
         ("Wave", () => new ColorShiftAnimation()),
         ("Zone Gradient", () => new ZoneGradientAnimation()),

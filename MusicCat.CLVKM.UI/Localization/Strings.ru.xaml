@@ -84,6 +84,7 @@
     <sys:String x:Key="Anim_Breathing">Дыхание</sys:String>
     <sys:String x:Key="Anim_NeonPulse">Неоновый пульс</sys:String>
     <sys:String x:Key="Anim_SpectrumCycle">Цикл спектра</sys:String>
+    <sys:String x:Key="Anim_Rainbow">Радуга</sys:String>
     <sys:String x:Key="Anim_StrobeBlink">Стробоскоп</sys:String>
     <sys:String x:Key="Anim_Wave">Волна</sys:String>
     <sys:String x:Key="Anim_AudioSync">Аудиосинхронизация</sys:String>
@@ -113,6 +114,7 @@
     <sys:String x:Key="Desc_Breathing">Дыхание одним цветом</sys:String>
     <sys:String x:Key="Desc_NeonPulse">Неоновая вспышка</sys:String>
     <sys:String x:Key="Desc_SpectrumCycle">Полный круг оттенков</sys:String>
+    <sys:String x:Key="Desc_Rainbow">Семь цветов строго по кругу</sys:String>
     <sys:String x:Key="Desc_StrobeBlink">Резкое мигание</sys:String>
     <sys:String x:Key="Desc_Wave">Бегущая волна по зонам</sys:String>
     <sys:String x:Key="Desc_AudioSync">Реакция на музыку</sys:String>

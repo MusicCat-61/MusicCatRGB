@@ -1104,7 +1104,25 @@ public partial class MainViewModel : ObservableObject
 
     private void SyncAnimationColors()
     {
-        if (SelectedAnimation?.Animation is not IColorAwareAnimation aware)
+        if (SelectedAnimation?.Animation is not { } animation)
+        {
+            return;
+        }
+
+        // Zone mode applies to effects that are not colour-aware as well.
+        var singleZone = !IsMultiZoneCapable;
+
+        if (animation is RainbowAnimation rainbow)
+        {
+            rainbow.SingleZone = singleZone;
+        }
+
+        if (animation is GarlandAnimation garland)
+        {
+            garland.SingleZone = singleZone;
+        }
+
+        if (animation is not IColorAwareAnimation aware)
         {
             return;
         }
@@ -1114,18 +1132,13 @@ public partial class MainViewModel : ObservableObject
 
         if (aware is ZoneGradientAnimation gradient)
         {
-            gradient.SingleZone = !IsMultiZoneCapable;
+            gradient.SingleZone = singleZone;
             gradient.Tertiary = new ColorRGB(TertiaryRed, TertiaryGreen, TertiaryBlue);
         }
 
         if (aware is ColorShiftAnimation wave)
         {
-            wave.SingleZone = !IsMultiZoneCapable;
-        }
-
-        if (aware is GarlandAnimation garland)
-        {
-            garland.SingleZone = !IsMultiZoneCapable;
+            wave.SingleZone = singleZone;
         }
     }
 

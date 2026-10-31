@@ -161,6 +161,9 @@ public class Worker : BackgroundService
             case ZoneGradientAnimation gradient:
                 gradient.SingleZone = singleZone;
                 break;
+            case RainbowAnimation rainbow:
+                rainbow.SingleZone = singleZone;
+                break;
         }
     }
 

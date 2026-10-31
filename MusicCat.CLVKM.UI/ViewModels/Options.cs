@@ -25,6 +25,7 @@ public sealed class AnimationItem : ObservableObject
         ["Breathing"] = ("Anim_Breathing", "Desc_Breathing"),
         ["Neon Pulse"] = ("Anim_NeonPulse", "Desc_NeonPulse"),
         ["Spectrum Cycle"] = ("Anim_SpectrumCycle", "Desc_SpectrumCycle"),
+        ["Rainbow"] = ("Anim_Rainbow", "Desc_Rainbow"),
         ["Strobe Blink"] = ("Anim_StrobeBlink", "Desc_StrobeBlink"),
         ["Wave"] = ("Anim_Wave", "Desc_Wave"),
         ["Audio Sync (Spectrum)"] = ("Anim_AudioSync", "Desc_AudioSync"),

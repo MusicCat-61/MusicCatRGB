@@ -84,6 +84,7 @@
     <sys:String x:Key="Anim_Breathing">Breathing</sys:String>
     <sys:String x:Key="Anim_NeonPulse">Neon pulse</sys:String>
     <sys:String x:Key="Anim_SpectrumCycle">Spectrum cycle</sys:String>
+    <sys:String x:Key="Anim_Rainbow">Rainbow</sys:String>
     <sys:String x:Key="Anim_StrobeBlink">Strobe blink</sys:String>
     <sys:String x:Key="Anim_Wave">Wave</sys:String>
     <sys:String x:Key="Anim_AudioSync">Audio sync</sys:String>
@@ -113,6 +114,7 @@
     <sys:String x:Key="Desc_Breathing">Breathing in one colour</sys:String>
     <sys:String x:Key="Desc_NeonPulse">Neon flash on every pulse</sys:String>
     <sys:String x:Key="Desc_SpectrumCycle">Full hue circle</sys:String>
+    <sys:String x:Key="Desc_Rainbow">Seven colours stepping in order</sys:String>
     <sys:String x:Key="Desc_StrobeBlink">Sharp on/off blinking</sys:String>
     <sys:String x:Key="Desc_Wave">Travelling wave across zones</sys:String>
     <sys:String x:Key="Desc_AudioSync">Reacts to your music</sys:String>

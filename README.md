@@ -27,7 +27,7 @@ KeyGlowMaster is a fork of the [GutsV project](https://github.com/gutsv-project/
 | 🪟 **Mica window** | Native Windows 11 backdrop, no system frame, custom title bar |
 | 🌗 **Frost themes** | Light and dark palettes, switched on the fly from the title bar |
 | 🌐 **Two languages** | English and Russian, switchable without a restart, follows the system language on first run |
-| 🎨 **15 effects** | From calm breathing to a chaotic Soviet garland — list below |
+| 🎨 **16 effects** | From calm breathing to a chaotic Soviet garland — list below |
 | 🎯 **Colour slots** | Three colours for animations plus a separate applied colour, each with its own preview |
 | ⌨️ **Live preview** | The keyboard on screen shows the colour that is actually being sent to the hardware |
 | 😴 **Sleep timer** | The backlight fades out after 5 minutes of idle time and comes back on input |
@@ -41,6 +41,7 @@ KeyGlowMaster is a fork of the [GutsV project](https://github.com/gutsv-project/
 | Neon pulse | Short bright flashes of a neon colour |
 | Two-Color Fade | Sine fade between the two picked colours |
 | Spectrum Cycle | Continuous walk around the full hue circle |
+| Rainbow | Seven colours — red, orange, yellow, green, cyan, blue, violet — stepping strictly in order; on a three-zone keyboard the zones lag by a third of a step |
 | Strobe blink | Sharp on/off blinking |
 | Wave | Travelling colour wave across the three zones |
 | Zone Gradient | Three zones, three picked colours, the palette scrolls across the keyboard |
@@ -98,8 +99,8 @@ or run `publish.bat` to get a self-contained folder in `Build_Output`.
 Pushing a version tag builds and publishes the app — the [release workflow](.github/workflows/release.yml) publishes a self-contained single-file `KGMaster.exe` (win-x64) on `windows-latest`, stamps the tag into its file version and attaches the executable plus its SHA-256 checksum to a GitHub release with generated notes. The download is about 75 MB: on the first start the bundle unpacks its runtime into `%TEMP%\.net\KGMaster` and reuses it afterwards.
 
 ```powershell
-git tag v1.0.3.4
-git push origin v1.0.3.4
+git tag v1.0.4
+git push origin v1.0.4
 ```
 
 Every push to `main` runs the [CI workflow](.github/workflows/ci.yml), which only compiles the solution — no tag, no release.
