@@ -46,7 +46,7 @@ KeyGlowMaster is a fork of the [GutsV project](https://github.com/gutsv-project/
 | Soviet garland | Chaotic warm flashes, dim-outs and burn-outs of old filament bulbs |
 | Audio Sync | Lighting reacts to the music playing on the system |
 | System Monitor | Colour driven by CPU load and ACPI temperature |
-| Ambient (Screen Sync) | Colour sampled from the screen edges |
+| Ambient (Screen Sync) | Average colour of the whole screen, weighted towards saturated areas |
 | Weather Sync | Live weather colours for the city set in the panel (rain — blue, sun — yellow, clouds — grey, snow — white; steady amber while updating, steady red when the API is unreachable) |
 | Dual Breathe | Two layered sine waves with different periods for a complex rhythm |
 
