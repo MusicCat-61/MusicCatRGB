@@ -1,0 +1,41 @@
+
+# Build Results
+[Bb]in/
+[Oo]bj/
+Build_Output/
+*.exe
+*.dll
+*.pdb
+!InsydeDCHU.dll
+
+# Visual Studio / Rider
+.vs/
+.idea/
+*.user
+*.suo
+
+# Temporary Files
+tmp/
+*.log
+*.tmp
+
+# MusicCat.CLVKM Specific
+MusicCat.CLVKM/bin/
+MusicCat.CLVKM/obj/
+MusicCat.CLVKM.UI/bin/
+MusicCat.CLVKM.UI/obj/
+MusicCat.CLVKM.Core/bin/
+MusicCat.CLVKM.Core/obj/
+MusicCat.CLVKM.Drivers/bin/
+MusicCat.CLVKM.Drivers/obj/
+MusicCat.CLVKM.Service/bin/
+MusicCat.CLVKM.Service/obj/
+MusicCat.CLVKM.Diagnostics/bin/
+MusicCat.CLVKM.Diagnostics/obj/
+
+# Generated diagnostics report
+MusicCat.CLVKM.Diagnostics/KeyGlowMaster_Report.txt
+
+# Design mockups / screenshots
+assets/concepts/
+

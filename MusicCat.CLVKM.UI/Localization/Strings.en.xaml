@@ -1,0 +1,133 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=System.Runtime">
+
+    <!-- Window / sections -->
+    <sys:String x:Key="L_Status">Status</sys:String>
+    <sys:String x:Key="L_Driver">Driver</sys:String>
+    <sys:String x:Key="L_DriverAuto">Auto detect</sys:String>
+    <sys:String x:Key="L_DriverInsyde">Insyde · 1 zone</sys:String>
+    <sys:String x:Key="L_DriverWmi">WMI · 3 zones</sys:String>
+    <sys:String x:Key="L_Brightness">Brightness</sys:String>
+    <sys:String x:Key="L_Color">Colour</sys:String>
+    <sys:String x:Key="L_ColorsForAnimation">Colours for animation</sys:String>
+    <sys:String x:Key="L_ThirdColor">Third colour</sys:String>
+    <sys:String x:Key="L_ZoneHint">Zone count is detected automatically: on a single-zone keyboard, zone effects (Wave, Zone Gradient) work as one colour.</sys:String>
+    <sys:String x:Key="L_Zone">Zone</sys:String>
+    <sys:String x:Key="L_ZoneAll">All zones</sys:String>
+    <sys:String x:Key="L_ZoneLeft">Left</sys:String>
+    <sys:String x:Key="L_ZoneCenter">Center</sys:String>
+    <sys:String x:Key="L_ZoneRight">Right</sys:String>
+    <sys:String x:Key="L_Hex">Hex</sys:String>
+    <sys:String x:Key="L_Apply">Apply colour</sys:String>
+    <sys:String x:Key="L_AnimModes">Animation modes</sys:String>
+    <sys:String x:Key="L_AnimSpeed">Animation speed</sys:String>
+    <sys:String x:Key="L_Start">Start animation</sys:String>
+    <sys:String x:Key="L_Stop">Stop animation</sys:String>
+    <sys:String x:Key="L_Reset">Reset</sys:String>
+    <sys:String x:Key="L_ResetTip">Reset settings and remove auto-start</sys:String>
+    <sys:String x:Key="L_Minimize">Minimize</sys:String>
+    <sys:String x:Key="L_Maximize">Maximize</sys:String>
+    <sys:String x:Key="L_Close">Close</sys:String>
+    <sys:String x:Key="L_Language">Language</sys:String>
+    <sys:String x:Key="L_Theme">Switch theme</sys:String>
+    <sys:String x:Key="Anim_Garland">Soviet garland</sys:String>
+    <sys:String x:Key="Desc_Garland">Chaotic warm flashes and burn-outs</sys:String>
+    <sys:String x:Key="L_SleepTimer">Turn off lighting when idle (5 min)</sys:String>
+    <sys:String x:Key="L_Preview">Preview</sys:String>
+
+    <!-- Status line -->
+    <sys:String x:Key="St_Init">Initializing engine…</sys:String>
+    <sys:String x:Key="St_Scan">Scanning hardware…</sys:String>
+    <sys:String x:Key="St_Retry">Retrying connection {0}/{1}…</sys:String>
+    <sys:String x:Key="St_AntiLag">Starting anti-lag pipeline…</sys:String>
+    <sys:String x:Key="St_Ready">Active · Ready</sys:String>
+    <sys:String x:Key="St_Running">Animation is running</sys:String>
+    <sys:String x:Key="St_Applied">Colour applied</sys:String>
+    <sys:String x:Key="St_Resuming">Restoring animation…</sys:String>
+    <sys:String x:Key="St_Stopped">Animation stopped</sys:String>
+    <sys:String x:Key="St_Sleeping">Lighting off (idle)</sys:String>
+    <sys:String x:Key="St_NotFound">Device not found. Check that Control Center is running, then restart.</sys:String>
+    <sys:String x:Key="St_Failed">Initialization failed: {0}</sys:String>
+
+    <!-- Tray -->
+    <sys:String x:Key="Tray_Ready">KeyGlowMaster</sys:String>
+    <sys:String x:Key="Tray_Running">KeyGlowMaster · Running</sys:String>
+    <sys:String x:Key="Tray_Starting">KeyGlowMaster · Starting…</sys:String>
+    <sys:String x:Key="Tray_WaitingFnKey">KeyGlowMaster · Waiting for Control Center…</sys:String>
+    <sys:String x:Key="Tray_FnKeyFound">KeyGlowMaster · Initializing…</sys:String>
+    <sys:String x:Key="Tray_Checking">KeyGlowMaster · Checking system…</sys:String>
+    <sys:String x:Key="Tray_Open">Open KeyGlowMaster</sys:String>
+    <sys:String x:Key="Tray_Exit">Exit</sys:String>
+
+    <!-- Dialogs -->
+    <sys:String x:Key="Msg_AlreadyRunning">KeyGlowMaster is already running. Check the notification area.</sys:String>
+    <sys:String x:Key="Msg_NoControlCenter" xml:space="preserve">Control Center (FnKey.exe) is not running.&#x0a;&#x0a;Please start Control Center first.</sys:String>
+    <sys:String x:Key="Msg_FatalTitle">Fatal error</sys:String>
+    <sys:String x:Key="Msg_ServiceMode" xml:space="preserve">Enable Service Mode (auto-start)?&#x0a;&#x0a;Your keyboard lighting will then be restored automatically every time Windows starts.</sys:String>
+    <sys:String x:Key="Msg_ServiceModeTitle">Setup required</sys:String>
+    <sys:String x:Key="Msg_CleanupDone" xml:space="preserve">Service Mode removed and settings cleared.&#x0a;You will be asked again on the next launch.</sys:String>
+    <sys:String x:Key="Msg_CleanupTitle">Cleanup complete</sys:String>
+    <sys:String x:Key="Msg_ErrorTitle">Error</sys:String>
+    <sys:String x:Key="Msg_CleanupError">Cleanup failed: {0}</sys:String>
+    <sys:String x:Key="Crash_Title">KeyGlowMaster crash report</sys:String>
+    <sys:String x:Key="Crash_Message" xml:space="preserve">Unhandled error: {0}&#x0a;&#x0a;Stack trace:&#x0a;{1}</sys:String>
+    <sys:String x:Key="Reset_Title">Reset confirmation</sys:String>
+    <sys:String x:Key="Reset_Message" xml:space="preserve">Reset KeyGlowMaster?&#x0a;&#x0a;• Auto-start will be disabled&#x0a;• Saved colors and animations will be deleted&#x0a;&#x0a;Only KGMaster.exe will remain.</sys:String>
+
+    <!-- Common buttons -->
+    <sys:String x:Key="Yes">Yes</sys:String>
+    <sys:String x:Key="No">No</sys:String>
+    <sys:String x:Key="Ok">OK</sys:String>
+
+    <!-- Animation names -->
+    <sys:String x:Key="Anim_Breathing">Breathing</sys:String>
+    <sys:String x:Key="Anim_NeonPulse">Neon pulse</sys:String>
+    <sys:String x:Key="Anim_SpectrumCycle">Spectrum cycle</sys:String>
+    <sys:String x:Key="Anim_StrobeBlink">Strobe blink</sys:String>
+    <sys:String x:Key="Anim_Wave">Wave</sys:String>
+    <sys:String x:Key="Anim_AudioSync">Audio sync</sys:String>
+    <sys:String x:Key="Anim_SystemMonitor">System monitor</sys:String>
+    <sys:String x:Key="Anim_Ambient">Ambient screen sync</sys:String>
+
+<!-- About -->
+    <sys:String x:Key="L_About">About</sys:String>
+    <sys:String x:Key="About_Title">About KeyGlowMaster</sys:String>
+    <sys:String x:Key="About_Developer">Modification developer: MusicCat161</sys:String>
+    <sys:String x:Key="About_Based">Based on the repository:</sys:String>
+    <sys:String x:Key="About_Link">gutsv-project/Clevo-Monster-RGB-Controller</sys:String>
+    <sys:String x:Key="About_Description">This project is a fork (an improved version) that includes bug fixes, a new interface and additional lighting modes.</sys:String>
+    <sys:String x:Key="About_LicensePrefix">Distributed under the</sys:String>
+    <sys:String x:Key="About_LicenseName">MIT License</sys:String>
+
+    <!-- New effects -->
+    <sys:String x:Key="Anim_DayNight">Day / Night</sys:String>
+    <sys:String x:Key="Anim_ZoneGradient">Zone Gradient</sys:String>
+    <sys:String x:Key="Anim_RandomNeon">Random Neon</sys:String>
+    <sys:String x:Key="Anim_TwoColorFade">Two-Color Fade</sys:String>
+
+    <!-- Effect descriptions -->
+    <sys:String x:Key="Desc_Breathing">Breathing in one colour</sys:String>
+    <sys:String x:Key="Desc_NeonPulse">Neon flash on every pulse</sys:String>
+    <sys:String x:Key="Desc_SpectrumCycle">Full hue circle</sys:String>
+    <sys:String x:Key="Desc_StrobeBlink">Sharp on/off blinking</sys:String>
+    <sys:String x:Key="Desc_Wave">Travelling wave across zones</sys:String>
+    <sys:String x:Key="Desc_AudioSync">Reacts to your music</sys:String>
+    <sys:String x:Key="Desc_SystemMonitor">CPU load and temperature</sys:String>
+    <sys:String x:Key="Desc_Ambient">Samples colours from screen</sys:String>
+    <sys:String x:Key="Desc_DayNight">Warm morning, white day, blue evening</sys:String>
+    <sys:String x:Key="Desc_ZoneGradient">Three zones, drifting colours</sys:String>
+    <sys:String x:Key="Desc_RandomNeon">New neon shade every 2–5 s</sys:String>
+    <sys:String x:Key="Desc_TwoColorFade">Smooth sine between two colours</sys:String>
+
+    <sys:String x:Key="L_SecondColor">Second colour</sys:String>
+    <sys:String x:Key="L_PrimaryColor">Primary</sys:String>
+    <sys:String x:Key="Anim_WeatherSync">Weather Sync</sys:String>
+    <sys:String x:Key="Anim_DualBreathe">Dual Breathe</sys:String>
+    <sys:String x:Key="Desc_WeatherSync">Colour follows the weather (Open-Meteo)</sys:String>
+    <sys:String x:Key="Desc_DualBreathe">Two overlapping sine waves</sys:String>
+    <sys:String x:Key="L_EditPrimary">Edit primary colour</sys:String>
+    <sys:String x:Key="L_EditSecondary">Edit second colour</sys:String>
+    <sys:String x:Key="L_SecondColorTip">Used by Two-Color Fade and Zone Gradient</sys:String>
+
+</ResourceDictionary>

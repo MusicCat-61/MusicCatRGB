@@ -1,0 +1,41 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AssemblyName>KGMaster</AssemblyName>
+    <RootNamespace>MusicCat.CLVKM.UI</RootNamespace>
+    <Product>KeyGlowMaster by MusicCat161</Product>
+    <AssemblyTitle>KeyGlowMaster by MusicCat161</AssemblyTitle>
+    <Company>MusicCat161</Company>
+    <Authors>acerhizm</Authors>
+    <ApplicationIcon>icon.ico</ApplicationIcon>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationHighDpiMode>PerMonitorV2</ApplicationHighDpiMode>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.3.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="icon.png" />
+    <None Update="icon.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MusicCat.CLVKM.Core\MusicCat.CLVKM.Core.csproj" />
+    <ProjectReference Include="..\MusicCat.CLVKM.Drivers\MusicCat.CLVKM.Drivers.csproj" />
+  </ItemGroup>
+
+
+
+
+
+</Project>

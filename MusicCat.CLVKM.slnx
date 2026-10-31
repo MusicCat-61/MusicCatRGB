@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="MusicCat.CLVKM.Core/MusicCat.CLVKM.Core.csproj" />
+  <Project Path="MusicCat.CLVKM.Diagnostics/MusicCat.CLVKM.Diagnostics.csproj" />
+  <Project Path="MusicCat.CLVKM.Drivers/MusicCat.CLVKM.Drivers.csproj" />
+  <Project Path="MusicCat.CLVKM.Service/MusicCat.CLVKM.Service.csproj" />
+  <Project Path="MusicCat.CLVKM.UI/MusicCat.CLVKM.UI.csproj" />
+</Solution>

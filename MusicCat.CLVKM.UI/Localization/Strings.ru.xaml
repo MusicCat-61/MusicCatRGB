@@ -1,0 +1,133 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=System.Runtime">
+
+    <!-- Window / sections -->
+    <sys:String x:Key="L_Status">Статус</sys:String>
+    <sys:String x:Key="L_Driver">Драйвер</sys:String>
+    <sys:String x:Key="L_DriverAuto">Автоопределение</sys:String>
+    <sys:String x:Key="L_DriverInsyde">Insyde · 1 зона</sys:String>
+    <sys:String x:Key="L_DriverWmi">WMI · 3 зоны</sys:String>
+    <sys:String x:Key="L_Brightness">Яркость</sys:String>
+    <sys:String x:Key="L_Color">Цвет</sys:String>
+    <sys:String x:Key="L_ColorsForAnimation">Цвета для анимации</sys:String>
+    <sys:String x:Key="L_ThirdColor">Третий цвет</sys:String>
+    <sys:String x:Key="L_ZoneHint">Зонность определяется автоматически: на 1-зонной клавиатуре зонные эффекты (Волна, Градиент по зонам) работают как один цвет.</sys:String>
+    <sys:String x:Key="L_Zone">Зона</sys:String>
+    <sys:String x:Key="L_ZoneAll">Все зоны</sys:String>
+    <sys:String x:Key="L_ZoneLeft">Левая</sys:String>
+    <sys:String x:Key="L_ZoneCenter">Центральная</sys:String>
+    <sys:String x:Key="L_ZoneRight">Правая</sys:String>
+    <sys:String x:Key="L_Hex">Hex</sys:String>
+    <sys:String x:Key="L_Apply">Применить цвет</sys:String>
+    <sys:String x:Key="L_AnimModes">Режимы анимации</sys:String>
+    <sys:String x:Key="L_AnimSpeed">Скорость анимации</sys:String>
+    <sys:String x:Key="L_Start">Запустить анимацию</sys:String>
+    <sys:String x:Key="L_Stop">Остановить анимацию</sys:String>
+    <sys:String x:Key="L_Reset">Сброс</sys:String>
+    <sys:String x:Key="L_ResetTip">Сбросить настройки и удалить автозапуск</sys:String>
+    <sys:String x:Key="L_Minimize">Свернуть</sys:String>
+    <sys:String x:Key="L_Maximize">Развернуть</sys:String>
+    <sys:String x:Key="L_Close">Закрыть</sys:String>
+    <sys:String x:Key="L_Language">Язык</sys:String>
+    <sys:String x:Key="L_Theme">Сменить тему</sys:String>
+    <sys:String x:Key="Anim_Garland">Советские гирлянды</sys:String>
+    <sys:String x:Key="Desc_Garland">Хаотичные тёплые вспышки и перегорания</sys:String>
+    <sys:String x:Key="L_SleepTimer">Выключать подсветку при простое (5 мин)</sys:String>
+    <sys:String x:Key="L_Preview">Предпросмотр</sys:String>
+
+    <!-- Status line -->
+    <sys:String x:Key="St_Init">Инициализация…</sys:String>
+    <sys:String x:Key="St_Scan">Поиск оборудования…</sys:String>
+    <sys:String x:Key="St_Retry">Повтор подключения {0}/{1}…</sys:String>
+    <sys:String x:Key="St_AntiLag">Запуск анти-лаг конвейера…</sys:String>
+    <sys:String x:Key="St_Ready">Активно · Готово</sys:String>
+    <sys:String x:Key="St_Running">Анимация запущена</sys:String>
+    <sys:String x:Key="St_Applied">Применён цвет</sys:String>
+    <sys:String x:Key="St_Resuming">Восстановление анимации…</sys:String>
+    <sys:String x:Key="St_Stopped">Анимация остановлена</sys:String>
+    <sys:String x:Key="St_Sleeping">Подсветка выключена (простой)</sys:String>
+    <sys:String x:Key="St_NotFound">Устройство не найдено. Проверьте, что Control Center запущен, и перезапустите программу.</sys:String>
+    <sys:String x:Key="St_Failed">Ошибка инициализации: {0}</sys:String>
+
+    <!-- Tray -->
+    <sys:String x:Key="Tray_Ready">KeyGlowMaster</sys:String>
+    <sys:String x:Key="Tray_Running">KeyGlowMaster · работает</sys:String>
+    <sys:String x:Key="Tray_Starting">KeyGlowMaster · запуск…</sys:String>
+    <sys:String x:Key="Tray_WaitingFnKey">KeyGlowMaster · ожидание Control Center…</sys:String>
+    <sys:String x:Key="Tray_FnKeyFound">KeyGlowMaster · инициализация…</sys:String>
+    <sys:String x:Key="Tray_Checking">KeyGlowMaster · проверка системы…</sys:String>
+    <sys:String x:Key="Tray_Open">Открыть KeyGlowMaster</sys:String>
+    <sys:String x:Key="Tray_Exit">Выход</sys:String>
+
+    <!-- Dialogs -->
+    <sys:String x:Key="Msg_AlreadyRunning">KeyGlowMaster уже запущен. Проверьте область уведомлений.</sys:String>
+    <sys:String x:Key="Msg_NoControlCenter" xml:space="preserve">Control Center (FnKey.exe) не запущен.&#x0a;&#x0a;Сначала запустите Control Center.</sys:String>
+    <sys:String x:Key="Msg_FatalTitle">Критическая ошибка</sys:String>
+    <sys:String x:Key="Msg_ServiceMode" xml:space="preserve">Включить режим службы (автозапуск)?&#x0a;&#x0a;Подсветка клавиатуры будет автоматически восстанавливаться при каждом запуске Windows.</sys:String>
+    <sys:String x:Key="Msg_ServiceModeTitle">Требуется настройка</sys:String>
+    <sys:String x:Key="Msg_CleanupDone" xml:space="preserve">Режим службы удалён, настройки очищены.&#x0a;При следующем запуске вопрос появится снова.</sys:String>
+    <sys:String x:Key="Msg_CleanupTitle">Очистка завершена</sys:String>
+    <sys:String x:Key="Msg_ErrorTitle">Ошибка</sys:String>
+    <sys:String x:Key="Msg_CleanupError">Ошибка очистки: {0}</sys:String>
+    <sys:String x:Key="Crash_Title">Отчёт о сбое KeyGlowMaster</sys:String>
+    <sys:String x:Key="Crash_Message" xml:space="preserve">Необработанная ошибка: {0}&#x0a;&#x0a;Трассировка:&#x0a;{1}</sys:String>
+    <sys:String x:Key="Reset_Title">Подтверждение сброса</sys:String>
+    <sys:String x:Key="Reset_Message" xml:space="preserve">Сбросить KeyGlowMaster?&#x0a;&#x0a;• Автозапуск будет отключён&#x0a;• Сохранённые цвета и анимации будут удалены&#x0a;&#x0a;Останется только KGMaster.exe.</sys:String>
+
+    <!-- Common buttons -->
+    <sys:String x:Key="Yes">Да</sys:String>
+    <sys:String x:Key="No">Нет</sys:String>
+    <sys:String x:Key="Ok">ОК</sys:String>
+
+    <!-- Animation names -->
+    <sys:String x:Key="Anim_Breathing">Дыхание</sys:String>
+    <sys:String x:Key="Anim_NeonPulse">Неоновый пульс</sys:String>
+    <sys:String x:Key="Anim_SpectrumCycle">Цикл спектра</sys:String>
+    <sys:String x:Key="Anim_StrobeBlink">Стробоскоп</sys:String>
+    <sys:String x:Key="Anim_Wave">Волна</sys:String>
+    <sys:String x:Key="Anim_AudioSync">Аудиосинхронизация</sys:String>
+    <sys:String x:Key="Anim_SystemMonitor">Монитор системы</sys:String>
+    <sys:String x:Key="Anim_Ambient">Синхронизация с экраном</sys:String>
+
+<!-- About -->
+    <sys:String x:Key="L_About">О программе</sys:String>
+    <sys:String x:Key="About_Title">О программе KeyGlowMaster</sys:String>
+    <sys:String x:Key="About_Developer">Разработчик модификации: MusicCat161</sys:String>
+    <sys:String x:Key="About_Based">Основано на репозитории:</sys:String>
+    <sys:String x:Key="About_Link">gutsv-project/Clevo-Monster-RGB-Controller</sys:String>
+    <sys:String x:Key="About_Description">Этот проект является форком (доработанной версией) и включает в себя исправления ошибок, новый интерфейс и дополнительные режимы подсветки.</sys:String>
+    <sys:String x:Key="About_LicensePrefix">Распространяется под лицензией</sys:String>
+    <sys:String x:Key="About_LicenseName">MIT</sys:String>
+
+    <!-- New effects -->
+    <sys:String x:Key="Anim_DayNight">Время суток</sys:String>
+    <sys:String x:Key="Anim_ZoneGradient">Градиент по зонам</sys:String>
+    <sys:String x:Key="Anim_RandomNeon">Случайный неон</sys:String>
+    <sys:String x:Key="Anim_TwoColorFade">Перелив двух цветов</sys:String>
+
+    <!-- Effect descriptions -->
+    <sys:String x:Key="Desc_Breathing">Дыхание одним цветом</sys:String>
+    <sys:String x:Key="Desc_NeonPulse">Неоновая вспышка</sys:String>
+    <sys:String x:Key="Desc_SpectrumCycle">Полный круг оттенков</sys:String>
+    <sys:String x:Key="Desc_StrobeBlink">Резкое мигание</sys:String>
+    <sys:String x:Key="Desc_Wave">Бегущая волна по зонам</sys:String>
+    <sys:String x:Key="Desc_AudioSync">Реакция на музыку</sys:String>
+    <sys:String x:Key="Desc_SystemMonitor">Нагрузка CPU и температура</sys:String>
+    <sys:String x:Key="Desc_Ambient">Цвет с экрана</sys:String>
+    <sys:String x:Key="Desc_DayNight">Тёплый день, белый, синий вечер</sys:String>
+    <sys:String x:Key="Desc_ZoneGradient">Три зоны, дрейф цвета</sys:String>
+    <sys:String x:Key="Desc_RandomNeon">Новый неон каждые 2–5 с</sys:String>
+    <sys:String x:Key="Desc_TwoColorFade">Плавная синусоида между цветами</sys:String>
+
+    <sys:String x:Key="L_SecondColor">Второй цвет</sys:String>
+    <sys:String x:Key="L_PrimaryColor">Основной</sys:String>
+    <sys:String x:Key="Anim_WeatherSync">Погодная подсветка</sys:String>
+    <sys:String x:Key="Anim_DualBreathe">Двойное дыхание</sys:String>
+    <sys:String x:Key="Desc_WeatherSync">Цвет по погоде (Open-Meteo)</sys:String>
+    <sys:String x:Key="Desc_DualBreathe">Две наложенные синусоиды</sys:String>
+    <sys:String x:Key="L_EditPrimary">Редактировать основной цвет</sys:String>
+    <sys:String x:Key="L_EditSecondary">Редактировать второй цвет</sys:String>
+    <sys:String x:Key="L_SecondColorTip">Используется в «Переливе двух цветов» и «Градиенте по зонам»</sys:String>
+
+</ResourceDictionary>
