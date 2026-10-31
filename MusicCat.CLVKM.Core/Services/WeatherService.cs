@@ -227,8 +227,16 @@ public sealed class WeatherService
                 }
 
                 _language = tag;
-                _location = null;
-                _lastAttemptUtc = DateTime.MinValue; // re-geocode so the place name follows the UI language
+
+                // A place picked from the suggestions carries exact coordinates: keep it,
+                // otherwise it would be geocoded again by its full display name
+                // ("Миллерово, Миллеровский район, Ростовская область") and fail.
+                // Only a name-only lookup is re-resolved so its name follows the UI language.
+                if (_location is not { Exact: true })
+                {
+                    _location = null;
+                    _lastAttemptUtc = DateTime.MinValue;
+                }
             }
         }
     }
@@ -495,7 +503,7 @@ public sealed class WeatherService
         lock (_sync)
         {
             _city = name;
-            _location = new Location(name, latitude, longitude, name);
+            _location = new Location(name, latitude, longitude, name, Exact: true);
             _lastAttemptUtc = DateTime.MinValue;
             _snapshot = new WeatherSnapshot { State = WeatherState.Updating };
             snapshot = _snapshot;
@@ -635,9 +643,41 @@ public sealed class WeatherService
             language = _language;
         }
 
+        // A saved display name ("Миллерово, Миллеровский район, …") is not a valid
+        // geocoder query; the settlement name before the first comma is.
+        var query = city;
+        var comma = query.IndexOf(',');
+        if (comma > 0)
+        {
+            query = query[..comma].Trim();
+        }
+
+        // Photon first: it accepts Cyrillic names in any UI language ("Миллерово" with
+        // lang=en still resolves to "Millerovo") and returns the district as well.
+        try
+        {
+            var matches = await SearchPhotonAsync(query, 1, CancellationToken.None).ConfigureAwait(false);
+            if (matches.Count > 0)
+            {
+                var match = matches[0];
+                var photonLocation = new Location(city, match.Latitude, match.Longitude, match.DisplayName);
+
+                lock (_sync)
+                {
+                    _location = photonLocation;
+                }
+
+                return photonLocation;
+            }
+        }
+        catch
+        {
+            // Photon unreachable - fall back to the Open-Meteo geocoder below.
+        }
+
         var url = string.Create(
             CultureInfo.InvariantCulture,
-            $"https://geocoding-api.open-meteo.com/v1/search?name={Uri.EscapeDataString(city)}&count=1&format=json&language={Uri.EscapeDataString(language)}");
+            $"https://geocoding-api.open-meteo.com/v1/search?name={Uri.EscapeDataString(query)}&count=1&format=json&language={Uri.EscapeDataString(language)}");
 
         var json = await _http.GetStringAsync(url).ConfigureAwait(false);
 
@@ -839,5 +879,5 @@ public sealed class WeatherService
             ConditionFromSymbol(symbol),
             !(symbol ?? string.Empty).EndsWith("_night", StringComparison.OrdinalIgnoreCase));
 
-    private sealed record Location(string Query, double Latitude, double Longitude, string Name);
+    private sealed record Location(string Query, double Latitude, double Longitude, string Name, bool Exact = false);
 }
