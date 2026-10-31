@@ -325,7 +325,7 @@
                             <Ellipse Width="16" Height="16" VerticalAlignment="Center"
                                      Fill="{Binding StaticColorBrush}" Stroke="#40FFFFFF" StrokeThickness="1"/>
                             <TextBlock Grid.Column="1" Text="{DynamicResource L_Color}" Style="{StaticResource ValueLabelStyle}"
-                                       Margin="8,0,10,0"/>
+                                       FontSize="15" Margin="8,0,10,0"/>
                             <TextBox x:Name="HexBox" Grid.Column="2" Text="{Binding StaticHexColor, UpdateSourceTrigger=PropertyChanged}"
                                      GotKeyboardFocus="HexBox_GotFocus"
                                      MaxLength="7" CharacterCasing="Upper" FontFamily="Consolas, Cascadia Mono"/>
@@ -626,7 +626,8 @@
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="52"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBlock Text="{DynamicResource L_AnimSpeed}" Style="{StaticResource ValueLabelStyle}" Margin="0,0,8,0"/>
+                                <TextBlock Text="{DynamicResource L_AnimSpeed}" Style="{StaticResource ValueLabelStyle}"
+                                           FontSize="15" Margin="0,0,8,0"/>
                                 <Slider Grid.Column="1" Minimum="0.2" Maximum="3.0" Value="{Binding AnimationSpeed}"
                                         IsSnapToTickEnabled="True" TickFrequency="0.1"/>
                                 <TextBlock Grid.Column="2" Text="{Binding AnimationSpeed, StringFormat={}{0:F1}x}"
