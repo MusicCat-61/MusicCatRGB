@@ -660,15 +660,27 @@
 
         <!-- ============================ Footer ============================ -->
         <Grid Grid.Row="2" Margin="20,0,20,0">
-            <Button HorizontalAlignment="Left" VerticalAlignment="Center" Click="AboutClick"
-                    Style="{StaticResource SubtleButtonStyle}" Padding="10,4">
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE946;" FontSize="15"
-                               Foreground="{DynamicResource TextTertiaryBrush}" VerticalAlignment="Center"/>
-                    <TextBlock Text="{DynamicResource L_About}" FontSize="15" Margin="8,0,0,0"
-                               Foreground="{DynamicResource TextTertiaryBrush}" VerticalAlignment="Center"/>
-                </StackPanel>
-            </Button>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center">
+                <Button Click="AboutClick" Style="{StaticResource SubtleButtonStyle}" Padding="10,4">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE946;" FontSize="15"
+                                   Foreground="{DynamicResource TextTertiaryBrush}" VerticalAlignment="Center"/>
+                        <TextBlock Text="{DynamicResource L_About}" FontSize="15" Margin="8,0,0,0"
+                                   Foreground="{DynamicResource TextTertiaryBrush}" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Button>
+
+                <Button x:Name="LogsButton" Click="LogsClick" Margin="8,0,0,0"
+                        Style="{StaticResource SubtleButtonStyle}" Padding="10,4"
+                        ToolTip="{DynamicResource L_LogsTip}">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE838;" FontSize="15"
+                                   Foreground="{DynamicResource TextTertiaryBrush}" VerticalAlignment="Center"/>
+                        <TextBlock Text="{DynamicResource L_Logs}" FontSize="15" Margin="8,0,0,0"
+                                   Foreground="{DynamicResource TextTertiaryBrush}" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Button>
+            </StackPanel>
         </Grid>
     </Grid>
 </Window>

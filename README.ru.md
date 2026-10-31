@@ -4,7 +4,7 @@
 [![Download](https://img.shields.io/badge/download-KGMaster.exe-2ea44f?style=flat-square)](https://github.com/MusicCat-61/KeyGlowMaster/releases/latest/download/KGMaster.exe)
 [![CI](https://github.com/MusicCat-61/KeyGlowMaster/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/MusicCat-61/KeyGlowMaster/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](LICENSE)
-[![Version](https://img.shields.io/badge/version-1.0.5.3-4CC2FF?style=flat-square)](https://github.com/MusicCat-61/KeyGlowMaster/releases/tag/v1.0.5.3)
+[![Version](https://img.shields.io/badge/version-1.0.5.4-4CC2FF?style=flat-square)](https://github.com/MusicCat-61/KeyGlowMaster/releases/tag/v1.0.5.4)
 [![Platform](https://img.shields.io/badge/platform-Windows%2010%20%7C%2011-0078D6?style=flat-square)](#)
 [![.NET](https://img.shields.io/badge/.NET-10-512BD4?style=flat-square)](https://dotnet.microsoft.com/download)
 
@@ -35,6 +35,7 @@ KeyGlowMaster — форк проекта [GutsV](https://github.com/gutsv-proje
 | ⌨️ **Живое превью** | Клавиатура на экране показывает цвет, который реально уходит в железо |
 | 😴 **Таймер сна** | Через 5 минут простоя подсветка плавно гаснет и возвращается при вводе |
 | 🎛 **Горячие клавиши** | Переключение эффектов и запуск анимации из любого приложения — окно открывать не нужно |
+| 🗒 **Файловые логи** | Ежедневные текстовые логи в `%LOCALAPPDATA%\MusicCat.CLVKM\logs`, открываются одной кнопкой |
 | ♻️ **Портативность** | Один самодостаточный файл, запуск от администратора, автозапуск через Планировщик задач |
 
 ## Эффекты
@@ -104,6 +105,12 @@ KeyGlowMaster — форк проекта [GutsV](https://github.com/gutsv-proje
 
 Оба переключателя — в заголовке окна: `EN | RU` для языка и кнопка солнце/луна для темы. Выбор запоминается, при первом запуске язык берётся из системы.
 
+## Логи
+
+Каждый запуск пишет обычный текстовый лог в `%LOCALAPPDATA%\MusicCat.CLVKM\logs\` — один файл на день (`kgmaster-20261031.txt`), хранятся последние 14. Кнопка **«Журнал»** в нижней панели открывает эту папку; она создаётся при первом обращении.
+
+В логе видны параметры запуска, подключение драйвера, переключение эффектов, предупреждения драйвера и необработанные исключения — обычно этого достаточно, чтобы понять «устройство не найдено» или «эффект остановился».
+
 ## Сборка из исходников
 
 Нужен .NET 10 SDK и Windows 10/11.
@@ -119,8 +126,8 @@ dotnet build MusicCat.CLVKM.slnx -c Release
 Пуш тега запускает сборку и публикацию: [workflow](.github/workflows/release.yml) собирает самодостаточный однофайловый `KGMaster.exe` под `win-x64` на `windows-latest`, проставляет ему версию из тега и прикрепляет исполняемый файл вместе с контрольной суммой SHA-256 к релизу с автоматически составленным списком изменений. Скачивание — около 75 МБ: при первом запуске бандл распаковывает среду выполнения в `%TEMP%\.net\KGMaster` и дальше переиспользует её.
 
 ```powershell
-git tag v1.0.5.3
-git push origin v1.0.5.3
+git tag v1.0.5.4
+git push origin v1.0.5.4
 ```
 
 Каждый пуш в `main` запускает [CI workflow](.github/workflows/ci.yml) — только сборку решения, без тега и релиза.

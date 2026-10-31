@@ -28,11 +28,13 @@ public class ZoneGradientAnimation : IAnimation, IColorAwareAnimation
 
     public IEnumerable<AnimationFrame> GenerateFrames()
     {
-        var palette = new[] { Primary, Secondary, Tertiary };
         var clock = Stopwatch.StartNew();
 
         while (true)
         {
+            // Read the colours every frame: edits in the colour editor apply immediately.
+            var palette = new[] { Primary, Secondary, Tertiary };
+
             double phase = clock.Elapsed.TotalSeconds % CycleSeconds / CycleSeconds * palette.Length;
 
             if (SingleZone)

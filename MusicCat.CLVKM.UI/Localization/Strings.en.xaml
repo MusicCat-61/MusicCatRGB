@@ -96,6 +96,8 @@
 
 <!-- About -->
     <sys:String x:Key="L_About">About</sys:String>
+    <sys:String x:Key="L_Logs">Logs</sys:String>
+    <sys:String x:Key="L_LogsTip">Open the log folder</sys:String>
     <sys:String x:Key="About_Title">About KeyGlowMaster</sys:String>
     <sys:String x:Key="About_Developer">Modification developer: MusicCat161</sys:String>
     <sys:String x:Key="About_Based">Based on the repository:</sys:String>

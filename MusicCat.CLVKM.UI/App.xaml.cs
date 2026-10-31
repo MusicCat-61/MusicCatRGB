@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -50,11 +51,14 @@ public partial class App : System.Windows.Application
         _effectToast = null;
         _notifyIcon?.Dispose();
         _mutex?.Dispose();
+        Logging.AppLog.Shutdown();
         base.OnExit(e);
     }
 
     protected override async void OnStartup(StartupEventArgs e)
     {
+        Logging.AppLog.Initialize();
+
         // Ensure the working directory is the app folder (DllImport needs InsydeDCHU.dll).
         Directory.SetCurrentDirectory(AppDomain.CurrentDomain.BaseDirectory);
 
@@ -62,6 +66,13 @@ public partial class App : System.Windows.Application
         Loc.Initialize(startupSettings.Language);
         Theming.Theme.Apply(Theming.Theme.Parse(startupSettings.Theme), notify: false);
         Loc.LanguageChanged += OnLanguageChanged;
+
+        Logging.AppLog.Info(
+            "Startup: tray={Tray}, language={Language}, theme={Theme}, driver={Driver}",
+            e.Args.Contains("--tray"),
+            Loc.CurrentCode,
+            Theming.Theme.CurrentCode,
+            startupSettings.DriverType);
 
         const string appName = "MusicCat.CLVKM_SingleInstance_Mutex";
         bool createdNew;
@@ -382,6 +393,8 @@ public partial class App : System.Windows.Application
 
     private void App_DispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
     {
+        Logging.AppLog.Error("Unhandled exception: {Message}", e.Exception, e.Exception.Message);
+
         System.Windows.MessageBox.Show(
             Loc.F("Crash_Message", e.Exception.Message, e.Exception.StackTrace),
             Loc.T("Crash_Title"),

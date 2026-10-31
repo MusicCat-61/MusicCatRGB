@@ -4,7 +4,7 @@
 [![Download](https://img.shields.io/badge/download-KGMaster.exe-2ea44f?style=flat-square)](https://github.com/MusicCat-61/KeyGlowMaster/releases/latest/download/KGMaster.exe)
 [![CI](https://github.com/MusicCat-61/KeyGlowMaster/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/MusicCat-61/KeyGlowMaster/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](LICENSE)
-[![Version](https://img.shields.io/badge/version-1.0.5.3-4CC2FF?style=flat-square)](https://github.com/MusicCat-61/KeyGlowMaster/releases/tag/v1.0.5.3)
+[![Version](https://img.shields.io/badge/version-1.0.5.4-4CC2FF?style=flat-square)](https://github.com/MusicCat-61/KeyGlowMaster/releases/tag/v1.0.5.4)
 [![Platform](https://img.shields.io/badge/platform-Windows%2010%20%7C%2011-0078D6?style=flat-square)](#)
 [![.NET](https://img.shields.io/badge/.NET-10-512BD4?style=flat-square)](https://dotnet.microsoft.com/download)
 
@@ -35,6 +35,7 @@ KeyGlowMaster is a fork of the [GutsV project](https://github.com/gutsv-project/
 | ⌨️ **Live preview** | The keyboard on screen shows the colour that is actually being sent to the hardware |
 | 😴 **Sleep timer** | The backlight fades out after 5 minutes of idle time and comes back on input |
 | 🎛 **Global hotkeys** | Switch effects and start or stop the animation from any app — no need to open the window |
+| 🗒 **File logs** | Daily plain-text logs in `%LOCALAPPDATA%\MusicCat.CLVKM\logs`, one button away |
 | ♻️ **Portable** | One self-contained executable, runs as administrator, auto-start through Task Scheduler |
 
 ## Effects
@@ -104,6 +105,12 @@ Every switch is confirmed by a small always-on-top toast in the corner of the sc
 
 Both switches live in the title bar: `EN | RU` for the interface language and the sun/moon button for the theme. The choice is remembered. The language defaults to the system one on first launch.
 
+## Logs
+
+Every run writes a plain-text log to `%LOCALAPPDATA%\MusicCat.CLVKM\logs\` — one file per day (`kgmaster-20261031.txt`), the last 14 are kept. The **Logs** button in the footer opens that folder; it is created on first use.
+
+The log records startup options, the driver handshake, effect switches, driver warnings and unhandled exceptions, which is usually enough to explain "the device is not found" or "an effect stopped".
+
 ## Building from source
 
 Requires the .NET 10 SDK and Windows 10/11.
@@ -119,8 +126,8 @@ or run `publish.bat` to get a self-contained folder in `Build_Output`.
 Pushing a version tag builds and publishes the app — the [release workflow](.github/workflows/release.yml) publishes a self-contained single-file `KGMaster.exe` (win-x64) on `windows-latest`, stamps the tag into its file version and attaches the executable plus its SHA-256 checksum to a GitHub release with generated notes. The download is about 75 MB: on the first start the bundle unpacks its runtime into `%TEMP%\.net\KGMaster` and reuses it afterwards.
 
 ```powershell
-git tag v1.0.5.3
-git push origin v1.0.5.3
+git tag v1.0.5.4
+git push origin v1.0.5.4
 ```
 
 Every push to `main` runs the [CI workflow](.github/workflows/ci.yml), which only compiles the solution — no tag, no release.

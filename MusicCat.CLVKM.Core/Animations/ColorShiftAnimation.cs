@@ -27,11 +27,13 @@ public class ColorShiftAnimation : IAnimation, IColorAwareAnimation
 
     public IEnumerable<AnimationFrame> GenerateFrames()
     {
-        var (hue, saturation, value) = Vivid(Primary);
         var clock = Stopwatch.StartNew();
 
         while (true)
         {
+            // Recomputed every frame so a colour edit is visible without restarting the effect.
+            var (hue, saturation, value) = Vivid(Primary);
+
             double phase = clock.Elapsed.TotalSeconds * DegreesPerSecond;
 
             if (SingleZone)

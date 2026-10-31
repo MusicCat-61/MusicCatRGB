@@ -16,6 +16,7 @@ using MusicCat.CLVKM.Core.Services;
 using MusicCat.CLVKM.Core.Settings;
 using MusicCat.CLVKM.Drivers;
 using MusicCat.CLVKM.UI.Localization;
+using MusicCat.CLVKM.UI.Logging;
 
 using Color = System.Windows.Media.Color;
 using Colors = System.Windows.Media.Colors;
@@ -396,8 +397,11 @@ public partial class MainViewModel : ObservableObject
             if (baseDriver is null)
             {
                 SetStatus("St_NotFound");
+                AppLog.Warn("Device not found after {Attempts} attempts (driver mode {Mode})", attempt, DriverType);
                 return;
             }
+
+            AppLog.Info("Driver connected: {Driver} ({Zones})", baseDriver.GetType().Name, IsMultiZoneCapable ? "multi-zone" : "single-zone");
 
             SetStatus("St_AntiLag");
             _queue = new AsyncDriverQueue(baseDriver);
@@ -429,6 +433,7 @@ public partial class MainViewModel : ObservableObject
         catch (Exception ex)
         {
             SetStatus("St_Failed", ex.Message);
+            AppLog.Error("Driver initialisation failed: {Message}", ex, ex.Message);
         }
     }
 
@@ -482,6 +487,7 @@ public partial class MainViewModel : ObservableObject
         _animationEngine.Start(SelectedAnimation.Animation);
         IsAnimationRunning = true;
         SetStatus("St_Running");
+        AppLog.Info("Animation started: {Effect}", SelectedAnimation.Animation.Name);
         SaveSettings();
     }
 
@@ -490,6 +496,7 @@ public partial class MainViewModel : ObservableObject
         _animationEngine?.Stop();
         IsAnimationRunning = false;
         SetStatus("St_Stopped");
+        AppLog.Info("Animation stopped: {Effect}", SelectedAnimation?.Animation.Name ?? "-");
 
         SaveSettings();
 
@@ -703,6 +710,8 @@ public partial class MainViewModel : ObservableObject
     /// <summary>Driver failures stay non-fatal; the last one is shown in the status tooltip.</summary>
     private void OnDriverError(string message)
     {
+        AppLog.Warn("Driver: {Message}", message);
+
         var app = System.Windows.Application.Current;
         if (app is null)
         {

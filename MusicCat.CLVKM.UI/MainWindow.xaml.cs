@@ -172,6 +172,14 @@ public partial class MainWindow : Window
         about.ShowDialog();
     }
 
+    private void LogsClick(object sender, RoutedEventArgs e)
+    {
+        if (!Logging.AppLog.OpenFolder())
+        {
+            Logging.AppLog.Warn("Could not open the log folder: {Folder}", Logging.AppLog.LogDirectory);
+        }
+    }
+
     /// <summary>Arrow keys walk the city suggestions, Enter takes the highlighted one.</summary>
     private void CityBox_PreviewKeyDown(object sender, KeyEventArgs e)
     {
