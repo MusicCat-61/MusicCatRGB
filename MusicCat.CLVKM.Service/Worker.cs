@@ -28,6 +28,9 @@ public class Worker : BackgroundService
     {
         _logger.LogInformation("KeyGlowMaster Service starting...");
 
+        void OnDriverError(string message) => _logger.LogWarning("Driver error: {Message}", message);
+        DriverDiagnostics.ErrorReported += OnDriverError;
+
         var settings = SettingsManager.Load();
 
         try
@@ -57,6 +60,7 @@ public class Worker : BackgroundService
         }
 
         StopAnimation();
+        DriverDiagnostics.ErrorReported -= OnDriverError;
 
         if (_driver is IDisposable disposable)
         {

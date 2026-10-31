@@ -126,6 +126,7 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty] private bool _isCitySuggestionsOpen;
     [ObservableProperty] private CitySuggestion? _selectedCitySuggestion;
     [ObservableProperty] private SolidColorBrush _weatherStatusBrush = WeatherUnknownBrush;
+    [ObservableProperty] private string _driverErrorText = string.Empty;
 
     public ObservableCollection<CitySuggestion> CitySuggestions { get; } = new();
 
@@ -338,6 +339,7 @@ public partial class MainViewModel : ObservableObject
         _currentSettings.LastAnimation = savedAnimationName;
 
         Loc.LanguageChanged += OnLanguageChanged;
+        DriverDiagnostics.ErrorReported += OnDriverError;
 
         InitializeAsync();
     }
@@ -663,6 +665,25 @@ public partial class MainViewModel : ObservableObject
         try
         {
             app.Dispatcher.Invoke(() => ApplyWeatherSnapshot(snapshot));
+        }
+        catch
+        {
+            // Dispatcher may be shutting down.
+        }
+    }
+
+    /// <summary>Driver failures stay non-fatal; the last one is shown in the status tooltip.</summary>
+    private void OnDriverError(string message)
+    {
+        var app = System.Windows.Application.Current;
+        if (app is null)
+        {
+            return;
+        }
+
+        try
+        {
+            app.Dispatcher.Invoke(() => DriverErrorText = message);
         }
         catch
         {

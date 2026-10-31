@@ -6,8 +6,9 @@ using MusicCat.CLVKM.Core.Services;
 namespace MusicCat.CLVKM.Core.Animations;
 
 /// <summary>
-/// Follows the current weather (Open-Meteo): blue for rain, yellow for sun,
-/// grey for clouds, white for snow. The colour fades smoothly between updates.
+/// Follows the current weather: blue for rain, yellow for sun, grey for clouds, white
+/// for snow. While a request is running the colour is steady amber, and when the API
+/// cannot be reached it is steady red — those two states do not pulse on purpose.
 /// </summary>
 public class WeatherSyncAnimation : IAnimation
 {
@@ -27,10 +28,13 @@ public class WeatherSyncAnimation : IAnimation
             // Fire-and-forget: the service itself throttles to one request per 15 minutes.
             _ = WeatherService.Instance.RefreshAsync();
 
-            var target = WeatherService.Instance.Color;
-            _shown = ColorRGB.Lerp(_shown, target, 0.08);
+            var snapshot = WeatherService.Instance.Snapshot;
+            _shown = ColorRGB.Lerp(_shown, WeatherService.Instance.Color, 0.08);
 
-            double pulse = 0.85 + 0.15 * Math.Sin(clock.Elapsed.TotalSeconds * 2 * Math.PI / PulsePeriodSeconds);
+            // Only a real weather colour gets the slow pulse; amber/red stay steady.
+            var pulse = snapshot.State == WeatherState.Ready
+                ? 0.85 + 0.15 * Math.Sin(clock.Elapsed.TotalSeconds * 2 * Math.PI / PulsePeriodSeconds)
+                : 1.0;
 
             yield return new AnimationFrame(_shown.ApplyBrightness((float)pulse), FrameMs);
         }

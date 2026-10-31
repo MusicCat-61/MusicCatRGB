@@ -32,8 +32,7 @@ public class WmiDriver : IKeyboardController
 
                 if (_wmiInstance == null)
                 {
-                    // Silent fail or throw? 
-                    // Throwing allows DeviceManager to fallback to Insyde or other methods.
+                    // Throwing allows DeviceManager to fall back to Insyde or other methods.
                     throw new PlatformNotSupportedException("Clevo WMI device not found.");
                 }
             }
@@ -69,9 +68,8 @@ public class WmiDriver : IKeyboardController
         {
             // Protocol: [Green, Red, Blue, Command]
             // Command = 0xF0 + ZoneIndex (0, 1, 2)
-            
             byte zoneCode = (byte)(0xF0 + (int)zone);
-            
+
             // Layout in memory (Little Endian):
             // Byte 0: Green
             // Byte 1: Red
@@ -79,14 +77,22 @@ public class WmiDriver : IKeyboardController
             // Byte 3: ZoneCode
             uint packet = (uint)((zoneCode << 24) | (color.B << 16) | (color.R << 8) | color.G);
 
-            ManagementBaseObject inParams = _wmiInstance!.GetMethodParameters(MethodName);
+            using var inParams = _wmiInstance!.GetMethodParameters(MethodName);
             inParams["Data"] = packet;
-            _wmiInstance.InvokeMethod(MethodName, inParams, null);
+
+            using var outParams = _wmiInstance.InvokeMethod(MethodName, inParams, null);
+
+            var returnValue = outParams?["ReturnValue"];
+            if (returnValue is not null && Convert.ToUInt32(returnValue) != 0)
+            {
+                throw new InvalidOperationException(
+                    $"SetKBLED returned {returnValue} for zone {zone}.");
+            }
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            // WMI can be flaky under load. 
-            // In a loop, one missed frame is acceptable.
+            // WMI can be flaky under load; one missed frame is acceptable, but keep it visible.
+            DriverDiagnostics.Report("WMI", ex);
         }
     }
 

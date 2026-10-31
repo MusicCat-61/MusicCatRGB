@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using MusicCat.CLVKM.Core.Interfaces;
@@ -10,9 +11,8 @@ public class InsydeDriver : IKeyboardController
 {
     private const string DllName = "InsydeDCHU.dll";
 
-    // Delegates for P/Invoke (if using LoadLibrary) or DllImport
-    // Since we want simple implementation, we use DllImport.
-    // Ensure "InsydeDCHU.dll" is in the output folder.
+    /// <summary>The vendor DLL ships next to the executable, not in the working directory.</summary>
+    private static readonly string DllPath = Path.Combine(AppContext.BaseDirectory, DllName);
 
     [DllImport(DllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "SetDCHU_Data")]
     private static extern int SetDCHU_Data(int command, byte[] buffer, int length);
@@ -20,52 +20,69 @@ public class InsydeDriver : IKeyboardController
     [DllImport(DllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "WriteAppSettings")]
     private static extern int WriteAppSettings(int page, int command, int length, byte[] buffer);
 
-    private bool _isInitialized = false;
+    private bool _isInitialized;
 
     public Task InitializeAsync()
     {
         return Task.Run(() =>
         {
-            if (!System.IO.File.Exists(DllName))
+            // Do not rely on Directory.GetCurrentDirectory(): a Windows service starts in
+            // C:\Windows\System32, where the DLL does not exist.
+            if (!File.Exists(DllPath))
             {
-                throw new System.IO.FileNotFoundException("InsydeDCHU.dll not found.");
+                throw new FileNotFoundException(
+                    "InsydeDCHU.dll was not found next to the application.",
+                    DllPath);
             }
-            
-            // Allow calling once to test?
+
+            // Report an unloadable DLL (missing VC runtime, wrong bitness) at startup
+            // instead of failing silently on the first colour write.
+            if (!NativeLibrary.TryLoad(DllPath, out var handle))
+            {
+                var error = Marshal.GetLastWin32Error();
+                throw new DllNotFoundException($"InsydeDCHU.dll could not be loaded (Win32 error {error}).");
+            }
+
+            NativeLibrary.Free(handle);
             _isInitialized = true;
         });
     }
 
     public Task SetColorAsync(Zone zone, ColorRGB color)
     {
-        if (!_isInitialized) return Task.CompletedTask;
-        if (zone != Zone.All && zone != Zone.Left) return Task.CompletedTask; // Single zone usually maps to 'All' or just sends one packet.
+        if (!_isInitialized)
+        {
+            return Task.CompletedTask;
+        }
 
         return Task.Run(() =>
         {
             try
             {
-                // Logic from C++:
-                // 1. SetDCHU_Data(103, [G, R, B, 0xF0], 4)
-                byte[] dchuData = new byte[] { color.G, color.R, color.B, 0xF0 };
-                SetDCHU_Data(103, dchuData, 4);
+                // The Insyde path is single-zone, so every zone maps to "all zones" (0xF0).
+                var dchuData = new byte[] { color.G, color.R, color.B, 0xF0 };
+                EnsureSuccess(SetDCHU_Data(103, dchuData, 4), "SetDCHU_Data(103)");
 
-                // 2. WriteAppSettings(2, 81, 3, [G, R, B])
-                // Note: The C++ code said `colour.size()` which is 3 for RGB array? 
-                // Let's assume sending just RGB colors.
-                byte[] colorData = new byte[] { color.G, color.R, color.B }; // Order G R B based on others? Or R G B? 
-                // WMI used G R B. Let's stick to G R B as per C++ likely having Colour[0]=G
-                WriteAppSettings(2, 81, 3, colorData);
+                var colorData = new byte[] { color.G, color.R, color.B };
+                EnsureSuccess(WriteAppSettings(2, 81, 3, colorData), "WriteAppSettings(2, 81)");
 
-                // 3. WriteAppSettings(2, 32, 1, [0x08]) -> Mode 8
-                byte[] modeData = new byte[] { 0x08 };
-                WriteAppSettings(2, 32, 1, modeData);
+                var modeData = new byte[] { 0x08 };
+                EnsureSuccess(WriteAppSettings(2, 32, 1, modeData), "WriteAppSettings(2, 32)");
             }
-            catch
+            catch (Exception ex)
             {
-                // DLL call error
+                // One failed frame must not stop the animation, but keep the reason visible.
+                DriverDiagnostics.Report("Insyde", ex);
             }
         });
+    }
+
+    private static void EnsureSuccess(int result, string operation)
+    {
+        if (result != 0)
+        {
+            throw new InvalidOperationException($"{operation} failed with code {result}.");
+        }
     }
 
     public Task ShutdownAsync()

@@ -151,13 +151,21 @@ public sealed class WeatherService
     /// <summary>Deep midnight blue for a clear night sky.</summary>
     public static readonly ColorRGB ClearNight = new(24, 30, 104);
 
+    /// <summary>Steady amber while a request is in flight (different from the sunny colour).</summary>
+    public static readonly ColorRGB Loading = new(255, 170, 0);
+
+    /// <summary>Steady red when the weather API cannot be reached or the city is unknown.</summary>
+    public static readonly ColorRGB LinkLost = new(230, 30, 40);
+
+    private static readonly ColorRGB Neutral = new(150, 175, 210);
+
     private readonly HttpClient _http;
     private readonly object _sync = new();
 
     private string _city = string.Empty;
     private string _language = "en";
     private WeatherSnapshot _snapshot = new();
-    private ColorRGB _color = new(150, 175, 210);
+    private ColorRGB _color = Neutral;
     private DateTime _lastAttemptUtc = DateTime.MinValue;
     private bool _refreshing;
     private Location? _location;
@@ -199,6 +207,7 @@ public sealed class WeatherService
                 {
                     State = trimmed.Length == 0 ? WeatherState.NoCity : WeatherState.Updating
                 };
+                _color = trimmed.Length == 0 ? Neutral : Loading;
                 snapshot = _snapshot;
             }
 
@@ -506,6 +515,7 @@ public sealed class WeatherService
             _location = new Location(name, latitude, longitude, name, Exact: true);
             _lastAttemptUtc = DateTime.MinValue;
             _snapshot = new WeatherSnapshot { State = WeatherState.Updating };
+            _color = Loading;
             snapshot = _snapshot;
         }
 
@@ -541,6 +551,7 @@ public sealed class WeatherService
                 _refreshing = true;
                 _lastAttemptUtc = DateTime.UtcNow;
                 _snapshot = _snapshot with { State = WeatherState.Updating };
+                _color = Loading;
                 city = _city;
             }
         }
@@ -604,11 +615,15 @@ public sealed class WeatherService
         {
             _snapshot = snapshot;
 
-            if (snapshot.State == WeatherState.Ready)
+            _color = snapshot.State switch
             {
-                _color = MapCondition(snapshot.Condition, snapshot.IsDay);
-            }
-            else if (snapshot.State is WeatherState.Offline or WeatherState.CityNotFound)
+                WeatherState.Ready => MapCondition(snapshot.Condition, snapshot.IsDay),
+                WeatherState.Updating => Loading,
+                WeatherState.Offline or WeatherState.CityNotFound => LinkLost,
+                _ => Neutral
+            };
+
+            if (snapshot.State is WeatherState.Offline or WeatherState.CityNotFound)
             {
                 // Try again sooner than a normal refresh, but do not hammer the APIs.
                 _lastAttemptUtc = DateTime.UtcNow - RefreshInterval + RetryInterval;

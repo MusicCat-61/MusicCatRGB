@@ -494,7 +494,18 @@
                                 </Ellipse.Style>
                             </Ellipse>
                             <TextBlock Text="{Binding StatusText}" FontSize="12" TextWrapping="Wrap"
-                                       Foreground="{DynamicResource TextSecondaryBrush}"/>
+                                       ToolTip="{Binding DriverErrorText}">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding DriverErrorText}" Value="">
+                                                <Setter Property="ToolTipService.IsEnabled" Value="False"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
                         </StackPanel>
 
                         <TextBlock Text="{DynamicResource L_Driver}" Style="{StaticResource SectionLabelStyle}" Margin="0,14,0,8"/>

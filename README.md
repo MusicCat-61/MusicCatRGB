@@ -45,7 +45,7 @@ KeyGlowMaster is a fork of the [GutsV project](https://github.com/gutsv-project/
 | Audio Sync | Lighting reacts to the music playing on the system |
 | System Monitor | Colour driven by CPU load and ACPI temperature |
 | Ambient (Screen Sync) | Colour sampled from the screen edges |
-| Weather Sync | Live weather colours for the city set in the panel (rain — blue, sun — yellow, clouds — grey, snow — white) |
+| Weather Sync | Live weather colours for the city set in the panel (rain — blue, sun — yellow, clouds — grey, snow — white; steady amber while updating, steady red when the API is unreachable) |
 | Dual Breathe | Two layered sine waves with different periods for a complex rhythm |
 
 ## How the colour model works
@@ -93,8 +93,8 @@ or run `publish.bat` to get a self-contained folder in `Build_Output`.
 Pushing a version tag builds and publishes the app — the [release workflow](.github/workflows/release.yml) publishes a self-contained single-file `KGMaster.exe` (win-x64) on `windows-latest`, stamps the tag into its file version and attaches the executable plus its SHA-256 checksum to a GitHub release with generated notes. The download is about 75 MB: on the first start the bundle unpacks its runtime into `%TEMP%\.net\KGMaster` and reuses it afterwards.
 
 ```powershell
-git tag v1.0.3.3
-git push origin v1.0.3.3
+git tag v1.0.3.4
+git push origin v1.0.3.4
 ```
 
 Every push to `main` runs the [CI workflow](.github/workflows/ci.yml), which only compiles the solution — no tag, no release.
@@ -105,7 +105,7 @@ Layout: `MusicCat.CLVKM.Core` (models, settings, animation engine, weather), `Mu
 
 - **Device not found** — start the original Control Center first, then restart KeyGlowMaster. In the driver box you can also force *Insyde* or *WMI* instead of auto-detect.
 - **Auto-start does nothing** — open the app as administrator and accept *Service Mode* again; the old scheduled task may have been removed by a cleanup.
-- **Weather stays grey** — open the **Weather** panel (it appears when the weather effect is selected), start typing a city and pick the right suggestion — the list shows the district and region, so same-named villages can be told apart. The city applies as soon as you click a suggestion (or press Enter on the highlighted one). A wrong name shows *City not found*. The effect needs internet access: it tries Open-Meteo first and falls back to `api.met.no`; if both are unreachable the dot next to the status turns red and the lighting stays neutral until the next attempt in a couple of minutes.
+- **Weather stays grey** — open the **Weather** panel (it appears when the weather effect is selected), start typing a city and pick the right suggestion — the list shows the district and region, so same-named villages can be told apart. The city applies as soon as you click a suggestion (or press Enter on the highlighted one). A wrong name shows *City not found*. The effect needs internet access: it tries Open-Meteo first and falls back to `api.met.no`; while a request is running the keyboard is steady amber, and if both providers are unreachable it turns steady red until the next attempt in a couple of minutes.
 - **Light goes off by itself** — uncheck the sleep timer.
 
 ## Credits & license
