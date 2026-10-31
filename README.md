@@ -1,75 +1,97 @@
-# KeyGlowMaster by MusicCat161 🎨
-> **The Next-Gen RGB Control Center for Monster High & Clevo Laptops**
+# KeyGlowMaster
 
-**KeyGlowMaster by MusicCat161** is a lightweight, high-performance, and aesthetically stunning alternative to the stock Control Center software for managing your laptop's RGB keyboard. Built with modern .NET technologies, it eliminates lag, offers advanced animations, and provides a seamless user experience.
+![KeyGlowMaster](assets/preview-en.png)
 
-![KeyGlowMaster Preview](assets/preview.png)
+**English** · [Русский](README.ru.md)
 
-## ⚡ Why KeyGlowMaster?
-The default Control Center software is often bloated, slow, and resource-heavy. KeyGlowMaster changes the game:
-*   **Zero Latency:** Custom `AsyncDriverQueue` technology ensures instant lighting response without freezing the UI.
-*   **Ultra Lightweight:** Consumes minimal RAM and CPU (<0.1% CPU in background).
-*   **System Integration:** Works alongside or replaces your existing RGB controls.
+A small, fast replacement for the stock Control Center on Clevo / Monster Notebook laptops. Written in C# on .NET 10 + WPF, it talks to the keyboard through the Insyde DCHU or WMI interfaces — no drivers of its own, no background services, no installer.
 
-## 🚀 Key Features
-*   **🎵 Audio Sync:** Turn your keyboard into a visualizer that reacts to your music and system audio in real-time.
-*   **🖥️ Ambient Lighting (Screen Sync):**
-    *   **Full 100% Screen Sync:** Edge-to-edge capture with High-DPI (PerMonitorV2) support for accurate border, window, and full-screen tracking.
-    *   **Chroma-Weighted Sampling:** Colorful, saturated pixels are given quadratic priority over white backgrounds, borders, menus, and subtitles.
-    *   **HSV Saturation & Vibrance Boost:** Enhances color depth so keyboard LEDs display rich, vibrant shades instead of washed-out pastel or milky white light.
-    *   **Smart Document & Blackout Modes:** Intelligently switches to soft, eye-friendly neutral white on monochrome/document screens (Word, PDF) and dims to pitch black during dark movie scenes.
-    *   **Cinematic Smoothing:** 60 FPS Exponential Moving Average (EMA) transitions eliminate stutter and harsh flickering.
-*   **🌡️ System Monitor (Heatmap):**
-    *   **Microsecond CPU Load:** Instantaneous CPU monitoring via direct low-level kernel APIs (`GetSystemTimes`).
-    *   **Hardware Temperature:** Real-time ACPI thermal zone temperature tracking (Celsius).
-    *   **5-Stop Heatmap Gradient:** Smooth continuous transitions (Cyan -> Green -> Yellow -> Orange -> Red) with dynamic smoothing.
-*   **💾 Auto-Persistence:** Remembers your exact color, brightness, and animation state after reboot.
-*   **🤖 Smart Start:** Automatically starts with Windows (Bypasses UAC via Task Scheduler) and waits for hardware initialization.
-*   **✨ Windows 11 Mica UI:** Fluent-looking window with the native Mica backdrop (solid fallback on Windows 10).
-*   **🌐 English / Русский:** Live language switch in the title bar — the whole interface and the tray menu update instantly; the choice is remembered.
-*   **🎨 Two colour slots:** click the primary or secondary swatch and the RGB sliders / hex field immediately switch to that colour.
-*   **🌌 Animation Engine (15 effects):**
-    *   **Breathe / Fresh Breathe:** Smooth, organic fading effects.
-    *   **Color Shift / Transform:** Seamlessly transitions between colors.
-    *   **Pulsating Blink:** Alert-style effects.
-    *   **Two-Color Fade:** Gentle sine fade between the two picked colors.
-    *   **Zone Gradient:** Left, centre and right zones with drifting colors.
-    *   **Random Neon:** A new neon shade every 2–5 seconds.
-    *   **Day / Night:** Warm morning, white day, cool blue evening — follows the system clock.
-    *   **Weather Sync:** Live conditions via Open-Meteo (rain — blue, sun — yellow, clouds — grey, snow — white); refreshes every 15 minutes.
-    *   **Dual Breathe:** Two layered sine waves with different periods for a complex, never-quite-repeating rhythm.
-    *   **Soviet Garland:** chaotic warm flashes, dim-outs and burn-outs, like an old filament garland.
+KeyGlowMaster is a fork of the [GutsV project](https://github.com/gutsv-project/Clevo-Monster-RGB-Controller): the interface was rebuilt from scratch, localisation, themes, new effects and small quality-of-life features were added. See [Credits](#credits--license).
 
-## 💻 Compatibility
-Designed primarily for **Monster Notebook** and **Clevo** chassis laptops using:
-*   **Insyde DCHU Drivers** (Most modern models)
-*   **WMI Interface** (Older/Specific models)
-*   *Note: Auto-detects Single-Zone and Multi-Zone layouts.*
-*   *Note: on a single-zone keyboard, zone-based effects (Wave, Zone Gradient) work as one colour — the app warns about this in the device panel.*
+## What is inside
 
-## 📦 Installation & Setup
-**KeyGlowMaster is a portable application.** No installer wizard required.
+| | |
+|---|---|
+| 🪟 **Mica window** | Native Windows 11 backdrop, no system frame, custom title bar |
+| 🌗 **Frost themes** | Light and dark palettes, switched on the fly from the title bar |
+| 🌐 **Two languages** | English and Russian, switchable without a restart, follows the system language on first run |
+| 🎨 **15 effects** | From calm breathing to a chaotic Soviet garland — list below |
+| 🎯 **Colour slots** | Three colours for animations plus a separate applied colour, each with its own preview |
+| ⌨️ **Live preview** | The keyboard on screen shows the colour that is actually being sent to the hardware |
+| 😴 **Sleep timer** | The backlight fades out after 5 minutes of idle time and comes back on input |
+| ♻️ **Portable** | Single folder, runs as administrator, auto-start through Task Scheduler |
 
-1.  **Download** the latest release.
-2.  Extract the folder to a permanent location (e.g., `C:\KeyGlowMaster`).
-3.  Run **`KGMaster.exe`**.
-4.  **First Run:** You will be asked to enable **Service Mode**. Click **"Yes"**.
-    *   *This allows KeyGlowMaster to start automatically with Windows without annoying admin prompts.*
+## Effects
 
-> **Important:** Keep your original Control Center (FnKey.exe) running in the background. KeyGlowMaster relies on the low-level drivers initialized by the manufacturer's software.
+| Effect | What it does |
+|---|---|
+| Breathing | Smooth single-colour fade in and out |
+| Neon pulse | Short bright flashes of a neon colour |
+| Two-Color Fade | Sine fade between the two picked colours |
+| Spectrum Cycle | Continuous walk around the full hue circle |
+| Strobe blink | Sharp on/off blinking |
+| Wave | Travelling colour wave across the three zones |
+| Zone Gradient | Three zones, three picked colours, the palette scrolls across the keyboard |
+| Random Neon | A new neon shade every 2–5 seconds |
+| Day / Night | Warm in the morning, white by day, deep blue at night — follows the clock |
+| Soviet garland | Chaotic warm flashes, dim-outs and burn-outs of old filament bulbs |
+| Audio Sync | Lighting reacts to the music playing on the system |
+| System Monitor | Colour driven by CPU load and ACPI temperature |
+| Ambient (Screen Sync) | Colour sampled from the screen edges |
+| Weather Sync | Live weather colours (rain — blue, sun — yellow, clouds — grey, snow — white) |
+| Dual Breathe | Two layered sine waves with different periods for a complex rhythm |
 
-## 🎮 Usage Guide
-*   **System Tray:** KeyGlowMaster runs silently in the background. Double-click the icon near your clock to open the dashboard.
-*   **Trash Icon:** Use the "Cleanup" button in the title bar to reset all settings and remove the auto-start service if you wish to uninstall.
-*   **Animations:** Select an animation from the list and click "START".
-*   **Static Color:** Stop any animation to apply a static color using the RGB sliders or Hex code.
+## How the colour model works
 
-## 🛠️ Troubleshooting
-*   **"Device Not Found":** Ensure your laptop's original Control Center is running. Restart KeyGlowMaster.
-*   **Auto-Start Not Working:** Open KeyGlowMaster, click the Trash icon (Cleanup), then restart the app and accept the "Service Mode" prompt.
+There are **four** colours in the app, and they are not the same thing:
 
-## ⚖️ Disclaimer
-This software interacts with hardware drivers. While extensively tested, use it at your own risk. The developer is not responsible for any hardware incompatibilities.
+- **Colour** — the applied colour. Press *Apply colour* and the keyboard switches to it; it is what the preview shows when no effect is running.
+- **Primary / Second colour / Third colour** — the palette used by effects. Click a swatch and the RGB sliders start editing that slot; the applied colour stays untouched.
 
----
-*Made by MusicCat161. Inspired by the [GutsV project](https://github.com/gutsv-project/Clevo-Monster-RGB-Controller).*
+The third swatch only appears for *Zone Gradient*, the only effect that needs three zones. Values are stored in `%LOCALAPPDATA%\MusicCat.CLVKM\settings.json`.
+
+## Zones
+
+Zone count is detected automatically. On a single-zone keyboard the zone-based effects (*Wave*, *Zone Gradient*) fall back to one colour — the app warns about it in the device panel.
+
+## Sleep timer
+
+Tick **Turn off lighting when idle (5 min)** in the device card. After five minutes without mouse or keyboard input the backlight fades to black in about half a second, the animation freezes and the brightness slider shows `0%`. Any input brings the previous state back with a short fade.
+
+## Installation
+
+1. Download the latest release.
+2. Unpack the folder anywhere (for example `C:\KeyGlowMaster`).
+3. Run **`KGMaster.exe`** as administrator — the app needs it to talk to the keyboard driver.
+4. On the first run accept **Service Mode** to create a scheduled task, so Windows starts the app with the saved lighting.
+
+> The original Control Center (`FnKey.exe`) should be running: KeyGlowMaster relies on the drivers it initialises.
+
+## Languages and themes
+
+Both switches live in the title bar: `EN | RU` for the interface language and the sun/moon button for the theme. The choice is remembered. The language defaults to the system one on first launch.
+
+## Building from source
+
+Requires the .NET 10 SDK and Windows 10/11.
+
+```powershell
+dotnet build MusicCat.CLVKM.slnx -c Release
+```
+
+or run `publish.bat` to get a self-contained folder in `Build_Output`.
+
+Layout: `MusicCat.CLVKM.Core` (models, settings, animation engine, weather), `MusicCat.CLVKM.Drivers` (Insyde / WMI), `MusicCat.CLVKM.UI` (WPF shell), plus a small service and a diagnostics console.
+
+## Troubleshooting
+
+- **Device not found** — start the original Control Center first, then restart KeyGlowMaster. In the driver box you can also force *Insyde* or *WMI* instead of auto-detect.
+- **Auto-start does nothing** — open the app as administrator and accept *Service Mode* again; the old scheduled task may have been removed by a cleanup.
+- **Weather stays grey** — the effect needs internet access. It tries Open-Meteo first and falls back to `api.met.no`; if both are unreachable the lighting stays neutral until the next attempt in a couple of minutes.
+- **Light goes off by itself** — uncheck the sleep timer.
+
+## Credits & license
+
+KeyGlowMaster is based on **GutsV Colour** by [acerhizm](https://github.com/gutsv-project/Clevo-Monster-RGB-Controller) — the drivers, the animation approach and the original idea are theirs. This fork was made by **MusicCat161** and adds a redesigned interface, Frost themes, localisation, new effects and the sleep timer.
+
+Distributed under the MIT License, see [LICENSE](LICENSE).
