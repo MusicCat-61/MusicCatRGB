@@ -26,7 +26,7 @@ public class Worker : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        _logger.LogInformation("KeyGlowMaster Service starting...");
+        _logger.LogInformation("MusicCatRGB Service starting...");
 
         void OnDriverError(string message) => _logger.LogWarning("Driver error: {Message}", message);
         DriverDiagnostics.ErrorReported += OnDriverError;
@@ -47,7 +47,7 @@ public class Worker : BackgroundService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Fatal error in KeyGlowMaster Service");
+            _logger.LogError(ex, "Fatal error in MusicCatRGB Service");
         }
 
         try

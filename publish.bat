@@ -1,5 +1,5 @@
 @echo off
-echo KeyGlowMaster by MusicCat161 paketleniyor...
+echo MusicCatRGB by MusicCat161 paketleniyor...
 echo.
 
 :: Release Modunda, Klasor olarak derle (Tek dosya modunda DLL sorunlari yasanmamasi icin)
@@ -10,7 +10,7 @@ echo ========================================================
 echo ISLEM TAMAMLANDI!
 echo Dosyalariniz "Build_Output" klasorunde hazir.
 echo.
-echo KGMaster.exe uygulamasini istediginiz yere tasiyabilirsiniz.
-echo Ilk calistirmada otomatik olarak baslangica (Registry) eklenecektir.
+echo MCRGB.exe uygulamasini istediginiz yere tasiyabilirsiniz.
+echo Ilk calistirmada otomatik olarak baslangica (Task Scheduler) eklenecektir.
 echo ========================================================
 pause

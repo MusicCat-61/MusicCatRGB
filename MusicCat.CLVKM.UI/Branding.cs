@@ -7,7 +7,7 @@ namespace MusicCat.CLVKM.UI;
 /// <summary>Assembly-relative resource URIs, so renaming the assembly cannot break icons.</summary>
 public static class Branding
 {
-    private static readonly string AssemblyName = typeof(Branding).Assembly.GetName().Name ?? "KGMaster";
+    private static readonly string AssemblyName = typeof(Branding).Assembly.GetName().Name ?? "MCRGB";
 
     private static ImageSource? _iconImage;
 

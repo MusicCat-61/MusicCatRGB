@@ -12,11 +12,11 @@ class Program
     {
         Console.ForegroundColor = ConsoleColor.Cyan;
         Console.WriteLine("==========================================");
-        Console.WriteLine("   KeyGlowMaster Hardware Diagnostic Tool v1.0    ");
+        Console.WriteLine("   MusicCatRGB Hardware Diagnostic Tool v1.0    ");
         Console.WriteLine("==========================================");
         Console.ResetColor();
 
-        string logPath = Path.Combine(Environment.CurrentDirectory, "KeyGlowMaster_Report.txt");
+        string logPath = Path.Combine(Environment.CurrentDirectory, "MusicCatRGB_Report.txt");
         using (StreamWriter writer = new StreamWriter(logPath))
         {
             Log(writer, "Diagnostic Started at " + DateTime.Now);

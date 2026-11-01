@@ -82,7 +82,7 @@ public partial class App : System.Windows.Application
         {
             if (e.Args.Length == 0 || e.Args[0] != "--tray")
             {
-                System.Windows.MessageBox.Show(Loc.T("Msg_AlreadyRunning"), "KeyGlowMaster");
+                System.Windows.MessageBox.Show(Loc.T("Msg_AlreadyRunning"), "MusicCatRGB");
             }
 
             Environment.Exit(0);
@@ -106,9 +106,17 @@ public partial class App : System.Windows.Application
             return;
         }
 
+        // The pre-1.0.6 task points at the old executable name; it is dead weight now.
+        DeleteStartupTask(Core.AppPaths.LegacyStartupTaskName);
+
         if (!startInTray)
         {
             CheckAndAskStartup();
+        }
+        else if (startupSettings.IsStartupEnabled)
+        {
+            // Started by the logon task: repoint it at this executable in case it was renamed.
+            SyncStartupTask();
         }
 
         var mainWindow = new MainWindow();
@@ -168,40 +176,36 @@ public partial class App : System.Windows.Application
     {
         try
         {
-            Process.Start(new ProcessStartInfo
-            {
-                FileName = "schtasks",
-                Arguments = "/delete /tn MusicCat.CLVKM /f",
-                UseShellExecute = false,
-                CreateNoWindow = true
-            })?.WaitForExit();
+            DeleteStartupTask(Core.AppPaths.StartupTaskName);
+            DeleteStartupTask(Core.AppPaths.LegacyStartupTaskName);
 
             // Legacy registry entry cleanup.
             try
             {
-                Registry.CurrentUser
-                    .OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true)
-                    ?.DeleteValue("MusicCat.CLVKM", false);
+                var runKey = Registry.CurrentUser
+                    .OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
+
+                runKey?.DeleteValue(Core.AppPaths.StartupTaskName, false);
+                runKey?.DeleteValue(Core.AppPaths.LegacyStartupTaskName, false);
             }
             catch
             {
                 // Ignore.
             }
 
-            try
+            foreach (var folder in new[] { Core.AppPaths.DataDirectory, Core.AppPaths.LegacyDataDirectory })
             {
-                string settingsPath = Path.Combine(
-                    Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                    "MusicCat.CLVKM");
-
-                if (Directory.Exists(settingsPath))
+                try
                 {
-                    Directory.Delete(settingsPath, true);
+                    if (Directory.Exists(folder))
+                    {
+                        Directory.Delete(folder, true);
+                    }
                 }
-            }
-            catch
-            {
-                // Ignore.
+                catch
+                {
+                    // Ignore: a file may still be held open by this process.
+                }
             }
 
             ModernMessageBox.ShowInfo(Loc.T("Msg_CleanupDone"), Loc.T("Msg_CleanupTitle"));
@@ -209,6 +213,24 @@ public partial class App : System.Windows.Application
         catch (Exception ex)
         {
             ModernMessageBox.ShowInfo(Loc.F("Msg_CleanupError", ex.Message), Loc.T("Msg_ErrorTitle"));
+        }
+    }
+
+    private static void DeleteStartupTask(string taskName)
+    {
+        try
+        {
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = "schtasks",
+                Arguments = $"/delete /tn \"{taskName}\" /f",
+                UseShellExecute = false,
+                CreateNoWindow = true
+            })?.WaitForExit();
+        }
+        catch
+        {
+            // The task may not exist.
         }
     }
 
@@ -267,7 +289,9 @@ public partial class App : System.Windows.Application
             }
 
             // Scheduled task so the app can start elevated at logon without a UAC prompt.
-            string cmd = $"/create /tn MusicCat.CLVKM /tr \"'\\\"{exePath}\\\"' --tray\" /sc onlogon /rl HIGHEST /f";
+            // /f makes this idempotent: re-registering repoints an existing task at the
+            // current executable, which is what keeps autostart working after a rename.
+            string cmd = $"/create /tn \"{Core.AppPaths.StartupTaskName}\" /tr \"'\\\"{exePath}\\\"' --tray\" /sc onlogon /rl HIGHEST /f";
 
             Process.Start(new ProcessStartInfo
             {
@@ -281,6 +305,16 @@ public partial class App : System.Windows.Application
         {
             // Optional feature.
         }
+    }
+
+    /// <summary>
+    /// Repairs autostart after the executable was renamed (1.0.6): without this the logon
+    /// task would keep pointing at a file that no longer exists.
+    /// </summary>
+    private void SyncStartupTask()
+    {
+        RegisterStartup();
+        Logging.AppLog.Event("mode", $"Autostart task repointed at {Core.AppPaths.ProductName}");
     }
 
     private void SetupTrayIcon()

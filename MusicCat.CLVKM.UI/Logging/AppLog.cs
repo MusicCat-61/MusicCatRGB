@@ -11,7 +11,7 @@ namespace MusicCat.CLVKM.UI.Logging;
 
 /// <summary>
 /// Plain-text file logging. Every run appends to a daily file in
-/// <c>%LOCALAPPDATA%\MusicCat.CLVKM\logs</c>; the last two weeks are kept.
+/// <c>%LOCALAPPDATA%\MusicCatRGB\logs</c>; the last two weeks are kept.
 ///
 /// Two kinds of entries are written:
 /// <list type="bullet">
@@ -23,10 +23,7 @@ namespace MusicCat.CLVKM.UI.Logging;
 /// </summary>
 internal static class AppLog
 {
-    public static string LogDirectory { get; } = Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-        "MusicCat.CLVKM",
-        "logs");
+    public static string LogDirectory { get; } = Core.AppPaths.LogDirectory;
 
     /// <summary>How long a burst of changes is collected before one line is written.</summary>
     private const int CoalesceWindowMs = 700;
@@ -55,7 +52,7 @@ internal static class AppLog
             Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Information()
                 .WriteTo.File(
-                    Path.Combine(LogDirectory, "kgmaster-.txt"),
+                    Path.Combine(LogDirectory, "musiccatrgb-.txt"),
                     rollingInterval: RollingInterval.Day,
                     retainedFileCountLimit: 14,
                     shared: true,
@@ -63,7 +60,7 @@ internal static class AppLog
                 .CreateLogger();
 
             Log.Information(
-                "KeyGlowMaster {Version} started on {Os} (logs: {Folder})",
+                "MusicCatRGB {Version} started on {Os} (logs: {Folder})",
                 typeof(AppLog).Assembly.GetName().Version,
                 Environment.OSVersion.VersionString,
                 LogDirectory);
@@ -157,7 +154,7 @@ internal static class AppLog
         try
         {
             FlushPending();
-            Log.Information("KeyGlowMaster stopped");
+            Log.Information("MusicCatRGB stopped");
             Log.CloseAndFlush();
         }
         catch

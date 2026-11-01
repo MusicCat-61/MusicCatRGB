@@ -54,17 +54,17 @@
     <sys:String x:Key="Hotkey_AnimOff">Animation off</sys:String>
 
     <!-- Tray -->
-    <sys:String x:Key="Tray_Ready">KeyGlowMaster</sys:String>
-    <sys:String x:Key="Tray_Running">KeyGlowMaster · Running</sys:String>
-    <sys:String x:Key="Tray_Starting">KeyGlowMaster · Starting…</sys:String>
-    <sys:String x:Key="Tray_WaitingFnKey">KeyGlowMaster · Waiting for Control Center…</sys:String>
-    <sys:String x:Key="Tray_FnKeyFound">KeyGlowMaster · Initializing…</sys:String>
-    <sys:String x:Key="Tray_Checking">KeyGlowMaster · Checking system…</sys:String>
-    <sys:String x:Key="Tray_Open">Open KeyGlowMaster</sys:String>
+    <sys:String x:Key="Tray_Ready">MusicCatRGB</sys:String>
+    <sys:String x:Key="Tray_Running">MusicCatRGB · Running</sys:String>
+    <sys:String x:Key="Tray_Starting">MusicCatRGB · Starting…</sys:String>
+    <sys:String x:Key="Tray_WaitingFnKey">MusicCatRGB · Waiting for Control Center…</sys:String>
+    <sys:String x:Key="Tray_FnKeyFound">MusicCatRGB · Initializing…</sys:String>
+    <sys:String x:Key="Tray_Checking">MusicCatRGB · Checking system…</sys:String>
+    <sys:String x:Key="Tray_Open">Open MusicCatRGB</sys:String>
     <sys:String x:Key="Tray_Exit">Exit</sys:String>
 
     <!-- Dialogs -->
-    <sys:String x:Key="Msg_AlreadyRunning">KeyGlowMaster is already running. Check the notification area.</sys:String>
+    <sys:String x:Key="Msg_AlreadyRunning">MusicCatRGB is already running. Check the notification area.</sys:String>
     <sys:String x:Key="Msg_NoControlCenter" xml:space="preserve">Control Center (FnKey.exe) is not running.&#x0a;&#x0a;Please start Control Center first.</sys:String>
     <sys:String x:Key="Msg_FatalTitle">Fatal error</sys:String>
     <sys:String x:Key="Msg_ServiceMode" xml:space="preserve">Enable Service Mode (auto-start)?&#x0a;&#x0a;Your keyboard lighting will then be restored automatically every time Windows starts.</sys:String>
@@ -73,10 +73,10 @@
     <sys:String x:Key="Msg_CleanupTitle">Cleanup complete</sys:String>
     <sys:String x:Key="Msg_ErrorTitle">Error</sys:String>
     <sys:String x:Key="Msg_CleanupError">Cleanup failed: {0}</sys:String>
-    <sys:String x:Key="Crash_Title">KeyGlowMaster crash report</sys:String>
+    <sys:String x:Key="Crash_Title">MusicCatRGB crash report</sys:String>
     <sys:String x:Key="Crash_Message" xml:space="preserve">Unhandled error: {0}&#x0a;&#x0a;Stack trace:&#x0a;{1}</sys:String>
     <sys:String x:Key="Reset_Title">Reset confirmation</sys:String>
-    <sys:String x:Key="Reset_Message" xml:space="preserve">Reset KeyGlowMaster?&#x0a;&#x0a;• Auto-start will be disabled&#x0a;• Saved colors and animations will be deleted&#x0a;&#x0a;Only KGMaster.exe will remain.</sys:String>
+    <sys:String x:Key="Reset_Message" xml:space="preserve">Reset MusicCatRGB?&#x0a;&#x0a;• Auto-start will be disabled&#x0a;• Saved colors and animations will be deleted&#x0a;&#x0a;Only MCRGB.exe will remain.</sys:String>
 
     <!-- Common buttons -->
     <sys:String x:Key="Yes">Yes</sys:String>
@@ -98,12 +98,12 @@
     <sys:String x:Key="L_About">About</sys:String>
     <sys:String x:Key="L_Logs">Logs</sys:String>
     <sys:String x:Key="L_LogsTip">Open the log folder</sys:String>
-    <sys:String x:Key="About_Title">About KeyGlowMaster</sys:String>
+    <sys:String x:Key="About_Title">About MusicCatRGB</sys:String>
     <sys:String x:Key="About_Developer">Modification developer: MusicCat161</sys:String>
     <sys:String x:Key="About_Based">Based on the repository:</sys:String>
     <sys:String x:Key="About_Link">gutsv-project/Clevo-Monster-RGB-Controller</sys:String>
     <sys:String x:Key="About_MyRepo">My repository:</sys:String>
-    <sys:String x:Key="About_MyRepoLink">MusicCat-61/KeyGlowMaster</sys:String>
+    <sys:String x:Key="About_MyRepoLink">MusicCat-61/MusicCatRGB</sys:String>
     <sys:String x:Key="About_Donate">Support the project</sys:String>
     <sys:String x:Key="About_TelegramLabel">Telegram:</sys:String>
     <sys:String x:Key="About_Description">This project is a fork (an improved version) that includes bug fixes, a new interface and additional lighting modes.</sys:String>

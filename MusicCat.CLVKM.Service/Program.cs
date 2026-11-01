@@ -6,7 +6,7 @@ using System.Runtime.Versioning;
 IHost host = Host.CreateDefaultBuilder(args)
     .UseWindowsService(options =>
     {
-        options.ServiceName = "KeyGlowMaster RGB Service";
+        options.ServiceName = "MusicCatRGB Service";
     })
     .ConfigureServices(services =>
     {

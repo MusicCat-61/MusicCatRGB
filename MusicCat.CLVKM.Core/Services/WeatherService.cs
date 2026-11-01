@@ -177,7 +177,7 @@ public sealed class WeatherService
     {
         _http = new HttpClient { Timeout = TimeSpan.FromSeconds(8) };
         _http.DefaultRequestHeaders.UserAgent.ParseAdd(
-            "KeyGlowMaster/1.0 (https://github.com/MusicCat-61/KeyGlowMaster)");
+            "MusicCatRGB/1.0 (https://github.com/MusicCat-61/MusicCatRGB)");
     }
 
     /// <summary>Raised after every finished attempt (successful or not). May run on a worker thread.</summary>

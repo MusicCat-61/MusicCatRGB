@@ -1,14 +1,14 @@
-# KeyGlowMaster
+# MusicCatRGB
 
-[![Release](https://img.shields.io/github/v/release/MusicCat-61/KeyGlowMaster?style=flat-square)](https://github.com/MusicCat-61/KeyGlowMaster/releases)
-[![Download](https://img.shields.io/badge/download-KGMaster.exe-2ea44f?style=flat-square)](https://github.com/MusicCat-61/KeyGlowMaster/releases/latest/download/KGMaster.exe)
-[![CI](https://github.com/MusicCat-61/KeyGlowMaster/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/MusicCat-61/KeyGlowMaster/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/MusicCat-61/MusicCatRGB?style=flat-square)](https://github.com/MusicCat-61/MusicCatRGB/releases)
+[![Download](https://img.shields.io/badge/download-MCRGB.exe-2ea44f?style=flat-square)](https://github.com/MusicCat-61/MusicCatRGB/releases/latest/download/MCRGB.exe)
+[![CI](https://github.com/MusicCat-61/MusicCatRGB/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/MusicCat-61/MusicCatRGB/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](LICENSE)
-[![Version](https://img.shields.io/badge/version-1.0.5.5-4CC2FF?style=flat-square)](https://github.com/MusicCat-61/KeyGlowMaster/releases/tag/v1.0.5.5)
+[![Version](https://img.shields.io/badge/version-1.0.6.0-4CC2FF?style=flat-square)](https://github.com/MusicCat-61/MusicCatRGB/releases/tag/v1.0.6.0)
 [![Platform](https://img.shields.io/badge/platform-Windows%2010%20%7C%2011-0078D6?style=flat-square)](#)
 [![.NET](https://img.shields.io/badge/.NET-10-512BD4?style=flat-square)](https://dotnet.microsoft.com/download)
 
-![KeyGlowMaster](assets/preview-en.png)
+![MusicCatRGB](assets/preview-en.png)
 
 *English interface · the Russian one is below on the [Russian page](README.ru.md).*
 
@@ -18,7 +18,10 @@ A small, fast replacement for the stock Control Center on Clevo-based laptops �
 
 WMI is used whenever it is available; if the WMI channel is disabled, the app automatically falls back to `InsydeDCHU.dll`. On other barebones (Tongfang, for example) the device will most likely not be found.
 
-KeyGlowMaster is a fork of the [GutsV project](https://github.com/gutsv-project/Clevo-Monster-RGB-Controller): the interface was rebuilt from scratch, localisation, themes, new effects and small quality-of-life features were added. See [Credits](#credits--license).
+MusicCatRGB is a fork of the [GutsV project](https://github.com/gutsv-project/Clevo-Monster-RGB-Controller): the interface was rebuilt from scratch, localisation, themes, new effects and small quality-of-life features were added. See [Credits](#credits--license).
+
+> [!NOTE]
+> **Renamed in 1.0.6.** The project used to be called *KeyGlowMaster* and the executable was `KGMaster.exe`. It is now **MusicCatRGB** with `MCRGB.exe`. Settings are migrated automatically from `%LOCALAPPDATA%\MusicCat.CLVKM` on the first start, and the old logon task is replaced. If you are upgrading, delete the old `KGMaster.exe` after the first run — otherwise two copies will fight over the keyboard.
 
 > [!WARNING]
 > **Use at your own risk.** The app has been tested, but its operation is not guaranteed. You take full responsibility for any risks of using it.
@@ -35,7 +38,7 @@ KeyGlowMaster is a fork of the [GutsV project](https://github.com/gutsv-project/
 | ⌨️ **Live preview** | The keyboard on screen shows the colour that is actually being sent to the hardware |
 | 😴 **Sleep timer** | The backlight fades out after 5 minutes of idle time and comes back on input |
 | 🎛 **Global hotkeys** | Switch effects and start or stop the animation from any app — no need to open the window |
-| 🗒 **File logs** | Daily plain-text logs in `%LOCALAPPDATA%\MusicCat.CLVKM\logs`, one button away |
+| 🗒 **File logs** | Daily plain-text logs in `%LOCALAPPDATA%\MusicCatRGB\logs`, one button away |
 | ♻️ **Portable** | One self-contained executable, runs as administrator, auto-start through Task Scheduler |
 
 ## Effects
@@ -66,7 +69,7 @@ There are **four** colours in the app, and they are not the same thing:
 - **Colour** — the applied colour. Press *Apply colour* and the keyboard switches to it; it is what the preview shows when no effect is running.
 - **Primary / Second colour / Third colour** — the palette used by effects. Click a swatch and the RGB sliders start editing that slot; the applied colour stays untouched.
 
-The third swatch only appears for *Zone Gradient*, the only effect that needs three zones. Values are stored in `%LOCALAPPDATA%\MusicCat.CLVKM\settings.json`.
+The third swatch only appears for *Zone Gradient*, the only effect that needs three zones. Values are stored in `%LOCALAPPDATA%\MusicCatRGB\settings.json`.
 
 ## Zones
 
@@ -94,12 +97,12 @@ Every switch is confirmed by a small always-on-top toast in the corner of the sc
 
 ## Installation
 
-1. Download [**`KGMaster.exe`**](https://github.com/MusicCat-61/KeyGlowMaster/releases/latest/download/KGMaster.exe) — one self-contained file, no installer and no .NET runtime required.
-2. Keep it in a permanent folder, for example `C:\KeyGlowMaster`.
+1. Download [**`MCRGB.exe`**](https://github.com/MusicCat-61/MusicCatRGB/releases/latest/download/MCRGB.exe) — one self-contained file, no installer and no .NET runtime required.
+2. Keep it in a permanent folder, for example `C:\MusicCatRGB`.
 3. Run it as administrator — the app needs it to talk to the keyboard driver.
 4. On the first run accept **Service Mode** to create a scheduled task, so Windows starts the app with the saved lighting.
 
-> The original Control Center (`FnKey.exe`) should be running: KeyGlowMaster relies on the drivers it initialises.
+> The original Control Center (`FnKey.exe`) should be running: MusicCatRGB relies on the drivers it initialises.
 
 ## Languages and themes
 
@@ -107,7 +110,7 @@ Both switches live in the title bar: `EN | RU` for the interface language and th
 
 ## Logs
 
-Every run writes a plain-text log to `%LOCALAPPDATA%\MusicCat.CLVKM\logs\` — one file per day (`kgmaster-20261031.txt`), the last 14 are kept. The **Logs** button in the footer opens that folder; it is created on first use.
+Every run writes a plain-text log to `%LOCALAPPDATA%\MusicCatRGB\logs\` — one file per day (`musiccatrgb-20261031.txt`), the last 14 are kept. The **Logs** button in the footer opens that folder; it is created on first use.
 
 Each entry is tagged with a category, so the file can be followed with a filter:
 
@@ -143,11 +146,11 @@ or run `publish.bat` to get a self-contained folder in `Build_Output`.
 
 ### Releases
 
-Pushing a version tag builds and publishes the app — the [release workflow](.github/workflows/release.yml) publishes a self-contained single-file `KGMaster.exe` (win-x64) on `windows-latest`, stamps the tag into its file version and attaches the executable plus its SHA-256 checksum to a GitHub release with generated notes. The download is about 75 MB: on the first start the bundle unpacks its runtime into `%TEMP%\.net\KGMaster` and reuses it afterwards.
+Pushing a version tag builds and publishes the app — the [release workflow](.github/workflows/release.yml) publishes a self-contained single-file `MCRGB.exe` (win-x64) on `windows-latest`, stamps the tag into its file version and attaches the executable plus its SHA-256 checksum to a GitHub release with generated notes. The download is about 75 MB: on the first start the bundle unpacks its runtime into `%TEMP%\.net\MCRGB` and reuses it afterwards.
 
 ```powershell
-git tag v1.0.5.5
-git push origin v1.0.5.5
+git tag v1.0.6.0
+git push origin v1.0.6.0
 ```
 
 Every push to `main` runs the [CI workflow](.github/workflows/ci.yml), which only compiles the solution — no tag, no release.
@@ -156,14 +159,14 @@ Layout: `MusicCat.CLVKM.Core` (models, settings, animation engine, weather), `Mu
 
 ## Troubleshooting
 
-- **Device not found** — start the original Control Center first, then restart KeyGlowMaster. In the driver box you can also force *Insyde* or *WMI* instead of auto-detect.
+- **Device not found** — start the original Control Center first, then restart MusicCatRGB. In the driver box you can also force *Insyde* or *WMI* instead of auto-detect.
 - **Auto-start does nothing** — open the app as administrator and accept *Service Mode* again; the old scheduled task may have been removed by a cleanup.
 - **Weather stays grey** — open the **Weather** panel (it appears when the weather effect is selected), start typing a city and pick the right suggestion — the list shows the district and region, so same-named villages can be told apart. The city applies as soon as you click a suggestion (or press Enter on the highlighted one). A wrong name shows *City not found*. The effect needs internet access: it tries Open-Meteo first and falls back to `api.met.no`; while a request is running the keyboard is steady amber, and if both providers are unreachable it turns steady red until the next attempt in a couple of minutes.
 - **Light goes off by itself** — uncheck the sleep timer.
 
 ## Credits & license
 
-KeyGlowMaster is based on **GutsV Colour** by [acerhizm](https://github.com/gutsv-project/Clevo-Monster-RGB-Controller) — the drivers, the animation approach and the original idea are theirs. This fork was made by **MusicCat161** and adds a redesigned interface, Frost themes, localisation, new effects, the sleep timer and various small quality-of-life touches.
+MusicCatRGB is based on **GutsV Colour** by [acerhizm](https://github.com/gutsv-project/Clevo-Monster-RGB-Controller) — the drivers, the animation approach and the original idea are theirs. This fork was made by **MusicCat161** and adds a redesigned interface, Frost themes, localisation, new effects, the sleep timer and various small quality-of-life touches.
 
 Distributed under the MIT License, see [LICENSE](LICENSE).
 

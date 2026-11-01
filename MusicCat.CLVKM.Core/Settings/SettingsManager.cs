@@ -48,11 +48,7 @@ public class AppSettings
 
 public static class SettingsManager
 {
-    private static readonly string SettingsPath = Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), 
-        "MusicCat.CLVKM", 
-        "settings.json"
-    );
+    private static readonly string SettingsPath = AppPaths.SettingsPath;
 
     public static void Save(AppSettings settings)
     {
@@ -69,6 +65,9 @@ public static class SettingsManager
 
     public static AppSettings Load()
     {
+        // Picks up settings written under the pre-1.0.6 folder name.
+        AppPaths.EnsureMigrated();
+
         try
         {
             if (File.Exists(SettingsPath))

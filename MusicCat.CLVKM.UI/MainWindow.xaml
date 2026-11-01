@@ -4,7 +4,7 @@
         xmlns:shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
         xmlns:vm="clr-namespace:MusicCat.CLVKM.UI.ViewModels"
         xmlns:local="clr-namespace:MusicCat.CLVKM.UI"
-        Title="KeyGlowMaster by MusicCat161"
+        Title="MusicCatRGB by MusicCat161"
         Width="1160" Height="830" MinWidth="1060" MinHeight="740"
         WindowStartupLocation="CenterScreen"
         WindowStyle="None" ResizeMode="CanResize"
@@ -44,7 +44,7 @@
             <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="18,0,0,0" VerticalAlignment="Center">
                 <Image Source="{x:Static local:Branding.IconImage}" Width="18" Height="18"
                        RenderOptions.BitmapScalingMode="HighQuality"/>
-                <TextBlock Text="KEYGLOWMASTER" Margin="10,0,0,0" FontSize="15" FontWeight="SemiBold"
+                <TextBlock Text="MusicCatRGB" Margin="10,0,0,0" FontSize="15" FontWeight="SemiBold"
                            VerticalAlignment="Center" Foreground="{DynamicResource TextPrimaryBrush}"/>
                 <TextBlock Text="by MusicCat161" Margin="8,0,0,0" FontSize="15"
                            VerticalAlignment="Center" Foreground="{DynamicResource TextTertiaryBrush}"/>

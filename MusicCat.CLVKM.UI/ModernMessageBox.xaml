@@ -1,7 +1,7 @@
 <Window x:Class="MusicCat.CLVKM.UI.ModernMessageBox"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="KeyGlowMaster"
+        Title="MusicCatRGB"
         Width="460"
         SizeToContent="Height"
         WindowStartupLocation="CenterScreen"
@@ -33,7 +33,7 @@
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
-                <TextBlock x:Name="TitleText" Text="KeyGlowMaster"
+                <TextBlock x:Name="TitleText" Text="MusicCatRGB"
                            Foreground="{DynamicResource TextPrimaryBrush}" FontWeight="SemiBold" FontSize="16"
                            VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
 

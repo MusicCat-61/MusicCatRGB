@@ -1,14 +1,14 @@
-# KeyGlowMaster
+# MusicCatRGB
 
-[![Release](https://img.shields.io/github/v/release/MusicCat-61/KeyGlowMaster?style=flat-square)](https://github.com/MusicCat-61/KeyGlowMaster/releases)
-[![Download](https://img.shields.io/badge/download-KGMaster.exe-2ea44f?style=flat-square)](https://github.com/MusicCat-61/KeyGlowMaster/releases/latest/download/KGMaster.exe)
-[![CI](https://github.com/MusicCat-61/KeyGlowMaster/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/MusicCat-61/KeyGlowMaster/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/MusicCat-61/MusicCatRGB?style=flat-square)](https://github.com/MusicCat-61/MusicCatRGB/releases)
+[![Download](https://img.shields.io/badge/download-MCRGB.exe-2ea44f?style=flat-square)](https://github.com/MusicCat-61/MusicCatRGB/releases/latest/download/MCRGB.exe)
+[![CI](https://github.com/MusicCat-61/MusicCatRGB/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/MusicCat-61/MusicCatRGB/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](LICENSE)
-[![Version](https://img.shields.io/badge/version-1.0.5.5-4CC2FF?style=flat-square)](https://github.com/MusicCat-61/KeyGlowMaster/releases/tag/v1.0.5.5)
+[![Version](https://img.shields.io/badge/version-1.0.6.0-4CC2FF?style=flat-square)](https://github.com/MusicCat-61/MusicCatRGB/releases/tag/v1.0.6.0)
 [![Platform](https://img.shields.io/badge/platform-Windows%2010%20%7C%2011-0078D6?style=flat-square)](#)
 [![.NET](https://img.shields.io/badge/.NET-10-512BD4?style=flat-square)](https://dotnet.microsoft.com/download)
 
-![KeyGlowMaster](assets/preview-ru.png)
+![MusicCatRGB](assets/preview-ru.png)
 
 *Русский интерфейс; английский — на [английской странице](README.md).*
 
@@ -18,7 +18,10 @@
 
 WMI используется, когда он доступен; если WMI-канал отключён, приложение автоматически переходит на `InsydeDCHU.dll`. На других платах (например, Tongfang) устройство, скорее всего, не найдётся.
 
-KeyGlowMaster — форк проекта [GutsV](https://github.com/gutsv-project/Clevo-Monster-RGB-Controller): интерфейс переписан с нуля, добавлены локализация, темы, новые эффекты и разные мелочи. Подробности — в разделе [Авторы и лицензия](#авторы-и-лицензия).
+MusicCatRGB — форк проекта [GutsV](https://github.com/gutsv-project/Clevo-Monster-RGB-Controller): интерфейс переписан с нуля, добавлены локализация, темы, новые эффекты и разные мелочи. Подробности — в разделе [Авторы и лицензия](#авторы-и-лицензия).
+
+> [!NOTE]
+> **Переименование в 1.0.6.** Раньше проект назывался *KeyGlowMaster*, а файл — `KGMaster.exe`. Теперь это **MusicCatRGB** и `MCRGB.exe`. Настройки при первом запуске переносятся автоматически из `%LOCALAPPDATA%\MusicCat.CLVKM`, старое задание автозапуска заменяется. При обновлении удалите старый `KGMaster.exe` после первого запуска — иначе две копии будут спорить за подсветку.
 
 > [!WARNING]
 > **Предупреждение.** Использование — на ваш страх и риск. Приложение тестировалось, но его работа не гарантируется. Все риски, связанные с использованием, несёт пользователь.
@@ -35,7 +38,7 @@ KeyGlowMaster — форк проекта [GutsV](https://github.com/gutsv-proje
 | ⌨️ **Живое превью** | Клавиатура на экране показывает цвет, который реально уходит в железо |
 | 😴 **Таймер сна** | Через 5 минут простоя подсветка плавно гаснет и возвращается при вводе |
 | 🎛 **Горячие клавиши** | Переключение эффектов и запуск анимации из любого приложения — окно открывать не нужно |
-| 🗒 **Файловые логи** | Ежедневные текстовые логи в `%LOCALAPPDATA%\MusicCat.CLVKM\logs`, открываются одной кнопкой |
+| 🗒 **Файловые логи** | Ежедневные текстовые логи в `%LOCALAPPDATA%\MusicCatRGB\logs`, открываются одной кнопкой |
 | ♻️ **Портативность** | Один самодостаточный файл, запуск от администратора, автозапуск через Планировщик задач |
 
 ## Эффекты
@@ -66,7 +69,7 @@ KeyGlowMaster — форк проекта [GutsV](https://github.com/gutsv-proje
 - **Цвет** — применяемый. Нажали «Применить цвет» — клавиатура переключилась на него; именно его показывает превью, когда ничего не запущено.
 - **Основной / Второй цвет / Третий цвет** — палитра для эффектов. Клик по плашке переводит ползунки R/G/B на этот слот, применяемый цвет при этом не меняется.
 
-Третья плашка появляется только у «Градиента по зонам» — единственного эффекта, которому нужны три зоны. Всё хранится в `%LOCALAPPDATA%\MusicCat.CLVKM\settings.json`.
+Третья плашка появляется только у «Градиента по зонам» — единственного эффекта, которому нужны три зоны. Всё хранится в `%LOCALAPPDATA%\MusicCatRGB\settings.json`.
 
 ## Зоны
 
@@ -94,12 +97,12 @@ KeyGlowMaster — форк проекта [GutsV](https://github.com/gutsv-proje
 
 ## Установка
 
-1. Скачайте [**`KGMaster.exe`**](https://github.com/MusicCat-61/KeyGlowMaster/releases/latest/download/KGMaster.exe) — один самодостаточный файл, установщик и .NET Runtime не нужны.
-2. Положите его в постоянную папку, например `C:\KeyGlowMaster`.
+1. Скачайте [**`MCRGB.exe`**](https://github.com/MusicCat-61/MusicCatRGB/releases/latest/download/MCRGB.exe) — один самодостаточный файл, установщик и .NET Runtime не нужны.
+2. Положите его в постоянную папку, например `C:\MusicCatRGB`.
 3. Запустите от имени администратора — иначе не будет доступа к драйверу клавиатуры.
 4. При первом запуске согласитесь на **режим службы**: приложение создаст задачу в Планировщике, чтобы Windows поднимала его с сохранённой подсветкой.
 
-> Желательно, чтобы оригинальный Control Center (`FnKey.exe`) был запущен: KeyGlowMaster опирается на драйверы, которые тот инициализирует.
+> Желательно, чтобы оригинальный Control Center (`FnKey.exe`) был запущен: MusicCatRGB опирается на драйверы, которые тот инициализирует.
 
 ## Язык и тема
 
@@ -107,7 +110,7 @@ KeyGlowMaster — форк проекта [GutsV](https://github.com/gutsv-proje
 
 ## Логи
 
-Каждый запуск пишет обычный текстовый лог в `%LOCALAPPDATA%\MusicCat.CLVKM\logs\` — один файл на день (`kgmaster-20261031.txt`), хранятся последние 14. Кнопка **«Журнал»** в нижней панели открывает эту папку; она создаётся при первом обращении.
+Каждый запуск пишет обычный текстовый лог в `%LOCALAPPDATA%\MusicCatRGB\logs\` — один файл на день (`musiccatrgb-20261031.txt`), хранятся последние 14. Кнопка **«Журнал»** в нижней панели открывает эту папку; она создаётся при первом обращении.
 
 Каждая запись помечена категорией — по ней удобно фильтровать файл:
 
@@ -143,11 +146,11 @@ dotnet build MusicCat.CLVKM.slnx -c Release
 
 ### Релизы
 
-Пуш тега запускает сборку и публикацию: [workflow](.github/workflows/release.yml) собирает самодостаточный однофайловый `KGMaster.exe` под `win-x64` на `windows-latest`, проставляет ему версию из тега и прикрепляет исполняемый файл вместе с контрольной суммой SHA-256 к релизу с автоматически составленным списком изменений. Скачивание — около 75 МБ: при первом запуске бандл распаковывает среду выполнения в `%TEMP%\.net\KGMaster` и дальше переиспользует её.
+Пуш тега запускает сборку и публикацию: [workflow](.github/workflows/release.yml) собирает самодостаточный однофайловый `MCRGB.exe` под `win-x64` на `windows-latest`, проставляет ему версию из тега и прикрепляет исполняемый файл вместе с контрольной суммой SHA-256 к релизу с автоматически составленным списком изменений. Скачивание — около 75 МБ: при первом запуске бандл распаковывает среду выполнения в `%TEMP%\.net\MCRGB` и дальше переиспользует её.
 
 ```powershell
-git tag v1.0.5.5
-git push origin v1.0.5.5
+git tag v1.0.6.0
+git push origin v1.0.6.0
 ```
 
 Каждый пуш в `main` запускает [CI workflow](.github/workflows/ci.yml) — только сборку решения, без тега и релиза.
@@ -156,14 +159,14 @@ git push origin v1.0.5.5
 
 ## Если что-то не работает
 
-- **«Устройство не найдено»** — сначала запустите оригинальный Control Center, потом перезапустите KeyGlowMaster. В списке драйверов можно принудительно выбрать *Insyde* или *WMI* вместо автоопределения.
+- **«Устройство не найдено»** — сначала запустите оригинальный Control Center, потом перезапустите MusicCatRGB. В списке драйверов можно принудительно выбрать *Insyde* или *WMI* вместо автоопределения.
 - **Автозапуск не срабатывает** — запустите приложение от администратора и снова согласитесь на режим службы: старая задача могла быть удалена очисткой.
 - **Погода остаётся серой** — откройте карточку **«Погода»** (появляется при выборе погодного эффекта), начните вводить город и выберите нужную подсказку — в списке видно район и область, поэтому одноимённые сёла не перепутаются. Город применяется сразу по клику (или по Enter на подсвеченном пункте). При ошибке в названии появится «Город не найден». Эффекту нужен интернет: сначала запрос идёт в Open-Meteo, при неудаче — в `api.met.no`; пока идёт запрос, клавиатура ровного янтарного цвета, а если оба провайдера недоступны — ровного красного до следующей попытки через пару минут.
 - **Подсветка гаснет сама** — снимите галочку таймера сна.
 
 ## Авторы и лицензия
 
-KeyGlowMaster основан на **GutsV Colour** от [acerhizm](https://github.com/gutsv-project/Clevo-Monster-RGB-Controller) — драйверы, подход к анимациям и сама идея принадлежат ему. Форк сделал **MusicCat161**: переработанный интерфейс, темы Frost, локализация, новые эффекты, таймер сна и разные мелочи.
+MusicCatRGB основан на **GutsV Colour** от [acerhizm](https://github.com/gutsv-project/Clevo-Monster-RGB-Controller) — драйверы, подход к анимациям и сама идея принадлежат ему. Форк сделал **MusicCat161**: переработанный интерфейс, темы Frost, локализация, новые эффекты, таймер сна и разные мелочи.
 
 Распространяется под лицензией MIT, см. [LICENSE](LICENSE).
 

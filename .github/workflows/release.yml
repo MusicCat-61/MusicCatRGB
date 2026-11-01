@@ -21,7 +21,7 @@ env:
 
 jobs:
   release:
-    name: KGMaster.exe (win-x64)
+    name: MCRGB.exe (win-x64)
     runs-on: windows-latest
 
     steps:
@@ -53,7 +53,7 @@ jobs:
       - name: Restore
         run: dotnet restore MusicCat.CLVKM.slnx
 
-      - name: Publish single-file KGMaster.exe
+      - name: Publish single-file MCRGB.exe
         shell: pwsh
         run: |
           dotnet publish $env:UI_PROJECT `
@@ -68,27 +68,27 @@ jobs:
             -p:Version=${{ steps.meta.outputs.version }} `
             -o publish
 
-          if (-not (Test-Path 'publish/KGMaster.exe')) {
-            throw 'KGMaster.exe was not produced by dotnet publish'
+          if (-not (Test-Path 'publish/MCRGB.exe')) {
+            throw 'MCRGB.exe was not produced by dotnet publish'
           }
 
-          $exe = Get-Item 'publish/KGMaster.exe'
-          Write-Host ("KGMaster.exe: {0:N1} MB, file version {1}" -f ($exe.Length / 1MB), $exe.VersionInfo.FileVersion)
+          $exe = Get-Item 'publish/MCRGB.exe'
+          Write-Host ("MCRGB.exe: {0:N1} MB, file version {1}" -f ($exe.Length / 1MB), $exe.VersionInfo.FileVersion)
 
       - name: Write SHA-256 checksum
         shell: pwsh
         run: |
-          $hash = (Get-FileHash 'publish/KGMaster.exe' -Algorithm SHA256).Hash.ToLowerInvariant()
-          "$hash  KGMaster.exe" | Set-Content 'publish/KGMaster.exe.sha256' -Encoding utf8
+          $hash = (Get-FileHash 'publish/MCRGB.exe' -Algorithm SHA256).Hash.ToLowerInvariant()
+          "$hash  MCRGB.exe" | Set-Content 'publish/MCRGB.exe.sha256' -Encoding utf8
           Write-Host "SHA-256: $hash"
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: KGMaster-${{ steps.meta.outputs.tag }}-win-x64
+          name: MCRGB-${{ steps.meta.outputs.tag }}-win-x64
           path: |
-            publish/KGMaster.exe
-            publish/KGMaster.exe.sha256
+            publish/MCRGB.exe
+            publish/MCRGB.exe.sha256
           if-no-files-found: error
           retention-days: 14
 
@@ -96,10 +96,10 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
-          name: KeyGlowMaster ${{ steps.meta.outputs.tag }}
+          name: MusicCatRGB ${{ steps.meta.outputs.tag }}
           generate_release_notes: true
           prerelease: ${{ contains(github.ref_name, '-') }}
           fail_on_unmatched_files: true
           files: |
-            publish/KGMaster.exe
-            publish/KGMaster.exe.sha256
+            publish/MCRGB.exe
+            publish/MCRGB.exe.sha256

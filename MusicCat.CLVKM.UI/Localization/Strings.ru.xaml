@@ -54,17 +54,17 @@
     <sys:String x:Key="Hotkey_AnimOff">Анимация выключена</sys:String>
 
     <!-- Tray -->
-    <sys:String x:Key="Tray_Ready">KeyGlowMaster</sys:String>
-    <sys:String x:Key="Tray_Running">KeyGlowMaster · работает</sys:String>
-    <sys:String x:Key="Tray_Starting">KeyGlowMaster · запуск…</sys:String>
-    <sys:String x:Key="Tray_WaitingFnKey">KeyGlowMaster · ожидание Control Center…</sys:String>
-    <sys:String x:Key="Tray_FnKeyFound">KeyGlowMaster · инициализация…</sys:String>
-    <sys:String x:Key="Tray_Checking">KeyGlowMaster · проверка системы…</sys:String>
-    <sys:String x:Key="Tray_Open">Открыть KeyGlowMaster</sys:String>
+    <sys:String x:Key="Tray_Ready">MusicCatRGB</sys:String>
+    <sys:String x:Key="Tray_Running">MusicCatRGB · работает</sys:String>
+    <sys:String x:Key="Tray_Starting">MusicCatRGB · запуск…</sys:String>
+    <sys:String x:Key="Tray_WaitingFnKey">MusicCatRGB · ожидание Control Center…</sys:String>
+    <sys:String x:Key="Tray_FnKeyFound">MusicCatRGB · инициализация…</sys:String>
+    <sys:String x:Key="Tray_Checking">MusicCatRGB · проверка системы…</sys:String>
+    <sys:String x:Key="Tray_Open">Открыть MusicCatRGB</sys:String>
     <sys:String x:Key="Tray_Exit">Выход</sys:String>
 
     <!-- Dialogs -->
-    <sys:String x:Key="Msg_AlreadyRunning">KeyGlowMaster уже запущен. Проверьте область уведомлений.</sys:String>
+    <sys:String x:Key="Msg_AlreadyRunning">MusicCatRGB уже запущен. Проверьте область уведомлений.</sys:String>
     <sys:String x:Key="Msg_NoControlCenter" xml:space="preserve">Control Center (FnKey.exe) не запущен.&#x0a;&#x0a;Сначала запустите Control Center.</sys:String>
     <sys:String x:Key="Msg_FatalTitle">Критическая ошибка</sys:String>
     <sys:String x:Key="Msg_ServiceMode" xml:space="preserve">Включить режим службы (автозапуск)?&#x0a;&#x0a;Подсветка клавиатуры будет автоматически восстанавливаться при каждом запуске Windows.</sys:String>
@@ -73,10 +73,10 @@
     <sys:String x:Key="Msg_CleanupTitle">Очистка завершена</sys:String>
     <sys:String x:Key="Msg_ErrorTitle">Ошибка</sys:String>
     <sys:String x:Key="Msg_CleanupError">Ошибка очистки: {0}</sys:String>
-    <sys:String x:Key="Crash_Title">Отчёт о сбое KeyGlowMaster</sys:String>
+    <sys:String x:Key="Crash_Title">Отчёт о сбое MusicCatRGB</sys:String>
     <sys:String x:Key="Crash_Message" xml:space="preserve">Необработанная ошибка: {0}&#x0a;&#x0a;Трассировка:&#x0a;{1}</sys:String>
     <sys:String x:Key="Reset_Title">Подтверждение сброса</sys:String>
-    <sys:String x:Key="Reset_Message" xml:space="preserve">Сбросить KeyGlowMaster?&#x0a;&#x0a;• Автозапуск будет отключён&#x0a;• Сохранённые цвета и анимации будут удалены&#x0a;&#x0a;Останется только KGMaster.exe.</sys:String>
+    <sys:String x:Key="Reset_Message" xml:space="preserve">Сбросить MusicCatRGB?&#x0a;&#x0a;• Автозапуск будет отключён&#x0a;• Сохранённые цвета и анимации будут удалены&#x0a;&#x0a;Останется только MCRGB.exe.</sys:String>
 
     <!-- Common buttons -->
     <sys:String x:Key="Yes">Да</sys:String>
@@ -98,12 +98,12 @@
     <sys:String x:Key="L_About">О программе</sys:String>
     <sys:String x:Key="L_Logs">Журнал</sys:String>
     <sys:String x:Key="L_LogsTip">Открыть папку с логами</sys:String>
-    <sys:String x:Key="About_Title">О программе KeyGlowMaster</sys:String>
+    <sys:String x:Key="About_Title">О программе MusicCatRGB</sys:String>
     <sys:String x:Key="About_Developer">Разработчик модификации: MusicCat161</sys:String>
     <sys:String x:Key="About_Based">Основано на репозитории:</sys:String>
     <sys:String x:Key="About_Link">gutsv-project/Clevo-Monster-RGB-Controller</sys:String>
     <sys:String x:Key="About_MyRepo">Мой репозиторий:</sys:String>
-    <sys:String x:Key="About_MyRepoLink">MusicCat-61/KeyGlowMaster</sys:String>
+    <sys:String x:Key="About_MyRepoLink">MusicCat-61/MusicCatRGB</sys:String>
     <sys:String x:Key="About_Donate">Поддержать проект</sys:String>
     <sys:String x:Key="About_TelegramLabel">Telegram:</sys:String>
     <sys:String x:Key="About_Description">Этот проект является форком (доработанной версией) и включает в себя исправления ошибок, новый интерфейс и дополнительные режимы подсветки.</sys:String>
