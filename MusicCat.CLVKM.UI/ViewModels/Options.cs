@@ -14,7 +14,10 @@ public enum ColorSlot
     Static,
     Primary,
     Secondary,
-    Tertiary
+    Tertiary,
+
+    /// <summary>The colour a Windows notification flashes the keyboard with.</summary>
+    Flash
 }
 
 /// <summary>Localizable wrapper around an animation engine implementation.</summary>

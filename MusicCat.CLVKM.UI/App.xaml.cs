@@ -8,9 +8,11 @@ using System.Windows;
 using System.Windows.Interop;
 using System.Windows.Threading;
 using Microsoft.Win32;
+using MusicCat.CLVKM.Core.Ipc;
 using MusicCat.CLVKM.Core.Updates;
 using MusicCat.CLVKM.Core.Settings;
 using MusicCat.CLVKM.UI.Localization;
+using MusicCat.CLVKM.UI.Watcher;
 
 namespace MusicCat.CLVKM.UI;
 
@@ -38,6 +40,9 @@ public partial class App : System.Windows.Application
     private bool _startupCheckSettling = true;
     private string? _announcedVersion;
     private DispatcherTimer? _checkTimer;
+
+    /// <summary>Owns the headless event watcher process and the pipe to it.</summary>
+    private WatcherClient? _watcher;
 
     private string _trayKey = "Tray_Ready";
     private object?[] _trayArgs = Array.Empty<object?>();
@@ -68,6 +73,8 @@ public partial class App : System.Windows.Application
 
         _effectToast?.Close();
         _effectToast = null;
+        _watcher?.Dispose();
+        _watcher = null;
         _notifyIcon?.Dispose();
         _mutex?.Dispose();
         Logging.AppLog.Shutdown();
@@ -76,6 +83,14 @@ public partial class App : System.Windows.Application
 
     protected override async void OnStartup(StartupEventArgs e)
     {
+        // The headless watcher shares this executable. It never creates a window and never
+        // takes the single-instance mutex, so it can run beside the app that started it.
+        if (e.Args.Contains(WatcherHost.Switch, StringComparer.OrdinalIgnoreCase))
+        {
+            Environment.Exit(WatcherHost.Run());
+            return;
+        }
+
         Logging.AppLog.Initialize();
 
         // Ensure the working directory is the app folder (DllImport needs InsydeDCHU.dll).
@@ -163,7 +178,59 @@ public partial class App : System.Windows.Application
         // runs whenever the window is opened again and every so often while it stays hidden.
         ReportLastUpdateApply();
         StartPeriodicUpdateChecks();
+        StartFlashWatcher();
         _ = CheckForUpdatesAfterStartupAsync();
+    }
+
+    /// <summary>
+    /// Brings up the event watcher and keeps it in step with the two flash switches. The
+    /// watcher is a separate process because a keyboard hook that stops answering stalls
+    /// input on the whole desktop; it talks to this window over an owner-only named pipe.
+    /// </summary>
+    private void StartFlashWatcher()
+    {
+        if (MainWindow?.DataContext is not ViewModels.MainViewModel viewModel)
+        {
+            return;
+        }
+
+        _watcher = new WatcherClient();
+        _watcher.EventReceived += OnWatcherEvent;
+        viewModel.FlashSettingsChanged += (_, _) => SyncFlashWatcher(viewModel);
+
+        SyncFlashWatcher(viewModel);
+    }
+
+    private void SyncFlashWatcher(ViewModels.MainViewModel viewModel)
+    {
+        var wanted = viewModel.TypingFlashEnabled || viewModel.NotificationFlashEnabled;
+
+        if (wanted)
+        {
+            _watcher?.Start();
+        }
+        else
+        {
+            _watcher?.Stop();
+        }
+
+        Logging.AppLog.Event(
+            "watcher",
+            wanted
+                ? $"Event watcher on (typing={viewModel.TypingFlashEnabled}, notifications={viewModel.NotificationFlashEnabled})"
+                : "Event watcher off: both flashes are disabled");
+    }
+
+    /// <summary>Events arrive on a worker thread; the flashes belong to the UI thread.</summary>
+    private void OnWatcherEvent(WatcherEvent message)
+    {
+        Dispatcher.BeginInvoke(new Action(() =>
+        {
+            if (MainWindow?.DataContext is ViewModels.MainViewModel viewModel)
+            {
+                viewModel.HandleWatcherEvent(message.Kind);
+            }
+        }));
     }
 
     private async Task CheckForUpdatesAfterStartupAsync()

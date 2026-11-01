@@ -196,6 +196,11 @@
     <sys:String x:Key="Wx_DirSW">SW</sys:String>
     <sys:String x:Key="Wx_DirW">W</sys:String>
     <sys:String x:Key="Wx_DirNW">NW</sys:String>
+    <!-- Keypress and notification flashes -->
+    <sys:String x:Key="L_TypingFlash">Flash on every keystroke (random colour)</sys:String>
+    <sys:String x:Key="L_NotificationFlash">Flash on Windows notifications</sys:String>
+    <sys:String x:Key="L_FlashColor">Notification flash colour</sys:String>
+
     <!-- Applying the downloaded update -->
     <sys:String x:Key="Upd_Applying">Installing the update… the app will close itself.</sys:String>
     <sys:String x:Key="Upd_NothingStaged">The downloaded update file is gone — download it again.</sys:String>

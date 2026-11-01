@@ -38,6 +38,16 @@ public class AppSettings
     // Turn the backlight off after 5 minutes of idle time
     public bool SleepTimerEnabled { get; set; }
 
+    // Flash the keyboard on every keypress while typing, in a random colour each time
+    public bool TypingFlashEnabled { get; set; }
+
+    // Flash the keyboard when Windows shows a notification, in the colour below
+    public bool NotificationFlashEnabled { get; set; }
+
+    public byte NotificationFlashRed { get; set; } = 255;
+    public byte NotificationFlashGreen { get; set; } = 255;
+    public byte NotificationFlashBlue { get; set; } = 255;
+
     // City the weather effect follows (null/empty = not configured yet)
     public string? WeatherCity { get; set; }
 

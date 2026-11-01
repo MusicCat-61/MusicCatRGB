@@ -11,6 +11,7 @@ using CommunityToolkit.Mvvm.Input;
 using MusicCat.CLVKM.Core.Animations;
 using MusicCat.CLVKM.Core.Drivers;
 using MusicCat.CLVKM.Core.Interfaces;
+using MusicCat.CLVKM.Core.Ipc;
 using MusicCat.CLVKM.Core.Models;
 using MusicCat.CLVKM.Core.Services;
 using MusicCat.CLVKM.Core.Settings;
@@ -92,6 +93,22 @@ public partial class MainViewModel : ObservableObject
     public bool IsAwake => !IsAsleep;
 
     partial void OnIsAsleepChanged(bool value) => OnPropertyChanged(nameof(IsAwake));
+
+    // --- Keypress and notification flashes (the events arrive from the watcher process) ---
+
+    /// <summary>Flash the keyboard on every key while typing, in a new random colour each time.</summary>
+    [ObservableProperty] private bool _typingFlashEnabled;
+
+    /// <summary>Flash the keyboard when Windows shows a notification, in <see cref="NotificationFlashColor"/>.</summary>
+    [ObservableProperty] private bool _notificationFlashEnabled;
+
+    [ObservableProperty] private byte _notificationFlashRed = 255;
+    [ObservableProperty] private byte _notificationFlashGreen = 255;
+    [ObservableProperty] private byte _notificationFlashBlue = 255;
+    [ObservableProperty] private string _notificationFlashHexColor = "#FFFFFF";
+
+    /// <summary>Raised when either flash is switched, so the watcher process can follow.</summary>
+    public event EventHandler? FlashSettingsChanged;
 
     private static readonly TimeSpan SleepTimeout = TimeSpan.FromMinutes(5);
     private DispatcherTimer? _idleTimer;
@@ -194,8 +211,21 @@ public partial class MainViewModel : ObservableObject
         ColorSlot.Secondary => SecondaryColor,
         ColorSlot.Tertiary => TertiaryColor,
         ColorSlot.Primary => PrimaryColor,
+        ColorSlot.Flash => FlashColor,
         _ => StaticColor
     };
+
+    /// <summary>The colour a Windows notification flashes the keyboard with.</summary>
+    public ColorRGB NotificationFlashColor => new(NotificationFlashRed, NotificationFlashGreen, NotificationFlashBlue);
+
+    public Color FlashColor => Color.FromRgb(NotificationFlashRed, NotificationFlashGreen, NotificationFlashBlue);
+
+    public SolidColorBrush FlashColorBrush => new(FlashColor);
+
+    public bool IsFlashActive => ActiveSlot == ColorSlot.Flash;
+
+    /// <summary>The flash colour chip is only worth showing once the notification flash is on.</summary>
+    public bool ShowFlashColor => NotificationFlashEnabled;
 
     public SolidColorBrush ActiveColorBrush => new(ActiveColor);
 
@@ -206,6 +236,7 @@ public partial class MainViewModel : ObservableObject
             ColorSlot.Secondary => SecondaryRed,
             ColorSlot.Tertiary => TertiaryRed,
             ColorSlot.Primary => Red,
+            ColorSlot.Flash => NotificationFlashRed,
             _ => StaticRed
         };
         set
@@ -215,6 +246,7 @@ public partial class MainViewModel : ObservableObject
                 case ColorSlot.Secondary: SecondaryRed = value; break;
                 case ColorSlot.Tertiary: TertiaryRed = value; break;
                 case ColorSlot.Primary: Red = value; break;
+                case ColorSlot.Flash: NotificationFlashRed = value; break;
                 default: StaticRed = value; break;
             }
 
@@ -229,6 +261,7 @@ public partial class MainViewModel : ObservableObject
             ColorSlot.Secondary => SecondaryGreen,
             ColorSlot.Tertiary => TertiaryGreen,
             ColorSlot.Primary => Green,
+            ColorSlot.Flash => NotificationFlashGreen,
             _ => StaticGreen
         };
         set
@@ -238,6 +271,7 @@ public partial class MainViewModel : ObservableObject
                 case ColorSlot.Secondary: SecondaryGreen = value; break;
                 case ColorSlot.Tertiary: TertiaryGreen = value; break;
                 case ColorSlot.Primary: Green = value; break;
+                case ColorSlot.Flash: NotificationFlashGreen = value; break;
                 default: StaticGreen = value; break;
             }
 
@@ -252,6 +286,7 @@ public partial class MainViewModel : ObservableObject
             ColorSlot.Secondary => SecondaryBlue,
             ColorSlot.Tertiary => TertiaryBlue,
             ColorSlot.Primary => Blue,
+            ColorSlot.Flash => NotificationFlashBlue,
             _ => StaticBlue
         };
         set
@@ -261,6 +296,7 @@ public partial class MainViewModel : ObservableObject
                 case ColorSlot.Secondary: SecondaryBlue = value; break;
                 case ColorSlot.Tertiary: TertiaryBlue = value; break;
                 case ColorSlot.Primary: Blue = value; break;
+                case ColorSlot.Flash: NotificationFlashBlue = value; break;
                 default: StaticBlue = value; break;
             }
 
@@ -275,6 +311,7 @@ public partial class MainViewModel : ObservableObject
             ColorSlot.Secondary => SecondaryHexColor,
             ColorSlot.Tertiary => TertiaryHexColor,
             ColorSlot.Primary => HexColor,
+            ColorSlot.Flash => NotificationFlashHexColor,
             _ => StaticHexColor
         };
         set
@@ -284,6 +321,7 @@ public partial class MainViewModel : ObservableObject
                 case ColorSlot.Secondary: SecondaryHexColor = value; break;
                 case ColorSlot.Tertiary: TertiaryHexColor = value; break;
                 case ColorSlot.Primary: HexColor = value; break;
+                case ColorSlot.Flash: NotificationFlashHexColor = value; break;
                 default: StaticHexColor = value; break;
             }
 
@@ -317,6 +355,12 @@ public partial class MainViewModel : ObservableObject
         _tertiaryRed = _currentSettings.TertiaryRed;
         _tertiaryGreen = _currentSettings.TertiaryGreen;
         _tertiaryBlue = _currentSettings.TertiaryBlue;
+
+        _typingFlashEnabled = _currentSettings.TypingFlashEnabled;
+        _notificationFlashEnabled = _currentSettings.NotificationFlashEnabled;
+        _notificationFlashRed = _currentSettings.NotificationFlashRed;
+        _notificationFlashGreen = _currentSettings.NotificationFlashGreen;
+        _notificationFlashBlue = _currentSettings.NotificationFlashBlue;
         _driverType = _currentSettings.DriverType;
         _brightness = Math.Clamp(_currentSettings.Brightness, 0, 100);
         _sleepTimerEnabled = _currentSettings.SleepTimerEnabled;
@@ -326,6 +370,7 @@ public partial class MainViewModel : ObservableObject
         UpdateSecondaryHexFromRgb();
         UpdateTertiaryHexFromRgb();
         UpdateStaticHexFromRgb();
+        UpdateNotificationFlashHexFromRgb();
         SetStatus("St_Init");
         BuildAnimations();
         UpdateIdleTimer();
@@ -882,12 +927,16 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     private void SelectTertiaryColor() => ActiveSlot = ColorSlot.Tertiary;
 
+    [RelayCommand]
+    private void SelectFlashColor() => ActiveSlot = ColorSlot.Flash;
+
     partial void OnActiveSlotChanged(ColorSlot value)
     {
         OnPropertyChanged(nameof(IsPrimaryActive));
         OnPropertyChanged(nameof(IsSecondaryActive));
         OnPropertyChanged(nameof(IsTertiaryActive));
         OnPropertyChanged(nameof(IsStaticActive));
+        OnPropertyChanged(nameof(IsFlashActive));
         OnPropertyChanged(nameof(ActiveRed));
         OnPropertyChanged(nameof(ActiveGreen));
         OnPropertyChanged(nameof(ActiveBlue));
@@ -1487,6 +1536,238 @@ public partial class MainViewModel : ObservableObject
         }
     }
 
+    // --- Keypress and notification flashes ------------------------------------------------
+
+    /// <summary>
+    /// Ten neon tones a keypress flash picks from. One is chosen per keypress and never the
+    /// same one twice in a row, so fast typing reads as a colour ripple instead of a blink.
+    /// </summary>
+    private static readonly ColorRGB[] KeypressFlashColors =
+    {
+        new(0x00, 0xD4, 0xFF), // cyan
+        new(0xFF, 0x3C, 0xC8), // magenta
+        new(0x4A, 0xDE, 0x80), // green
+        new(0xFF, 0x8C, 0x00), // orange
+        new(0x9B, 0x5C, 0xFF), // violet
+        new(0xFF, 0xE0, 0x3C), // yellow
+        new(0x00, 0xFF, 0xC8), // aqua
+        new(0xFF, 0x4D, 0x4D), // red
+        new(0x3C, 0x7C, 0xFF), // blue
+        new(0xFF, 0x9A, 0xE8)  // pink
+    };
+
+    /// <summary>Fast typing must not turn the flashes into one long glow.</summary>
+    private static readonly TimeSpan FlashCooldown = TimeSpan.FromMilliseconds(90);
+
+    private static readonly TimeSpan KeypressFlashDuration = TimeSpan.FromMilliseconds(90);
+    private static readonly TimeSpan NotificationFlashDuration = TimeSpan.FromMilliseconds(420);
+
+    private static readonly Random FlashRandom = new();
+
+    private long _lastFlashTicks;
+    private int _flashGeneration;
+    private int _lastPaletteIndex = -1;
+    private bool _updatingFlashHex;
+
+    /// <summary>
+    /// Called on the UI thread for every event the watcher sends over the pipe. The switches
+    /// are re-checked here: the watcher may still be delivering a queued keypress from the
+    /// moment before the user unticked the box.
+    /// </summary>
+    public void HandleWatcherEvent(WatcherEventKind kind)
+    {
+        switch (kind)
+        {
+            case WatcherEventKind.Keypress when TypingFlashEnabled:
+                FlashKeypress();
+                break;
+
+            case WatcherEventKind.Notification when NotificationFlashEnabled:
+                FlashNotification();
+                break;
+        }
+    }
+
+    private void FlashKeypress()
+    {
+        if (CanFlashNow())
+        {
+            _ = FlashAsync(NextKeypressColor(), KeypressFlashDuration);
+        }
+    }
+
+    private void FlashNotification()
+    {
+        if (CanFlashNow())
+        {
+            _ = FlashAsync(NotificationFlashColor, NotificationFlashDuration);
+        }
+    }
+
+    /// <summary>True when a flash may start now: ready, awake and not right after the last one.</summary>
+    private bool CanFlashNow()
+    {
+        if (!IsReady || IsAsleep || _driver is null)
+        {
+            return false;
+        }
+
+        var now = Environment.TickCount64;
+
+        if (now - Interlocked.Read(ref _lastFlashTicks) < FlashCooldown.TotalMilliseconds)
+        {
+            return false;
+        }
+
+        Interlocked.Exchange(ref _lastFlashTicks, now);
+        return true;
+    }
+
+    /// <summary>A random palette colour that is never the same as the previous one.</summary>
+    private ColorRGB NextKeypressColor()
+    {
+        var index = FlashRandom.Next(KeypressFlashColors.Length);
+
+        if (index == _lastPaletteIndex)
+        {
+            index = (index + 1) % KeypressFlashColors.Length;
+        }
+
+        _lastPaletteIndex = index;
+        return KeypressFlashColors[index];
+    }
+
+    /// <summary>
+    /// Paints the keyboard for a moment. With an effect running the engine draws the flash
+    /// itself and the effect comes back on its own; a static colour is restored by hand, and
+    /// a flash that was overtaken by a newer one leaves the restore to that newer flash.
+    /// </summary>
+    private async Task FlashAsync(ColorRGB color, TimeSpan duration)
+    {
+        if (_driver is null)
+        {
+            return;
+        }
+
+        var generation = Interlocked.Increment(ref _flashGeneration);
+        var painted = color.ApplyBrightness((float)(Brightness / 100.0));
+
+        try
+        {
+            if (IsAnimationRunning && _animationEngine is not null)
+            {
+                _animationEngine.Flash(painted, duration);
+                return;
+            }
+
+            await _driver.SetColorAsync(Zone.All, painted);
+            await Task.Delay(duration);
+
+            if (Volatile.Read(ref _flashGeneration) != generation)
+            {
+                return;
+            }
+
+            await _driver.SetColorAsync(Zone.All, OutputColor);
+        }
+        catch (Exception ex)
+        {
+            AppLog.Warn("Flash could not be painted: {Message}", ex.Message);
+        }
+    }
+
+    private void UpdateNotificationFlashHexFromRgb()
+    {
+        // The hex box mirrors the sliders; the guard keeps the two from updating each other.
+        _updatingFlashHex = true;
+
+        try
+        {
+            NotificationFlashHexColor = $"#{NotificationFlashRed:X2}{NotificationFlashGreen:X2}{NotificationFlashBlue:X2}";
+        }
+        finally
+        {
+            _updatingFlashHex = false;
+        }
+
+        OnPropertyChanged(nameof(NotificationFlashColor));
+        OnPropertyChanged(nameof(FlashColor));
+        OnPropertyChanged(nameof(FlashColorBrush));
+        OnPropertyChanged(nameof(ActiveColor));
+        OnPropertyChanged(nameof(ActiveColorBrush));
+
+        if (IsFlashActive)
+        {
+            OnPropertyChanged(nameof(ActiveRed));
+            OnPropertyChanged(nameof(ActiveGreen));
+            OnPropertyChanged(nameof(ActiveBlue));
+            OnPropertyChanged(nameof(ActiveHexColor));
+        }
+    }
+
+    partial void OnNotificationFlashRedChanged(byte value) => UpdateNotificationFlashHexFromRgb();
+
+    partial void OnNotificationFlashGreenChanged(byte value) => UpdateNotificationFlashHexFromRgb();
+
+    partial void OnNotificationFlashBlueChanged(byte value) => UpdateNotificationFlashHexFromRgb();
+
+    /// <summary>The hex box stays an alternative input for the sliders, as in every other slot.</summary>
+    partial void OnNotificationFlashHexColorChanged(string value)
+    {
+        if (_updatingFlashHex)
+        {
+            return;
+        }
+
+        if (value is not { Length: 7 } || value[0] != '#')
+        {
+            return;
+        }
+
+        var span = value.AsSpan(1);
+
+        if (!byte.TryParse(span[..2], NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var red)
+            || !byte.TryParse(span.Slice(2, 2), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var green)
+            || !byte.TryParse(span.Slice(4, 2), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var blue))
+        {
+            return;
+        }
+
+        NotificationFlashRed = red;
+        NotificationFlashGreen = green;
+        NotificationFlashBlue = blue;
+    }
+
+    partial void OnTypingFlashEnabledChanged(bool value)
+    {
+        _currentSettings.TypingFlashEnabled = value;
+        SaveSettings();
+        FlashSettingsChanged?.Invoke(this, EventArgs.Empty);
+
+        if (_loggingActive)
+        {
+            AppLog.Event("flash", $"Typing flash: {(value ? "on" : "off")}");
+        }
+    }
+
+    partial void OnNotificationFlashEnabledChanged(bool value)
+    {
+        _currentSettings.NotificationFlashEnabled = value;
+        SaveSettings();
+        OnPropertyChanged(nameof(ShowFlashColor));
+        FlashSettingsChanged?.Invoke(this, EventArgs.Empty);
+
+        if (_loggingActive)
+        {
+            AppLog.Event("flash", $"Notification flash: {(value ? "on" : "off")}");
+        }
+
+        if (!value && ActiveSlot == ColorSlot.Flash)
+        {
+            ActiveSlot = ColorSlot.Primary;
+        }
+    }
+
     private async void Sleep()
     {
         if (_isSleeping || _sleepTransition || _driver is null || !IsReady)
@@ -1578,6 +1859,11 @@ public partial class MainViewModel : ObservableObject
         _currentSettings.StaticBlue = StaticBlue;
         _currentSettings.HasStaticColor = true;
         _currentSettings.SleepTimerEnabled = SleepTimerEnabled;
+        _currentSettings.TypingFlashEnabled = TypingFlashEnabled;
+        _currentSettings.NotificationFlashEnabled = NotificationFlashEnabled;
+        _currentSettings.NotificationFlashRed = NotificationFlashRed;
+        _currentSettings.NotificationFlashGreen = NotificationFlashGreen;
+        _currentSettings.NotificationFlashBlue = NotificationFlashBlue;
         _currentSettings.DriverType = DriverType;
         _currentSettings.Brightness = Brightness;
         _currentSettings.IsAnimationActive = IsAnimationRunning;
