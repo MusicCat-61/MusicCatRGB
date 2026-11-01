@@ -455,9 +455,45 @@ public partial class App : System.Windows.Application
 
         Logging.AppLog.Shutdown();
 
+        CloseEveryWindow();
+
         StartExitWatchdog();
 
         Current?.Shutdown();
+    }
+
+    /// <summary>
+    /// Closes the window and any dialog on top of it.
+    ///
+    /// A dialog opened with ShowDialog runs its own dispatcher loop and is not part of
+    /// <see cref="Application.Windows"/>, so Shutdown alone would leave it on screen until the
+    /// watchdog fires — the update looked frozen for those seconds.
+    /// </summary>
+    private static void CloseEveryWindow()
+    {
+        if (Current is not { } app)
+        {
+            return;
+        }
+
+        var windows = app.Windows.OfType<Window>().ToList();
+
+        if (app.MainWindow is Window owner)
+        {
+            windows.AddRange(owner.OwnedWindows.OfType<Window>());
+        }
+
+        foreach (var window in windows)
+        {
+            try
+            {
+                window.Close();
+            }
+            catch
+            {
+                // A window that refuses to close is left to the watchdog.
+            }
+        }
     }
 
     /// <summary>

@@ -142,9 +142,23 @@ public partial class AboutWindow : Window
         UpdateFinishButton.Visibility = finish ? Visibility.Visible : Visibility.Collapsed;
         UpdateReleaseButton.Visibility = release ? Visibility.Visible : Visibility.Collapsed;
 
+        RefreshEnabledState();
+    }
+
+    /// <summary>
+    /// Applies the busy state to whichever buttons are visible.
+    ///
+    /// The visibility of a button and its enabled state are decided at different moments: the
+    /// Finish button appears while a download is still running, so it would be created disabled
+    /// and stay that way — the update then looked stuck, with a button that did nothing. Every
+    /// path that ends a busy operation has to come back here.
+    /// </summary>
+    private void RefreshEnabledState()
+    {
         UpdateCheckButton.IsEnabled = !_busy;
         UpdateDownloadButton.IsEnabled = !_busy;
         UpdateFinishButton.IsEnabled = !_busy;
+        UpdateReleaseButton.IsEnabled = !_busy;
     }
 
     /// <summary>Pass a fraction 0..1 to show the bar, or null to hide it.</summary>
@@ -208,7 +222,7 @@ public partial class AboutWindow : Window
         finally
         {
             _busy = false;
-            UpdateCheckButton.IsEnabled = true;
+            RefreshEnabledState();
         }
     }
 
@@ -288,8 +302,10 @@ public partial class AboutWindow : Window
         finally
         {
             _busy = false;
-            UpdateCheckButton.IsEnabled = true;
-            UpdateDownloadButton.IsEnabled = true;
+
+            // The buttons were shown during the download, when this flag was still set; without
+            // this the Finish button stays disabled and the update cannot be applied at all.
+            RefreshEnabledState();
         }
     }
 

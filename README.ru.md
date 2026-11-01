@@ -4,7 +4,7 @@
 [![Download](https://img.shields.io/badge/download-MCRGB.exe-2ea44f?style=flat-square)](https://github.com/MusicCat-61/MusicCatRGB/releases/latest/download/MCRGB.exe)
 [![CI](https://github.com/MusicCat-61/MusicCatRGB/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/MusicCat-61/MusicCatRGB/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](LICENSE)
-[![Version](https://img.shields.io/badge/version-1.0.6.4-4CC2FF?style=flat-square)](https://github.com/MusicCat-61/MusicCatRGB/releases/tag/v1.0.6.4)
+[![Version](https://img.shields.io/badge/version-1.0.6.5-4CC2FF?style=flat-square)](https://github.com/MusicCat-61/MusicCatRGB/releases/tag/v1.0.6.5)
 [![Platform](https://img.shields.io/badge/platform-Windows%2010%20%7C%2011-0078D6?style=flat-square)](#)
 [![.NET](https://img.shields.io/badge/.NET-10-512BD4?style=flat-square)](https://dotnet.microsoft.com/download)
 
@@ -179,8 +179,8 @@ dotnet build MusicCat.CLVKM.slnx -c Release
 РџСѓС€ С‚РµРіР° Р·Р°РїСѓСЃРєР°РµС‚ СЃР±РѕСЂРєСѓ Рё РїСѓР±Р»РёРєР°С†РёСЋ: [workflow](.github/workflows/release.yml) СЃРѕР±РёСЂР°РµС‚ СЃР°РјРѕРґРѕСЃС‚Р°С‚РѕС‡РЅС‹Р№ РѕРґРЅРѕС„Р°Р№Р»РѕРІС‹Р№ `MCRGB.exe` РїРѕРґ `win-x64` РЅР° `windows-latest`, РїСЂРѕСЃС‚Р°РІР»СЏРµС‚ РµРјСѓ РІРµСЂСЃРёСЋ РёР· С‚РµРіР° Рё РїСЂРёРєСЂРµРїР»СЏРµС‚ РёСЃРїРѕР»РЅСЏРµРјС‹Р№ С„Р°Р№Р» РІРјРµСЃС‚Рµ СЃ РєРѕРЅС‚СЂРѕР»СЊРЅРѕР№ СЃСѓРјРјРѕР№ SHA-256 Рє СЂРµР»РёР·Сѓ СЃ Р°РІС‚РѕРјР°С‚РёС‡РµСЃРєРё СЃРѕСЃС‚Р°РІР»РµРЅРЅС‹Рј СЃРїРёСЃРєРѕРј РёР·РјРµРЅРµРЅРёР№. РЎРєР°С‡РёРІР°РЅРёРµ вЂ” РѕРєРѕР»Рѕ 75 РњР‘: РїСЂРё РїРµСЂРІРѕРј Р·Р°РїСѓСЃРєРµ Р±Р°РЅРґР» СЂР°СЃРїР°РєРѕРІС‹РІР°РµС‚ СЃСЂРµРґСѓ РІС‹РїРѕР»РЅРµРЅРёСЏ РІ `%TEMP%\.net\MCRGB` Рё РґР°Р»СЊС€Рµ РїРµСЂРµРёСЃРїРѕР»СЊР·СѓРµС‚ РµС‘.
 
 ```powershell
-git tag v1.0.6.4
-git push origin v1.0.6.4
+git tag v1.0.6.5
+git push origin v1.0.6.5
 ```
 
 РљР°Р¶РґС‹Р№ РїСѓС€ РІ `main` Р·Р°РїСѓСЃРєР°РµС‚ [CI workflow](.github/workflows/ci.yml) вЂ” С‚РѕР»СЊРєРѕ СЃР±РѕСЂРєСѓ СЂРµС€РµРЅРёСЏ, Р±РµР· С‚РµРіР° Рё СЂРµР»РёР·Р°.
