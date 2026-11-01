@@ -922,6 +922,12 @@ public partial class MainViewModel : ObservableObject
         var zone = IsMultiZoneCapable ? SelectedZone : Zone.All;
 
         await _driver.SetColorAsync(zone, finalColor);
+
+        // The preview is meant to show what the keyboard shows, so it follows the write,
+        // brightness included. Without this it kept the frozen last frame of an effect that
+        // Apply had just stopped, and the button looked like it did nothing.
+        PreviewColor = Color.FromRgb(finalColor.R, finalColor.G, finalColor.B);
+
         SaveSettings();
 
         if (announceStatus)
