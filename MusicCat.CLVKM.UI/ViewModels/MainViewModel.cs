@@ -107,6 +107,15 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty] private byte _notificationFlashBlue = 255;
     [ObservableProperty] private string _notificationFlashHexColor = "#FFFFFF";
 
+    /// <summary>How long a notification keeps the keyboard, in seconds.</summary>
+    [ObservableProperty] private double _notificationFlashSeconds = DefaultFlashSeconds;
+
+    /// <summary>Bounds of the duration slider; also guards a hand-edited settings file.</summary>
+    public const double MinFlashSeconds = 0.5;
+    public const double MaxFlashSeconds = 5.0;
+
+    public const double DefaultFlashSeconds = 2.0;
+
     /// <summary>Raised when either flash is switched, so the watcher process can follow.</summary>
     public event EventHandler? FlashSettingsChanged;
 
@@ -361,6 +370,10 @@ public partial class MainViewModel : ObservableObject
         _notificationFlashRed = _currentSettings.NotificationFlashRed;
         _notificationFlashGreen = _currentSettings.NotificationFlashGreen;
         _notificationFlashBlue = _currentSettings.NotificationFlashBlue;
+        _notificationFlashSeconds = Math.Clamp(
+            _currentSettings.NotificationFlashSeconds,
+            MinFlashSeconds,
+            MaxFlashSeconds);
         _driverType = _currentSettings.DriverType;
         _brightness = Math.Clamp(_currentSettings.Brightness, 0, 100);
         _sleepTimerEnabled = _currentSettings.SleepTimerEnabled;
@@ -1565,9 +1578,6 @@ public partial class MainViewModel : ObservableObject
     /// <summary>The effect steps aside while the user types and comes back after this pause.</summary>
     private static readonly TimeSpan TypingHold = TimeSpan.FromSeconds(5);
 
-    /// <summary>How long a notification keeps the keyboard to itself.</summary>
-    private static readonly TimeSpan NotificationHold = TimeSpan.FromMilliseconds(700);
-
     /// <summary>The return to the effect is a glide, never a jump.</summary>
     private static readonly TimeSpan FlashFadeBack = TimeSpan.FromMilliseconds(350);
 
@@ -1644,10 +1654,13 @@ public partial class MainViewModel : ObservableObject
         BeginFlashSession();
         Interlocked.Exchange(
             ref _notificationHoldUntilTicks,
-            Environment.TickCount64 + (long)NotificationHold.TotalMilliseconds);
+            Environment.TickCount64 + (long)(ClampedFlashSeconds * 1000));
 
         PaintFlash(NotificationFlashColor);
     }
+
+    /// <summary>The stored duration, clamped to the range the slider offers.</summary>
+    private double ClampedFlashSeconds => Math.Clamp(NotificationFlashSeconds, MinFlashSeconds, MaxFlashSeconds);
 
     /// <summary>True when a flash may be shown now: the driver is ready and the keyboard awake.</summary>
     private bool CanFlash() => IsReady && !IsAsleep && _driver is not null;
@@ -1819,6 +1832,13 @@ public partial class MainViewModel : ObservableObject
 
     partial void OnNotificationFlashBlueChanged(byte value) => UpdateNotificationFlashHexFromRgb();
 
+    /// <summary>The duration slider: clamped and stored, so it survives a restart.</summary>
+    partial void OnNotificationFlashSecondsChanged(double value)
+    {
+        _currentSettings.NotificationFlashSeconds = Math.Clamp(value, MinFlashSeconds, MaxFlashSeconds);
+        SaveSettings();
+    }
+
     /// <summary>The hex box stays an alternative input for the sliders, as in every other slot.</summary>
     partial void OnNotificationFlashHexColorChanged(string value)
     {
@@ -1975,6 +1995,7 @@ public partial class MainViewModel : ObservableObject
         _currentSettings.NotificationFlashRed = NotificationFlashRed;
         _currentSettings.NotificationFlashGreen = NotificationFlashGreen;
         _currentSettings.NotificationFlashBlue = NotificationFlashBlue;
+        _currentSettings.NotificationFlashSeconds = ClampedFlashSeconds;
         _currentSettings.DriverType = DriverType;
         _currentSettings.Brightness = Brightness;
         _currentSettings.IsAnimationActive = IsAnimationRunning;

@@ -203,6 +203,7 @@
     <sys:String x:Key="L_TypingFlash">Вспышка при наборе (случайный цвет)</sys:String>
     <sys:String x:Key="L_NotificationFlash">Вспышка при уведомлениях Windows</sys:String>
     <sys:String x:Key="L_FlashColor">Цвет вспышки</sys:String>
+    <sys:String x:Key="L_FlashDuration">Длительность вспышки, с</sys:String>
 
     <!-- Applying the downloaded update -->
     <sys:String x:Key="Upd_Applying">Устанавливаю обновление… приложение закроется само.</sys:String>

@@ -48,6 +48,9 @@ public class AppSettings
     public byte NotificationFlashGreen { get; set; } = 255;
     public byte NotificationFlashBlue { get; set; } = 255;
 
+    // How long a notification keeps the keyboard, in seconds (0.5 - 5)
+    public double NotificationFlashSeconds { get; set; } = 2.0;
+
     // City the weather effect follows (null/empty = not configured yet)
     public string? WeatherCity { get; set; }
 

@@ -203,6 +203,7 @@
     <sys:String x:Key="L_TypingFlash">Flash on every keystroke (random colour)</sys:String>
     <sys:String x:Key="L_NotificationFlash">Flash on Windows notifications</sys:String>
     <sys:String x:Key="L_FlashColor">Notification flash colour</sys:String>
+    <sys:String x:Key="L_FlashDuration">Flash duration, s</sys:String>
 
     <!-- Applying the downloaded update -->
     <sys:String x:Key="Upd_Applying">Installing the update… the app will close itself.</sys:String>

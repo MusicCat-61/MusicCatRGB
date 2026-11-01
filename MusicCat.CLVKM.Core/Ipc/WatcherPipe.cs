@@ -39,6 +39,13 @@ public sealed class WatcherEventServer : IAsyncDisposable
     private readonly Channel<WatcherEvent> _outbox = Channel.CreateBounded<WatcherEvent>(
         new BoundedChannelOptions(64) { FullMode = BoundedChannelFullMode.DropOldest });
 
+    private readonly string _pipeName;
+
+    /// <param name="pipeName">
+    /// Overrides the pipe name; only tests use this, so a running app cannot take the channel.
+    /// </param>
+    public WatcherEventServer(string? pipeName = null) => _pipeName = pipeName ?? WatcherPipe.Name;
+
     /// <summary>Latest moment a client was connected; used to notice that nobody listens.</summary>
     public DateTime? LastClientUtc { get; private set; }
 
@@ -54,7 +61,7 @@ public sealed class WatcherEventServer : IAsyncDisposable
         while (!cancellationToken.IsCancellationRequested)
         {
             await using var server = new NamedPipeServerStream(
-                WatcherPipe.Name,
+                _pipeName,
                 PipeDirection.Out,
                 maxNumberOfServerInstances: 1,
                 PipeTransmissionMode.Byte,
@@ -146,6 +153,10 @@ public sealed class WatcherEventServer : IAsyncDisposable
 public sealed class WatcherEventClient : IAsyncDisposable
 {
     private readonly CancellationTokenSource _cts = new();
+    private readonly string _pipeName;
+
+    /// <param name="pipeName">Overrides the pipe name; only tests use this.</param>
+    public WatcherEventClient(string? pipeName = null) => _pipeName = pipeName ?? WatcherPipe.Name;
 
     /// <summary>Raised on a background thread for every event received.</summary>
     public event EventHandler<WatcherEvent>? Received;
@@ -183,7 +194,7 @@ public sealed class WatcherEventClient : IAsyncDisposable
             {
                 await using var pipe = new NamedPipeClientStream(
                     ".",
-                    WatcherPipe.Name,
+                    _pipeName,
                     PipeDirection.In,
                     PipeOptions.Asynchronous);
 

@@ -4,7 +4,7 @@
 [![Download](https://img.shields.io/badge/download-MCRGB.exe-2ea44f?style=flat-square)](https://github.com/MusicCat-61/MusicCatRGB/releases/latest/download/MCRGB.exe)
 [![CI](https://github.com/MusicCat-61/MusicCatRGB/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/MusicCat-61/MusicCatRGB/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](LICENSE)
-[![Version](https://img.shields.io/badge/version-1.0.6.6-4CC2FF?style=flat-square)](https://github.com/MusicCat-61/MusicCatRGB/releases/tag/v1.0.6.6)
+[![Version](https://img.shields.io/badge/version-1.0.7.0-4CC2FF?style=flat-square)](https://github.com/MusicCat-61/MusicCatRGB/releases/tag/v1.0.7.0)
 [![Platform](https://img.shields.io/badge/platform-Windows%2010%20%7C%2011-0078D6?style=flat-square)](#)
 [![.NET](https://img.shields.io/badge/.NET-10-512BD4?style=flat-square)](https://dotnet.microsoft.com/download)
 
@@ -84,7 +84,7 @@ Two checkboxes in the device card make the keyboard flash briefly:
 - **Flash on every keystroke (random colour)** — while you type, every keypress lights the keyboard in a new random colour from a set of ten neon tones. The same colour never comes twice in a row, and fast typing coalesces the flashes so they do not merge into one steady glow.
 - **Flash on Windows notifications** — when a notification appears, the keyboard flashes in the colour from the **Notification flash colour** chip. The same R/G/B sliders and HEX box edit it: pick that chip and tune the shade like any other colour.
 
-The flash takes the keyboard for itself and the effect steps aside: while you type the animation sits paused, and it only comes back five seconds after the last keypress — with a smooth fade, never a jump. A notification holds the keyboard for a moment (about seven tenths of a second) and hands it straight back. Typing and notifications never cut each other short: each holds the keyboard for its own time and it returns when the last delay expires. Nothing flashes while the sleep timer has the backlight off.
+The flash takes the keyboard for itself and the effect steps aside: while you type the animation sits paused, and it only comes back five seconds after the last keypress — with a smooth fade, never a jump. A notification holds the keyboard for as long as the **Flash duration, s** slider says — from half a second to five, two by default — and then hands it back. The value is remembered in the settings. Typing and notifications never cut each other short: each holds the keyboard for its own time and it returns when the last delay expires. Nothing flashes while the sleep timer has the backlight off.
 
 Flashes need to know about input and notifications, and a low-level keyboard hook cannot live in the window process: if such a hook stops answering, Windows starts dropping input on the whole desktop. So the events are collected by a **separate watcher process** (`MCRGB.exe --watcher`) that talks to the app over a **named pipe with an ACL**: the security descriptor grants the signed-in user only and remote clients are rejected, so another account on the machine cannot connect. The watcher runs only while at least one flash is on and ends together with the app.
 
@@ -181,8 +181,8 @@ or run `publish.bat` to get a self-contained folder in `Build_Output`.
 Pushing a version tag builds and publishes the app — the [release workflow](.github/workflows/release.yml) publishes a self-contained single-file `MCRGB.exe` (win-x64) on `windows-latest`, stamps the tag into its file version and attaches the executable plus its SHA-256 checksum to a GitHub release with generated notes. The download is about 75 MB: on the first start the bundle unpacks its runtime into `%TEMP%\.net\MCRGB` and reuses it afterwards.
 
 ```powershell
-git tag v1.0.6.6
-git push origin v1.0.6.6
+git tag v1.0.7.0
+git push origin v1.0.7.0
 ```
 
 Every push to `main` runs the [CI workflow](.github/workflows/ci.yml), which only compiles the solution — no tag, no release.
