@@ -35,6 +35,7 @@ MusicCat.CLVKM.Diagnostics/bin/
 MusicCat.CLVKM.Diagnostics/obj/
 
 # Generated diagnostics report
+MusicCat.CLVKM.Diagnostics/MusicCatRGB_Report.txt
 MusicCat.CLVKM.Diagnostics/KeyGlowMaster_Report.txt
 
 # Design mockups / screenshots
