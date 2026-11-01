@@ -1572,8 +1572,12 @@ public partial class MainViewModel : ObservableObject
         new(0xFF, 0x9A, 0xE8)  // pink
     };
 
-    /// <summary>Fast typing must not turn the flashes into one long glow.</summary>
-    private static readonly TimeSpan FlashCooldown = TimeSpan.FromMilliseconds(90);
+    /// <summary>
+    /// Shortest gap between two colours. Fast typing should ripple, but the keyboard cannot
+    /// show more than a couple of dozen colours per second anyway, and a longer cooldown made
+    /// an ordinary typing rhythm look sluggish.
+    /// </summary>
+    private static readonly TimeSpan FlashCooldown = TimeSpan.FromMilliseconds(40);
 
     /// <summary>The effect steps aside while the user types and comes back after this pause.</summary>
     private static readonly TimeSpan TypingHold = TimeSpan.FromSeconds(5);

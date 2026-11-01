@@ -96,10 +96,15 @@ public sealed class WatcherEventServer : IAsyncDisposable
     }
 
     /// <summary>
-    /// Forwards events until the pipe breaks. A silent second sends an empty line instead:
-    /// it is the only reliable way to notice that the client is gone — <c>IsConnected</c> on a
-    /// server stream stays true until an I/O operation actually fails. The app ignores blank
-    /// lines, so the keepalive costs nothing.
+    /// Forwards events until the pipe breaks.
+    ///
+    /// The loop waits on the outbox, not on a timer: an event is written the moment it is
+    /// published. It used to sleep for a second between keepalives, which made every keypress
+    /// wait for that tick — the flashes then changed about once a second however fast you typed.
+    ///
+    /// A silent second still sends an empty line, because that is the only reliable way to
+    /// notice that the client is gone: <c>IsConnected</c> on a server stream stays true until
+    /// an I/O operation actually fails. The app ignores blank lines.
     /// </summary>
     private async Task PumpAsync(NamedPipeServerStream server, CancellationToken cancellationToken)
     {
@@ -114,14 +119,26 @@ public sealed class WatcherEventServer : IAsyncDisposable
 
             while (!cancellationToken.IsCancellationRequested)
             {
-                if (_outbox.Reader.TryRead(out var message))
+                try
                 {
-                    await writer.WriteLineAsync(message.ToJson().AsMemory(), cancellationToken).ConfigureAwait(false);
+                    // WaitToReadAsync does not consume anything, so a waiter that loses the race
+                    // to the keepalive is harmless — it simply completes and is dropped.
+                    await _outbox.Reader
+                        .WaitToReadAsync(cancellationToken)
+                        .AsTask()
+                        .WaitAsync(heartbeat, cancellationToken)
+                        .ConfigureAwait(false);
+                }
+                catch (TimeoutException)
+                {
+                    await writer.WriteLineAsync(ReadOnlyMemory<char>.Empty, cancellationToken).ConfigureAwait(false);
                     continue;
                 }
 
-                await writer.WriteLineAsync(ReadOnlyMemory<char>.Empty, cancellationToken).ConfigureAwait(false);
-                await Task.Delay(heartbeat, cancellationToken).ConfigureAwait(false);
+                while (_outbox.Reader.TryRead(out var message))
+                {
+                    await writer.WriteLineAsync(message.ToJson().AsMemory(), cancellationToken).ConfigureAwait(false);
+                }
             }
         }
         catch (OperationCanceledException)
