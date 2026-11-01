@@ -4,7 +4,7 @@
 [![Download](https://img.shields.io/badge/download-MCRGB.exe-2ea44f?style=flat-square)](https://github.com/MusicCat-61/MusicCatRGB/releases/latest/download/MCRGB.exe)
 [![CI](https://github.com/MusicCat-61/MusicCatRGB/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/MusicCat-61/MusicCatRGB/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](LICENSE)
-[![Version](https://img.shields.io/badge/version-1.0.6.1-4CC2FF?style=flat-square)](https://github.com/MusicCat-61/MusicCatRGB/releases/tag/v1.0.6.1)
+[![Version](https://img.shields.io/badge/version-1.0.6.2-4CC2FF?style=flat-square)](https://github.com/MusicCat-61/MusicCatRGB/releases/tag/v1.0.6.2)
 [![Platform](https://img.shields.io/badge/platform-Windows%2010%20%7C%2011-0078D6?style=flat-square)](#)
 [![.NET](https://img.shields.io/badge/.NET-10-512BD4?style=flat-square)](https://dotnet.microsoft.com/download)
 
@@ -19,9 +19,6 @@
 WMI используется, когда он доступен; если WMI-канал отключён, приложение автоматически переходит на `InsydeDCHU.dll`. На других платах (например, Tongfang) устройство, скорее всего, не найдётся.
 
 MusicCatRGB — форк проекта [GutsV](https://github.com/gutsv-project/Clevo-Monster-RGB-Controller): интерфейс переписан с нуля, добавлены локализация, темы, новые эффекты и разные мелочи. Подробности — в разделе [Авторы и лицензия](#авторы-и-лицензия).
-
-> [!NOTE]
-> **Переименование в 1.0.6.** Раньше проект назывался *KeyGlowMaster*, а файл — `KGMaster.exe`. Теперь это **MusicCatRGB** и `MCRGB.exe`. Настройки при первом запуске переносятся автоматически из `%LOCALAPPDATA%\MusicCat.CLVKM`, старое задание автозапуска заменяется. При обновлении удалите старый `KGMaster.exe` после первого запуска — иначе две копии будут спорить за подсветку.
 
 > [!WARNING]
 > **Предупреждение.** Использование — на ваш страх и риск. Приложение тестировалось, но его работа не гарантируется. Все риски, связанные с использованием, несёт пользователь.
@@ -96,6 +93,10 @@ MusicCatRGB — форк проекта [GutsV](https://github.com/gutsv-project
 
 *Плашка эффекта, затем переключатель анимации в обоих состояниях.*
 
+## Язык и тема
+
+Оба переключателя — в заголовке окна: `EN | RU` для языка и кнопка солнце/луна для темы. Выбор запоминается, при первом запуске язык берётся из системы.
+
 ## Установка
 
 1. Скачайте [**`MCRGB.exe`**](https://github.com/MusicCat-61/MusicCatRGB/releases/latest/download/MCRGB.exe) — один самодостаточный файл, установщик и .NET Runtime не нужны.
@@ -117,9 +118,6 @@ MusicCatRGB — форк проекта [GutsV](https://github.com/gutsv-project
 - **Папка только для чтения** (`Program Files`) — приложение честно скажет об этом и предложит перенести `MCRGB.exe` туда, где запись разрешена, например в `C:\MusicCatRGB`.
 - **Сеть недоступна** — проверка молча уходит в лог, подсветка работает как обычно. Никаких диалогов с ошибкой при старте.
 - **Проверка анонимная**, но GitHub ограничивает частоту запросов с одного IP; при исчерпании лимита приложение скажет об этом в окне «О программе».
-
-
-Оба переключателя — в заголовке окна: `EN | RU` для языка и кнопка солнце/луна для темы. Выбор запоминается, при первом запуске язык берётся из системы.
 
 ## Логи
 
@@ -163,8 +161,8 @@ dotnet build MusicCat.CLVKM.slnx -c Release
 Пуш тега запускает сборку и публикацию: [workflow](.github/workflows/release.yml) собирает самодостаточный однофайловый `MCRGB.exe` под `win-x64` на `windows-latest`, проставляет ему версию из тега и прикрепляет исполняемый файл вместе с контрольной суммой SHA-256 к релизу с автоматически составленным списком изменений. Скачивание — около 75 МБ: при первом запуске бандл распаковывает среду выполнения в `%TEMP%\.net\MCRGB` и дальше переиспользует её.
 
 ```powershell
-git tag v1.0.6.1
-git push origin v1.0.6.1
+git tag v1.0.6.2
+git push origin v1.0.6.2
 ```
 
 Каждый пуш в `main` запускает [CI workflow](.github/workflows/ci.yml) — только сборку решения, без тега и релиза.

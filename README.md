@@ -4,7 +4,7 @@
 [![Download](https://img.shields.io/badge/download-MCRGB.exe-2ea44f?style=flat-square)](https://github.com/MusicCat-61/MusicCatRGB/releases/latest/download/MCRGB.exe)
 [![CI](https://github.com/MusicCat-61/MusicCatRGB/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/MusicCat-61/MusicCatRGB/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](LICENSE)
-[![Version](https://img.shields.io/badge/version-1.0.6.1-4CC2FF?style=flat-square)](https://github.com/MusicCat-61/MusicCatRGB/releases/tag/v1.0.6.1)
+[![Version](https://img.shields.io/badge/version-1.0.6.2-4CC2FF?style=flat-square)](https://github.com/MusicCat-61/MusicCatRGB/releases/tag/v1.0.6.2)
 [![Platform](https://img.shields.io/badge/platform-Windows%2010%20%7C%2011-0078D6?style=flat-square)](#)
 [![.NET](https://img.shields.io/badge/.NET-10-512BD4?style=flat-square)](https://dotnet.microsoft.com/download)
 
@@ -19,9 +19,6 @@ A small, fast replacement for the stock Control Center on Clevo-based laptops �
 WMI is used whenever it is available; if the WMI channel is disabled, the app automatically falls back to `InsydeDCHU.dll`. On other barebones (Tongfang, for example) the device will most likely not be found.
 
 MusicCatRGB is a fork of the [GutsV project](https://github.com/gutsv-project/Clevo-Monster-RGB-Controller): the interface was rebuilt from scratch, localisation, themes, new effects and small quality-of-life features were added. See [Credits](#credits--license).
-
-> [!NOTE]
-> **Renamed in 1.0.6.** The project used to be called *KeyGlowMaster* and the executable was `KGMaster.exe`. It is now **MusicCatRGB** with `MCRGB.exe`. Settings are migrated automatically from `%LOCALAPPDATA%\MusicCat.CLVKM` on the first start, and the old logon task is replaced. If you are upgrading, delete the old `KGMaster.exe` after the first run — otherwise two copies will fight over the keyboard.
 
 > [!WARNING]
 > **Use at your own risk.** The app has been tested, but its operation is not guaranteed. You take full responsibility for any risks of using it.
@@ -96,6 +93,10 @@ Every switch is confirmed by a small always-on-top toast in the corner of the sc
 
 *The effect toast, then the animation toggle in both states.*
 
+## Languages and themes
+
+Both switches live in the title bar: `EN | RU` for the interface language and the sun/moon button for the theme. The choice is remembered. The language defaults to the system one on first launch.
+
 ## Installation
 
 1. Download [**`MCRGB.exe`**](https://github.com/MusicCat-61/MusicCatRGB/releases/latest/download/MCRGB.exe) — one self-contained file, no installer and no .NET runtime required.
@@ -117,10 +118,6 @@ Worth knowing:
 - **A read-only folder** (`Program Files`) is reported honestly, with a suggestion to move `MCRGB.exe` somewhere writable, for example `C:\MusicCatRGB`.
 - **No network** — the check quietly goes to the log and the lighting carries on. No error dialog at startup.
 - **The check is anonymous**, but GitHub rate-limits requests per IP; when the limit is hit the About window says so.
-
-## Languages and themes
-
-Both switches live in the title bar: `EN | RU` for the interface language and the sun/moon button for the theme. The choice is remembered. The language defaults to the system one on first launch.
 
 ## Logs
 
@@ -164,8 +161,8 @@ or run `publish.bat` to get a self-contained folder in `Build_Output`.
 Pushing a version tag builds and publishes the app — the [release workflow](.github/workflows/release.yml) publishes a self-contained single-file `MCRGB.exe` (win-x64) on `windows-latest`, stamps the tag into its file version and attaches the executable plus its SHA-256 checksum to a GitHub release with generated notes. The download is about 75 MB: on the first start the bundle unpacks its runtime into `%TEMP%\.net\MCRGB` and reuses it afterwards.
 
 ```powershell
-git tag v1.0.6.1
-git push origin v1.0.6.1
+git tag v1.0.6.2
+git push origin v1.0.6.2
 ```
 
 Every push to `main` runs the [CI workflow](.github/workflows/ci.yml), which only compiles the solution — no tag, no release.
