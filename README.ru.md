@@ -4,7 +4,7 @@
 [![Download](https://img.shields.io/badge/download-MCRGB.exe-2ea44f?style=flat-square)](https://github.com/MusicCat-61/MusicCatRGB/releases/latest/download/MCRGB.exe)
 [![CI](https://github.com/MusicCat-61/MusicCatRGB/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/MusicCat-61/MusicCatRGB/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](LICENSE)
-[![Version](https://img.shields.io/badge/version-1.0.7.2-4CC2FF?style=flat-square)](https://github.com/MusicCat-61/MusicCatRGB/releases/tag/v1.0.7.2)
+[![Version](https://img.shields.io/badge/version-1.0.7.3-4CC2FF?style=flat-square)](https://github.com/MusicCat-61/MusicCatRGB/releases/tag/v1.0.7.3)
 [![Platform](https://img.shields.io/badge/platform-Windows%2010%20%7C%2011-0078D6?style=flat-square)](#)
 [![.NET](https://img.shields.io/badge/.NET-10-512BD4?style=flat-square)](https://dotnet.microsoft.com/download)
 
@@ -135,7 +135,7 @@ MusicCatRGB — форк проекта [GutsV](https://github.com/gutsv-project
 - **Папка только для чтения** (`Program Files`) — приложение честно скажет об этом и предложит перенести `MCRGB.exe` туда, где запись разрешена, например в `C:\MusicCatRGB`.
 - **Сеть недоступна** — проверка молча уходит в лог, подсветка работает как обычно. Никаких диалогов с ошибкой при старте; после неудачной попытки приложение повторит её через несколько минут.
 - **Обновление не встало** — при следующем запуске появится уведомление, а подробности попадут в `logs\update-apply.log`. Скачанный файл при этом сохраняется: установку можно повторить, не загружая его заново.
-- **Проверка анонимная**, но GitHub ограничивает частоту запросов с одного IP; при исчерпании лимита приложение скажет об этом в окне «О программе».
+- **Проверка не трогает API GitHub**: приложение запрашивает обычную страницу `releases/latest` и читает версию из её редиректа, поэтому лимит «60 запросов в час» из REST API его не касается. Ссылка на файл собирается по правилам релизов — `releases/download/<тег>/MCRGB.exe`.
 
 ## Логи
 
@@ -181,8 +181,8 @@ dotnet build MusicCat.CLVKM.slnx -c Release
 Пуш тега запускает сборку и публикацию: [workflow](.github/workflows/release.yml) собирает самодостаточный однофайловый `MCRGB.exe` под `win-x64` на `windows-latest`, проставляет ему версию из тега и прикрепляет исполняемый файл вместе с контрольной суммой SHA-256 к релизу с автоматически составленным списком изменений. Скачивание — около 75 МБ: при первом запуске бандл распаковывает среду выполнения в `%TEMP%\.net\MCRGB` и дальше переиспользует её.
 
 ```powershell
-git tag v1.0.7.2
-git push origin v1.0.7.2
+git tag v1.0.7.3
+git push origin v1.0.7.3
 ```
 
 Каждый пуш в `main` запускает [CI workflow](.github/workflows/ci.yml) — только сборку решения, без тега и релиза.

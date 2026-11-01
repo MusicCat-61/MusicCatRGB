@@ -5,7 +5,6 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Reflection;
-using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -68,7 +67,10 @@ public static class UpdateService
     /// <summary>Repository the releases are read from.</summary>
     public const string Repository = "MusicCat-61/MusicCatRGB";
 
-    private const string ApiUrl = "https://api.github.com/repos/" + Repository + "/releases/latest";
+    private const string LatestReleaseUrl = "https://github.com/" + Repository + "/releases/latest";
+
+    /// <summary>Name of the executable every release carries (see the release workflow).</summary>
+    public const string AssetFileName = "MCRGB.exe";
 
     /// <summary>File name the downloaded build is parked under until the app restarts.</summary>
     public const string StagedFileName = "MCRGB.update.exe";
@@ -76,8 +78,13 @@ public static class UpdateService
     private static readonly SemaphoreSlim Gate = new(1, 1);
 
     private static HttpClient? _http;
+    private static HttpClient? _downloadHttp;
     private static ReleaseVersion? _currentVersion;
 
+    /// <summary>
+    /// Used for the release pages, where the redirect itself is the answer. Following it would
+    /// lose the <c>Location</c> header that carries the version.
+    /// </summary>
     private static HttpClient Http
     {
         get
@@ -89,7 +96,24 @@ public static class UpdateService
 
             lock (Gate)
             {
-                return _http ??= CreateClient();
+                return _http ??= CreateClient(allowRedirects: false);
+            }
+        }
+    }
+
+    /// <summary>Asset downloads answer with a redirect to the CDN, so this one follows them.</summary>
+    private static HttpClient DownloadHttp
+    {
+        get
+        {
+            if (_downloadHttp is not null)
+            {
+                return _downloadHttp;
+            }
+
+            lock (Gate)
+            {
+                return _downloadHttp ??= CreateClient(allowRedirects: true);
             }
         }
     }
@@ -165,20 +189,31 @@ public static class UpdateService
     {
         try
         {
-            using var response = await Http.GetAsync(ApiUrl, cancellationToken).ConfigureAwait(false);
+            // A plain web request, not the REST API. GitHub answers /releases/latest with a
+            // redirect to /releases/tag/<version>, so the newest version is in the Location
+            // header — and a page request is not counted against the API rate limit at all.
+            using var request = new HttpRequestMessage(HttpMethod.Get, LatestReleaseUrl);
+            using var response = await Http
+                .SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken)
+                .ConfigureAwait(false);
+
+            if (response.Headers.Location is { } location)
+            {
+                return await FromRedirectAsync(location, cancellationToken).ConfigureAwait(false);
+            }
 
             if (!response.IsSuccessStatusCode)
             {
-                int code = (int)response.StatusCode;
-                var hint = code is 403 or 429
-                    ? $"GitHub API rate limit (HTTP {code})"
-                    : $"HTTP {code}";
-
-                return Failed(hint);
+                return Failed($"HTTP {(int)response.StatusCode}");
             }
 
-            var json = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
-            return Parse(json);
+            // A successful answer without a redirect means the repository has no release yet.
+            return new UpdateCheckResult
+            {
+                Status = UpdateStatus.UpToDate,
+                Current = CurrentVersion,
+                Latest = CurrentVersion
+            };
         }
         catch (Exception ex)
         {
@@ -187,93 +222,89 @@ public static class UpdateService
         }
     }
 
-    /// <summary>Separated from the network call so it can be tested against fixed JSON.</summary>
-    public static UpdateCheckResult Parse(string releaseJson)
+    /// <summary>
+    /// Turns the redirect target into a result. The executable is not listed anywhere in a
+    /// page response, so its address is derived from the tag by the release convention and
+    /// then confirmed with a HEAD request: a release without the file says so instead of
+    /// failing later at download time.
+    /// </summary>
+    private static async Task<UpdateCheckResult> FromRedirectAsync(Uri location, CancellationToken cancellationToken)
     {
-        try
+        var tag = TagFromLocation(location);
+
+        if (tag is null || !ReleaseVersion.TryParse(tag, out var latest))
         {
-            using var document = JsonDocument.Parse(releaseJson);
-            var root = document.RootElement;
+            return Failed($"«/releases/latest» redirected to «{location}», which is not a release tag");
+        }
 
-            var tag = root.TryGetProperty("tag_name", out var tagElement) ? tagElement.GetString() : null;
-            if (!ReleaseVersion.TryParse(tag, out var latest))
-            {
-                return Failed($"release tag \"{tag}\" is not a version");
-            }
+        var releaseUrl = $"https://github.com/{Repository}/releases/tag/{tag}";
 
-            var releaseUrl = root.TryGetProperty("html_url", out var htmlElement) ? htmlElement.GetString() : null;
-
-            if (latest <= CurrentVersion)
-            {
-                return new UpdateCheckResult
-                {
-                    Status = UpdateStatus.UpToDate,
-                    Current = CurrentVersion,
-                    Latest = latest,
-                    ReleaseUrl = releaseUrl
-                };
-            }
-
-            if (FindExecutableAsset(root) is not { } asset)
-            {
-                return new UpdateCheckResult
-                {
-                    Status = UpdateStatus.NoDownload,
-                    Current = CurrentVersion,
-                    Latest = latest,
-                    ReleaseUrl = releaseUrl,
-                    Error = "the release has no .exe asset"
-                };
-            }
-
+        if (latest <= CurrentVersion)
+        {
             return new UpdateCheckResult
             {
-                Status = UpdateStatus.UpdateAvailable,
+                Status = UpdateStatus.UpToDate,
                 Current = CurrentVersion,
                 Latest = latest,
-                DownloadUrl = asset.Url,
-                AssetName = asset.Name,
-                AssetSize = asset.Size,
                 ReleaseUrl = releaseUrl
             };
         }
-        catch (JsonException ex)
+
+        var assetUrl = $"https://github.com/{Repository}/releases/download/{tag}/{AssetFileName}";
+
+        if (!await AssetExistsAsync(assetUrl, cancellationToken).ConfigureAwait(false))
         {
-            return Failed($"unreadable API answer: {ex.Message}");
+            return new UpdateCheckResult
+            {
+                Status = UpdateStatus.NoDownload,
+                Current = CurrentVersion,
+                Latest = latest,
+                ReleaseUrl = releaseUrl,
+                Error = $"the release carries no {AssetFileName}"
+            };
         }
+
+        return new UpdateCheckResult
+        {
+            Status = UpdateStatus.UpdateAvailable,
+            Current = CurrentVersion,
+            Latest = latest,
+            DownloadUrl = assetUrl,
+            AssetName = AssetFileName,
+            ReleaseUrl = releaseUrl
+        };
     }
 
-    private static (string Name, string Url, long Size)? FindExecutableAsset(JsonElement root)
+    /// <summary>
+    /// The version at the end of a <c>/releases/tag/&lt;version&gt;</c> address; null for
+    /// anything else, including the redirect to a bare <c>/releases</c>.
+    /// </summary>
+    public static string? TagFromLocation(Uri location)
     {
-        if (!root.TryGetProperty("assets", out var assets) || assets.ValueKind != JsonValueKind.Array)
+        var segments = location.AbsolutePath.Trim('/').Split('/');
+
+        return segments.Length >= 2 && segments[^2].Equals("tag", StringComparison.OrdinalIgnoreCase)
+            ? Uri.UnescapeDataString(segments[^1])
+            : null;
+    }
+
+    private static async Task<bool> AssetExistsAsync(string url, CancellationToken cancellationToken)
+    {
+        try
         {
-            return null;
-        }
+            using var request = new HttpRequestMessage(HttpMethod.Head, url);
+            using var response = await Http
+                .SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken)
+                .ConfigureAwait(false);
 
-        // The release ships "MCRGB.exe" and "MCRGB.exe.sha256"; only the first is wanted.
-        foreach (var asset in assets.EnumerateArray())
+            // A release asset answers with a redirect to the download host; 404 means missing.
+            return (int)response.StatusCode is 200 or 301 or 302;
+        }
+        catch
         {
-            var name = asset.TryGetProperty("name", out var nameElement) ? nameElement.GetString() : null;
-            var url = asset.TryGetProperty("browser_download_url", out var urlElement) ? urlElement.GetString() : null;
-
-            if (string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(url))
-            {
-                continue;
-            }
-
-            if (!name.EndsWith(".exe", StringComparison.OrdinalIgnoreCase))
-            {
-                continue;
-            }
-
-            long size = asset.TryGetProperty("size", out var sizeElement) && sizeElement.TryGetInt64(out var parsed)
-                ? parsed
-                : 0;
-
-            return (name, url, size);
+            // A flaky probe must not cost the user an update: let the download try.
+            return true;
         }
-
-        return null;
     }
 
     /// <summary>
@@ -294,7 +325,9 @@ public static class UpdateService
         Directory.CreateDirectory(targetDirectory);
         var target = Path.Combine(targetDirectory, StagedFileName);
 
-        using var response = await Http
+        // The download host sits behind a redirect of its own, so this is the client that
+        // follows redirects.
+        using var response = await DownloadHttp
             .GetAsync(result.DownloadUrl, HttpCompletionOption.ResponseHeadersRead, cancellationToken)
             .ConfigureAwait(false);
 
@@ -643,11 +676,20 @@ public static class UpdateService
         }
     }
 
-    private static HttpClient CreateClient()
+    /// <param name="allowRedirects">
+    /// False for the release pages, where the redirect target is the answer; true for asset
+    /// downloads, which are redirected to the CDN.
+    /// </param>
+    private static HttpClient CreateClient(bool allowRedirects = true)
     {
-        var client = new HttpClient { Timeout = TimeSpan.FromSeconds(20) };
+        var handler = new SocketsHttpHandler
+        {
+            AllowAutoRedirect = allowRedirects,
+            PooledConnectionLifetime = TimeSpan.FromMinutes(10)
+        };
+
+        var client = new HttpClient(handler, disposeHandler: true) { Timeout = TimeSpan.FromSeconds(20) };
         client.DefaultRequestHeaders.UserAgent.ParseAdd($"MusicCatRGB/{CurrentVersion.Display}");
-        client.DefaultRequestHeaders.Accept.ParseAdd("application/vnd.github+json");
         return client;
     }
 

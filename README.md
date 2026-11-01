@@ -4,7 +4,7 @@
 [![Download](https://img.shields.io/badge/download-MCRGB.exe-2ea44f?style=flat-square)](https://github.com/MusicCat-61/MusicCatRGB/releases/latest/download/MCRGB.exe)
 [![CI](https://github.com/MusicCat-61/MusicCatRGB/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/MusicCat-61/MusicCatRGB/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](LICENSE)
-[![Version](https://img.shields.io/badge/version-1.0.7.2-4CC2FF?style=flat-square)](https://github.com/MusicCat-61/MusicCatRGB/releases/tag/v1.0.7.2)
+[![Version](https://img.shields.io/badge/version-1.0.7.3-4CC2FF?style=flat-square)](https://github.com/MusicCat-61/MusicCatRGB/releases/tag/v1.0.7.3)
 [![Platform](https://img.shields.io/badge/platform-Windows%2010%20%7C%2011-0078D6?style=flat-square)](#)
 [![.NET](https://img.shields.io/badge/.NET-10-512BD4?style=flat-square)](https://dotnet.microsoft.com/download)
 
@@ -135,7 +135,7 @@ Worth knowing:
 - **A read-only folder** (`Program Files`) is reported honestly, with a suggestion to move `MCRGB.exe` somewhere writable, for example `C:\MusicCatRGB`.
 - **No network** — the check quietly goes to the log and the lighting carries on. No error dialog at startup; after a failed attempt the app tries again a few minutes later.
 - **An update that did not install** is announced on the next start, with the details in `logs\update-apply.log`. The downloaded file is kept, so the install can be retried without fetching it again.
-- **The check is anonymous**, but GitHub rate-limits requests per IP; when the limit is hit the About window says so.
+- **The check never touches the GitHub API**: the app requests the ordinary `releases/latest` page and reads the version from its redirect, so the REST API limit of 60 requests an hour does not apply. The file address is built from the release convention — `releases/download/<tag>/MCRGB.exe`.
 
 ## Logs
 
@@ -181,8 +181,8 @@ or run `publish.bat` to get a self-contained folder in `Build_Output`.
 Pushing a version tag builds and publishes the app — the [release workflow](.github/workflows/release.yml) publishes a self-contained single-file `MCRGB.exe` (win-x64) on `windows-latest`, stamps the tag into its file version and attaches the executable plus its SHA-256 checksum to a GitHub release with generated notes. The download is about 75 MB: on the first start the bundle unpacks its runtime into `%TEMP%\.net\MCRGB` and reuses it afterwards.
 
 ```powershell
-git tag v1.0.7.2
-git push origin v1.0.7.2
+git tag v1.0.7.3
+git push origin v1.0.7.3
 ```
 
 Every push to `main` runs the [CI workflow](.github/workflows/ci.yml), which only compiles the solution — no tag, no release.
