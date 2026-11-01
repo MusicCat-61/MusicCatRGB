@@ -4,7 +4,7 @@
 [![Download](https://img.shields.io/badge/download-MCRGB.exe-2ea44f?style=flat-square)](https://github.com/MusicCat-61/MusicCatRGB/releases/latest/download/MCRGB.exe)
 [![CI](https://github.com/MusicCat-61/MusicCatRGB/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/MusicCat-61/MusicCatRGB/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](LICENSE)
-[![Version](https://img.shields.io/badge/version-1.0.6.2-4CC2FF?style=flat-square)](https://github.com/MusicCat-61/MusicCatRGB/releases/tag/v1.0.6.2)
+[![Version](https://img.shields.io/badge/version-1.0.6.3-4CC2FF?style=flat-square)](https://github.com/MusicCat-61/MusicCatRGB/releases/tag/v1.0.6.3)
 [![Platform](https://img.shields.io/badge/platform-Windows%2010%20%7C%2011-0078D6?style=flat-square)](#)
 [![.NET](https://img.shields.io/badge/.NET-10-512BD4?style=flat-square)](https://dotnet.microsoft.com/download)
 
@@ -108,15 +108,18 @@ Both switches live in the title bar: `EN | RU` for the interface language and th
 
 ## Updates
 
-The app checks GitHub for new releases by itself — a few seconds after launch, silently. If a newer version exists, a tray notification appears; clicking it opens the About window, where the install button lives. You can also check manually at any time: **About → Check for updates**.
+The app checks GitHub for new releases by itself, in three cases: a few seconds after launch, every time the window is opened from the tray, and every 15 minutes while the app stays in the tray. At most once every half hour, so the GitHub rate limit is never an issue. The check is silent: if a newer version exists, a tray notification appears; clicking it opens the About window, where the install button lives. You can also check manually at any time: **About → Check for updates**.
 
-Nothing has to be downloaded by hand: the file is saved **into the folder the app was started from**, as `MCRGB.update.exe`. The **Finish update** button closes the process, swaps the executable and starts the app again — already on the new version. Windows locks a running `.exe` against being overwritten, so the swap is done by a separate script that waits for the process to exit and then relaunches it.
+Nothing has to be downloaded by hand: the file is saved **into the folder the app was started from**, as `MCRGB.update.exe`. The **Finish update** button closes the process, swaps the executable and starts the app again — already on the new version. Windows locks a running `.exe` against being overwritten, so the swap is done by a separate script that waits for the process to exit, ends a stuck instance if it has to, and then relaunches the app.
+
+When the downloaded file is already on disk — say, About was closed before the install was finished — the window offers **Finish update** straight away instead of a second download.
 
 Worth knowing:
 
 - **Version numbers** are compared component by component and understand both three and four digits: `1.7.0`, `1.0.6.1`, `1.0.6`. The tag `v1.0.6.0` is not an update for an installed `1.0.6.1` — that is the same version.
 - **A read-only folder** (`Program Files`) is reported honestly, with a suggestion to move `MCRGB.exe` somewhere writable, for example `C:\MusicCatRGB`.
-- **No network** — the check quietly goes to the log and the lighting carries on. No error dialog at startup.
+- **No network** — the check quietly goes to the log and the lighting carries on. No error dialog at startup; after a failed attempt the app tries again a few minutes later.
+- **An update that did not install** is announced on the next start, with the details in `logs\update-apply.log`. The downloaded file is kept, so the install can be retried without fetching it again.
 - **The check is anonymous**, but GitHub rate-limits requests per IP; when the limit is hit the About window says so.
 
 ## Logs
@@ -132,7 +135,7 @@ Each entry is tagged with a category, so the file can be followed with a filter:
 | `[color]` | Colour-slot edits, the static colour sent to the keyboard and weather-location changes |
 | `[mode]` | Theme, language, driver mode, zone, brightness, speed, sleep timer and the state restored at startup |
 | `[driver]` | The driver handshake, plus the raw status codes the Insyde DLL answers with |
-| `[update]` | Release checks, the version found, the download and the restart that installs it |
+| `[update]` | Release checks, the version found, the download, the restart that installs it and what a failed swap left behind |
 
 ```text
 2026-10-31 21:42:07.385 [INF] Driver connected: InsydeDriver (single-zone) after 1 attempt(s)
@@ -161,8 +164,8 @@ or run `publish.bat` to get a self-contained folder in `Build_Output`.
 Pushing a version tag builds and publishes the app — the [release workflow](.github/workflows/release.yml) publishes a self-contained single-file `MCRGB.exe` (win-x64) on `windows-latest`, stamps the tag into its file version and attaches the executable plus its SHA-256 checksum to a GitHub release with generated notes. The download is about 75 MB: on the first start the bundle unpacks its runtime into `%TEMP%\.net\MCRGB` and reuses it afterwards.
 
 ```powershell
-git tag v1.0.6.2
-git push origin v1.0.6.2
+git tag v1.0.6.3
+git push origin v1.0.6.3
 ```
 
 Every push to `main` runs the [CI workflow](.github/workflows/ci.yml), which only compiles the solution — no tag, no release.

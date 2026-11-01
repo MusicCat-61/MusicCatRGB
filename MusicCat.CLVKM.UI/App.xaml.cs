@@ -21,6 +21,24 @@ public partial class App : System.Windows.Application
     private System.Windows.Forms.ToolStripMenuItem? _menuExit;
     private EffectToastWindow? _effectToast;
 
+    /// <summary>How long a finished check is trusted before the app may ask GitHub again.</summary>
+    private const int CheckIntervalMinutes = 30;
+
+    /// <summary>A failed check (offline, rate limit) is retried much sooner.</summary>
+    private const int FailedCheckRetryMinutes = 5;
+
+    /// <summary>How often a long-running tray instance looks for a new release.</summary>
+    private const int PeriodicCheckMinutes = 15;
+
+    /// <summary>Set once the update shutdown started, so it cannot run twice.</summary>
+    private static int _updateShutdownStarted;
+
+    private readonly object _checkSync = new();
+    private bool _checkRunning;
+    private bool _startupCheckSettling = true;
+    private string? _announcedVersion;
+    private DispatcherTimer? _checkTimer;
+
     private string _trayKey = "Tray_Ready";
     private object?[] _trayArgs = Array.Empty<object?>();
 
@@ -141,42 +159,161 @@ public partial class App : System.Windows.Application
         ShutdownMode = ShutdownMode.OnLastWindowClose;
 
         // Not urgent: let the window and the lighting settle, then look for a new release.
-        _ = CheckForUpdatesInBackgroundAsync();
+        // A build that starts at logon sits in the tray for days, so the same check also
+        // runs whenever the window is opened again and every so often while it stays hidden.
+        ReportLastUpdateApply();
+        StartPeriodicUpdateChecks();
+        _ = CheckForUpdatesAfterStartupAsync();
     }
 
-    /// <summary>
-    /// Silent update check. A failure is logged and nothing else happens — the user must
-    /// never learn about a missing network through a dialog, and the manual button in the
-    /// About window is always there.
-    /// </summary>
-    private async Task CheckForUpdatesInBackgroundAsync()
+    private async Task CheckForUpdatesAfterStartupAsync()
     {
         try
         {
             await Task.Delay(TimeSpan.FromSeconds(6)).ConfigureAwait(true);
-
-            var result = await UpdateService.CheckAsync().ConfigureAwait(true);
-
-            if (result.HasUpdate)
-            {
-                Logging.AppLog.Event(
-                    "update",
-                    $"Update available: {result.Latest!.Display} (installed {UpdateService.CurrentVersion.Display}, {result.AssetName})");
-
-                ShowUpdateBalloon(result.Latest.Display);
-            }
-            else if (result.Status == UpdateStatus.UpToDate)
-            {
-                Logging.AppLog.Info("Update check: up to date ({Version})", UpdateService.CurrentVersion.Display);
-            }
-            else
-            {
-                Logging.AppLog.EventWarning("update", $"Update check: {result.Status} — {result.Error}");
-            }
+            await CheckForUpdatesAsync("startup", force: true).ConfigureAwait(true);
         }
         catch (Exception ex)
         {
-            Logging.AppLog.EventWarning("update", $"Background update check failed: {ex.Message}");
+            Logging.AppLog.EventWarning("update", $"Startup update check failed: {ex.Message}");
+        }
+        finally
+        {
+            _startupCheckSettling = false;
+        }
+    }
+
+    /// <summary>
+    /// The window becoming visible is the best moment to mention a new release: the user is
+    /// looking at the app anyway. Throttled by <see cref="UpdateService.IsCheckDue"/>, so
+    /// opening the window over and over cannot hammer the GitHub API.
+    /// </summary>
+    internal void OnMainWindowShown()
+    {
+        // The window is shown while the startup check is still waiting for the app to
+        // settle; that check owns this moment, so this one would only duplicate it.
+        if (_startupCheckSettling)
+        {
+            return;
+        }
+
+        _ = CheckForUpdatesAsync("window opened", force: false);
+    }
+
+    /// <summary>Covers the instance that never shows a window for hours on end.</summary>
+    private void StartPeriodicUpdateChecks()
+    {
+        _checkTimer = new DispatcherTimer(DispatcherPriority.Background)
+        {
+            Interval = TimeSpan.FromMinutes(PeriodicCheckMinutes)
+        };
+
+        _checkTimer.Tick += (_, _) => _ = CheckForUpdatesAsync("timer", force: false);
+        _checkTimer.Start();
+    }
+
+    /// <summary>
+    /// One throttled update check. A failure is logged and nothing else happens — the user
+    /// must never learn about a missing network through a dialog, and the manual button in
+    /// the About window is always there.
+    /// </summary>
+    private async Task CheckForUpdatesAsync(string reason, bool force)
+    {
+        if (!force && !UpdateService.IsCheckDue(
+                TimeSpan.FromMinutes(CheckIntervalMinutes),
+                TimeSpan.FromMinutes(FailedCheckRetryMinutes)))
+        {
+            return;
+        }
+
+        lock (_checkSync)
+        {
+            if (_checkRunning)
+            {
+                return;
+            }
+
+            _checkRunning = true;
+        }
+
+        try
+        {
+            var result = await UpdateService.CheckAsync().ConfigureAwait(true);
+            ReportCheckResult(result, reason);
+        }
+        catch (Exception ex)
+        {
+            Logging.AppLog.EventWarning("update", $"Update check ({reason}) failed: {ex.Message}");
+        }
+        finally
+        {
+            lock (_checkSync)
+            {
+                _checkRunning = false;
+            }
+        }
+    }
+
+    private void ReportCheckResult(UpdateCheckResult result, string reason)
+    {
+        switch (result.Status)
+        {
+            case UpdateStatus.UpdateAvailable:
+                Logging.AppLog.Event(
+                    "update",
+                    $"Update available: {result.Latest!.Display} (installed {UpdateService.CurrentVersion.Display}, {result.AssetName}) — found by the {reason} check");
+
+                // One balloon per release, not one per check.
+                if (!string.Equals(_announcedVersion, result.Latest.Display, StringComparison.Ordinal))
+                {
+                    _announcedVersion = result.Latest.Display;
+                    ShowUpdateBalloon(result.Latest.Display);
+                }
+
+                break;
+
+            case UpdateStatus.UpToDate:
+                Logging.AppLog.Info(
+                    "Update check ({Reason}): up to date ({Version})",
+                    reason,
+                    UpdateService.CurrentVersion.Display);
+                break;
+
+            default:
+                Logging.AppLog.EventWarning("update", $"Update check ({reason}): {result.Status} — {result.Error}");
+                break;
+        }
+    }
+
+    /// <summary>
+    /// The replacement script writes a report next to the logs. Without this the user saw
+    /// an update that closed the app and then simply did nothing.
+    /// </summary>
+    private void ReportLastUpdateApply()
+    {
+        try
+        {
+            var report = UpdateService.ReadLastApplyReport();
+
+            // Whatever happened, the leftovers of that attempt are read once and dropped.
+            UpdateService.CleanUpAfterUpdate();
+
+            if (report is not { Succeeded: false } failure)
+            {
+                return;
+            }
+
+            Logging.AppLog.EventWarning("update", $"The last update attempt failed: {failure.Detail}");
+
+            _notifyIcon?.ShowBalloonTip(
+                15000,
+                Loc.T("Upd_ApplyFailedTitle"),
+                Loc.F("Upd_ApplyFailedText", failure.Detail),
+                System.Windows.Forms.ToolTipIcon.Warning);
+        }
+        catch
+        {
+            // Reporting must never disturb startup.
         }
     }
 
@@ -213,9 +350,18 @@ public partial class App : System.Windows.Application
     /// <summary>
     /// Leaves the process so the detached replacement script can swap the executable.
     /// The log is flushed first: this is the last thing this build ever writes.
+    ///
+    /// The script waits for this process to disappear, so a shutdown that never finishes
+    /// would keep the executable locked and the update would silently do nothing. That is
+    /// why the shutdown is bounded and a watchdog ends the process if it lingers anyway.
     /// </summary>
-    public static void ShutdownForUpdate()
+    public static async Task ShutdownForUpdateAsync()
     {
+        if (Interlocked.Exchange(ref _updateShutdownStarted, 1) == 1)
+        {
+            return;
+        }
+
         IsExplicitExit = true;
 
         if (Current is App app)
@@ -225,9 +371,46 @@ public partial class App : System.Windows.Application
         }
 
         Logging.AppLog.Event("update", "Closing to apply the update and restart");
+
+        // Release the keyboard first: it keeps the lights from being left on, and the
+        // script only needs the process to end.
+        if (Current?.MainWindow?.DataContext is ViewModels.MainViewModel viewModel)
+        {
+            try
+            {
+                await viewModel.ShutdownCommand.ExecuteAsync(null).WaitAsync(TimeSpan.FromSeconds(5));
+            }
+            catch (Exception ex)
+            {
+                Logging.AppLog.EventWarning("update", $"Shutdown before the update did not finish cleanly: {ex.Message}");
+            }
+        }
+
         Logging.AppLog.Shutdown();
 
+        StartExitWatchdog();
+
         Current?.Shutdown();
+    }
+
+    /// <summary>
+    /// Ends the process even if the dispatcher refuses to unwind (a modal dialog, a driver
+    /// call that never returns). Without it the swap script would wait half a minute, kill
+    /// the app itself and only then replace the file.
+    /// </summary>
+    private static void StartExitWatchdog()
+    {
+        var watchdog = new Thread(() =>
+        {
+            Thread.Sleep(TimeSpan.FromSeconds(8));
+            Environment.Exit(0);
+        })
+        {
+            IsBackground = true,
+            Name = "update-exit-watchdog"
+        };
+
+        watchdog.Start();
     }
 
     private void CheckAndAskStartup()

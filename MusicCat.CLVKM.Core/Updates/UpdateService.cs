@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -107,8 +108,27 @@ public static class UpdateService
     /// <summary>Result of the most recent check in this run; null before the first one.</summary>
     public static UpdateCheckResult? LastResult { get; private set; }
 
+    /// <summary>When the most recent check finished (UTC); null before the first one.</summary>
+    public static DateTime? LastCheckUtc { get; private set; }
+
     /// <summary>Raised after every finished check. May run on a worker thread.</summary>
     public static event EventHandler<UpdateCheckResult>? Checked;
+
+    /// <summary>
+    /// True when asking GitHub again is worth it. A successful check is left alone for
+    /// <paramref name="interval"/>; a failed one is retried much sooner, because the usual
+    /// reason is a missing network rather than a missing release.
+    /// </summary>
+    public static bool IsCheckDue(TimeSpan interval, TimeSpan retryAfterFailure)
+    {
+        if (LastCheckUtc is not { } last)
+        {
+            return true;
+        }
+
+        var needs = LastResult is { Status: UpdateStatus.Failed } ? retryAfterFailure : interval;
+        return DateTime.UtcNow - last >= needs;
+    }
 
     /// <summary>
     /// Reads the newest release. Never throws: every failure comes back as
@@ -122,6 +142,7 @@ public static class UpdateService
         {
             var result = await CheckCoreAsync(cancellationToken).ConfigureAwait(false);
             LastResult = result;
+            LastCheckUtc = DateTime.UtcNow;
 
             try
             {
@@ -310,7 +331,32 @@ public static class UpdateService
             throw new IOException("The download was incomplete.");
         }
 
+        // A proxy error page or an HTML sign-in form saved as ".exe" would otherwise be
+        // copied over the running build and destroy the installation.
+        if (!LooksLikeExecutable(target))
+        {
+            File.Delete(target);
+            throw new IOException("The downloaded file is not a Windows executable.");
+        }
+
         return target;
+    }
+
+    /// <summary>True when the file starts with the "MZ" signature every PE image has.</summary>
+    private static bool LooksLikeExecutable(string path)
+    {
+        try
+        {
+            using var stream = File.OpenRead(path);
+            var header = new byte[2];
+            return stream.Read(header, 0, header.Length) == header.Length
+                && header[0] == (byte)'M'
+                && header[1] == (byte)'Z';
+        }
+        catch
+        {
+            return false;
+        }
     }
 
     /// <summary>
@@ -330,44 +376,24 @@ public static class UpdateService
                 return false;
             }
 
-            var script = Path.Combine(Path.GetTempPath(), $"musiccatrgb-update-{Guid.NewGuid():N}.cmd");
+            Directory.CreateDirectory(AppPaths.DataDirectory);
 
             // The script text stays pure ASCII and takes both paths from the environment.
             // cmd.exe reads a .cmd file in the OEM code page, so an install path like
             // "C:\Users\Маksim\..." would be mangled if it were written into the file.
             //
-            // Waiting is done by retrying the move itself rather than by watching the PID:
-            // that is the condition we actually care about, and it cannot be fooled by a
-            // process id appearing in unrelated tasklist output.
-            var lines = new[]
-            {
-                "@echo off",
-                "setlocal",
-                "set /a tries=0",
-                ":retry",
-                "move /Y \"%MCRGB_STAGED%\" \"%MCRGB_TARGET%\" >nul 2>nul",
-                "if not errorlevel 1 goto swapped",
-                "set /a tries+=1",
-                "if %tries% geq 120 goto giveup",
-                "rem ping is a sleep that works without a console window",
-                "ping -n 2 127.0.0.1 >nul",
-                "goto retry",
-                ":swapped",
-                "start \"\" \"%MCRGB_TARGET%\"",
-                "goto cleanup",
-                ":giveup",
-                "rem Give up quietly, but do not leave the user without an app.",
-                "start \"\" \"%MCRGB_TARGET%\"",
-                ":cleanup",
-                "del \"%~f0\""
-            };
+            // The swap waits for this process to disappear, retries the move, and only then
+            // falls back to a copy. Every step and every failure lands in a log, so a failed
+            // update is no longer silent.
+            File.WriteAllLines(ApplyScriptPath, ApplyScriptLines);
 
-            File.WriteAllLines(script, lines);
+            // A report left behind by an earlier attempt would be mistaken for this one's.
+            TryDelete(ApplyLogPath);
 
             var startInfo = new ProcessStartInfo
             {
                 FileName = "cmd.exe",
-                Arguments = $"/c \"\"{script}\"\"",
+                Arguments = $"/c \"\"{ApplyScriptPath}\"\"",
                 UseShellExecute = false,
                 CreateNoWindow = true,
                 WindowStyle = ProcessWindowStyle.Hidden
@@ -375,6 +401,9 @@ public static class UpdateService
 
             startInfo.Environment["MCRGB_STAGED"] = stagedFile;
             startInfo.Environment["MCRGB_TARGET"] = executablePath;
+            startInfo.Environment["MCRGB_LOG"] = ApplyLogPath;
+            startInfo.Environment["MCRGB_PID"] = Environment.ProcessId.ToString(CultureInfo.InvariantCulture);
+            startInfo.Environment["MCRGB_EXPECT"] = new FileInfo(stagedFile).Length.ToString(CultureInfo.InvariantCulture);
 
             Process.Start(startInfo);
 
@@ -386,6 +415,209 @@ public static class UpdateService
             return false;
         }
     }
+
+    /// <summary>Script that performs the swap after this process is gone.</summary>
+    private static string ApplyScriptPath => Path.Combine(AppPaths.DataDirectory, "apply-update.cmd");
+
+    /// <summary>Where the apply script records what it did; read on the next start.</summary>
+    public static string ApplyLogPath => Path.Combine(AppPaths.LogDirectory, "update-apply.log");
+
+    /// <summary>Full path the download is parked under until the app restarts.</summary>
+    public static string StagedFilePath => Path.Combine(ExecutableDirectory, StagedFileName);
+
+    /// <summary>
+    /// The staged build, when one is on disk and newer than the running one. A leftover of
+    /// an already installed release is deleted: it would be offered for ever otherwise, and
+    /// applying it would quietly downgrade the app.
+    /// </summary>
+    public static string? FindStagedUpdate()
+    {
+        try
+        {
+            var staged = StagedFilePath;
+
+            if (!File.Exists(staged))
+            {
+                return null;
+            }
+
+            if (new FileInfo(staged).Length == 0 || IsNotNewer(staged))
+            {
+                File.Delete(staged);
+                return null;
+            }
+
+            return staged;
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    /// <summary>True when the staged build is not newer than the running one.</summary>
+    private static bool IsNotNewer(string staged)
+    {
+        // A file without a readable version is kept: refusing a real update would be worse
+        // than offering it twice.
+        var text = FileVersionInfo.GetVersionInfo(staged).FileVersion;
+        return ReleaseVersion.TryParse(text, out var stagedVersion) && stagedVersion <= CurrentVersion;
+    }
+
+    /// <summary>What the detached apply script reported the last time it ran.</summary>
+    public sealed record UpdateApplyReport(bool Succeeded, string Detail);
+
+    /// <summary>
+    /// Outcome of the last apply attempt, or null when the script never got as far as
+    /// writing one. This is how a failed update stops being silent.
+    /// </summary>
+    public static UpdateApplyReport? ReadLastApplyReport()
+    {
+        try
+        {
+            if (!File.Exists(ApplyLogPath))
+            {
+                return null;
+            }
+
+            const string marker = "RESULT=";
+            var line = File.ReadLines(ApplyLogPath)
+                .LastOrDefault(entry => entry.Contains(marker, StringComparison.Ordinal));
+
+            if (line is null)
+            {
+                return null;
+            }
+
+            var text = line[(line.IndexOf(marker, StringComparison.Ordinal) + marker.Length)..].Trim();
+
+            if (text.StartsWith("OK", StringComparison.Ordinal))
+            {
+                return new UpdateApplyReport(true, string.Empty);
+            }
+
+            return new UpdateApplyReport(
+                false,
+                text.StartsWith("FAILED", StringComparison.Ordinal) ? text["FAILED".Length..].Trim() : text);
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    /// <summary>
+    /// Drops everything the last apply attempt left behind: the report and the script.
+    /// A failing attempt must be announced once, not on every start.
+    /// </summary>
+    public static void CleanUpAfterUpdate()
+    {
+        TryDelete(ApplyLogPath);
+        TryDelete(ApplyScriptPath);
+    }
+
+    private static void TryDelete(string path)
+    {
+        try
+        {
+            if (File.Exists(path))
+            {
+                File.Delete(path);
+            }
+        }
+        catch
+        {
+            // A leftover file is harmless.
+        }
+    }
+
+    /// <summary>
+    /// The replacement script. It decides nothing on its own: it waits for the app to exit,
+    /// swaps the file, checks the result, starts the app again and records every step in
+    /// <see cref="ApplyLogPath"/>, errors included.
+    /// </summary>
+    private static readonly string[] ApplyScriptLines =
+    {
+        "@echo off",
+        "setlocal",
+        "set \"STAGED=%MCRGB_STAGED%\"",
+        "set \"TARGET=%MCRGB_TARGET%\"",
+        "set \"LOG=%MCRGB_LOG%\"",
+        "set \"APPPID=%MCRGB_PID%\"",
+        "set \"EXPECT=%MCRGB_EXPECT%\"",
+        "call :note \"apply start: pid=%APPPID% expected bytes=%EXPECT%\"",
+        "call :note \"staged: %STAGED%\"",
+        "call :note \"target: %TARGET%\"",
+        "",
+        "rem Windows keeps a running executable locked, so retry the move itself: that is the",
+        "rem condition we actually care about, and it cannot be fooled by a process id that",
+        "rem shows up in unrelated tasklist output.",
+        "set /a tries=0",
+        ":swap",
+        "move /Y \"%STAGED%\" \"%TARGET%\" >nul 2>nul",
+        "if not errorlevel 1 goto swapped",
+        "set /a tries+=1",
+        "if %tries% geq 30 goto stuck",
+        "call :sleep",
+        "goto swap",
+        "",
+        ":stuck",
+        "rem Still locked after half a minute, so the process holding the file did not go",
+        "rem away by itself. The lock it is still holding proves that the id is ours.",
+        "call :note \"still locked after 30s, ending pid %APPPID%\"",
+        "taskkill /PID %APPPID% /T /F >nul 2>nul",
+        "call :sleep",
+        "set /a tries=0",
+        ":swapagain",
+        "move /Y \"%STAGED%\" \"%TARGET%\" >nul 2>nul",
+        "if not errorlevel 1 goto swapped",
+        "set /a tries+=1",
+        "if %tries% geq 15 goto copyfile",
+        "call :sleep",
+        "goto swapagain",
+        "",
+        ":copyfile",
+        "rem A rename can also fail for reasons no retry can fix (another volume, a filter",
+        "rem driver holding the file). Copying fails differently, so give it one chance.",
+        "call :note \"rename failed, trying a copy\"",
+        "copy /Y /B \"%STAGED%\" \"%TARGET%\" >>\"%LOG%\" 2>&1",
+        "if errorlevel 1 goto failed",
+        "del /F /Q \"%STAGED%\" >nul 2>nul",
+        "",
+        ":swapped",
+        "call :verify",
+        "if errorlevel 1 goto failed",
+        "call :note \"RESULT=OK\"",
+        "call :note \"the new build is in place, starting it\"",
+        "start \"\" \"%TARGET%\"",
+        "goto done",
+        "",
+        ":failed",
+        "call :note \"RESULT=FAILED the downloaded file could not replace the running one\"",
+        "call :note \"kept for another try: %STAGED%\"",
+        "start \"\" \"%TARGET%\"",
+        "goto done",
+        "",
+        ":done",
+        "rem Nothing left to do here: the app deletes this script when it starts again.",
+        "exit /b 0",
+        "",
+        ":verify",
+        "if not exist \"%TARGET%\" exit /b 1",
+        "for %%A in (\"%TARGET%\") do if %%~zA LSS 1024 exit /b 1",
+        "if \"%EXPECT%\"==\"\" exit /b 0",
+        "for %%A in (\"%TARGET%\") do if not \"%%~zA\"==\"%EXPECT%\" exit /b 1",
+        "exit /b 0",
+        "",
+        ":note",
+        ">>\"%LOG%\" echo [%DATE% %TIME%] %~1",
+        "exit /b 0",
+        "",
+        ":sleep",
+        "rem A wait that works without a console window.",
+        "ping -n 2 127.0.0.1 >nul 2>nul",
+        "exit /b 0"
+    };
 
     /// <summary>Folder the application was started from — where the update is written.</summary>
     public static string ExecutableDirectory =>

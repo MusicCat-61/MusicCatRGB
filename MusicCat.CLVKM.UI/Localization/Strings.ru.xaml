@@ -196,5 +196,10 @@
     <sys:String x:Key="Wx_DirSW">ЮЗ</sys:String>
     <sys:String x:Key="Wx_DirW">З</sys:String>
     <sys:String x:Key="Wx_DirNW">СЗ</sys:String>
+    <!-- Applying the downloaded update -->
+    <sys:String x:Key="Upd_Applying">Устанавливаю обновление… приложение закроется само.</sys:String>
+    <sys:String x:Key="Upd_NothingStaged">Скачанный файл обновления больше не найден — скачайте его заново.</sys:String>
+    <sys:String x:Key="Upd_ApplyFailedTitle">Обновление не установилось</sys:String>
+    <sys:String x:Key="Upd_ApplyFailedText" xml:space="preserve">Не удалось заменить файл приложения: {0}&#x0a;Закройте MusicCatRGB полностью (в том числе значок в трее) и попробуйте ещё раз.</sys:String>
 
 </ResourceDictionary>

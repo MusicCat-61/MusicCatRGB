@@ -31,6 +31,36 @@ public partial class MainWindow : Window
         {
             // Icon is cosmetic only.
         }
+
+        // The app spends most of its life in the tray. Opening the window (tray menu, double
+        // click, taskbar) is the moment the silent update check should happen again.
+        IsVisibleChanged += (_, _) =>
+        {
+            if (IsVisible)
+            {
+                NotifyWindowShown();
+            }
+        };
+    }
+
+    /// <summary>Tells the app the window is on screen again, so it may look for updates.</summary>
+    private void NotifyWindowShown() =>
+        (System.Windows.Application.Current as App)?.OnMainWindowShown();
+
+    protected override void OnStateChanged(EventArgs e)
+    {
+        base.OnStateChanged(e);
+
+        if (IsVisible && WindowState != WindowState.Minimized)
+        {
+            NotifyWindowShown();
+        }
+    }
+
+    protected override void OnActivated(EventArgs e)
+    {
+        base.OnActivated(e);
+        NotifyWindowShown();
     }
 
     protected override void OnSourceInitialized(EventArgs e)

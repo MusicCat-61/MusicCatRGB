@@ -28,21 +28,28 @@ public partial class AboutWindow : Window
 
     private bool _busy;
 
+    /// <summary>A result younger than this is shown as is instead of being asked for again.</summary>
+    private static readonly TimeSpan FreshFor = TimeSpan.FromMinutes(30);
+
     public AboutWindow()
     {
         InitializeComponent();
         Title = Loc.T("About_Title");
         VersionText.Text = Loc.F("About_Version", AppVersion);
 
-        // A silent check runs at startup, so the dialog usually opens already knowing
-        // whether an update exists — no need to hit the network again.
-        if (UpdateService.LastResult is { } known)
+        // The silent checks keep this state fresh, so the dialog usually opens already
+        // knowing whether an update exists. An old or failed answer is refreshed instead of
+        // being presented as the truth.
+        UpdateService.Checked += OnCheckedInBackground;
+
+        if (UpdateService.LastResult is { } known && !UpdateService.IsCheckDue(FreshFor, TimeSpan.Zero))
         {
             ShowResult(known);
         }
         else
         {
             ShowIdle();
+            _ = RefreshAsync();
         }
     }
 
@@ -84,6 +91,7 @@ public partial class AboutWindow : Window
     private void ShowResult(UpdateCheckResult result)
     {
         _result = result;
+        _stagedFile = null;
 
         switch (result.Status)
         {
@@ -91,6 +99,15 @@ public partial class AboutWindow : Window
                 UpdateStatusText.Text = Loc.T("Upd_UpToDate");
                 SetButtons(check: true, download: false, finish: false, release: false);
                 SetProgress(null);
+                break;
+
+            case UpdateStatus.UpdateAvailable when UpdateService.FindStagedUpdate() is { } staged:
+                // Already downloaded — possibly in an earlier session, where the dialog was
+                // closed before the restart. Offer the restart, not a second download.
+                _stagedFile = staged;
+                UpdateStatusText.Text = Loc.F("Upd_Ready", UpdateService.StagedFileName);
+                SetButtons(check: false, download: false, finish: true, release: false);
+                SetProgress(1);
                 break;
 
             case UpdateStatus.UpdateAvailable:
@@ -155,13 +172,25 @@ public partial class AboutWindow : Window
             return;
         }
 
+        AppLog.Event("update", "Manual update check requested");
+        await RefreshAsync();
+    }
+
+    /// <summary>
+    /// Asks GitHub and shows the answer. Used by the button and, when the last answer is old
+    /// or missing, by the dialog itself as it opens.
+    /// </summary>
+    private async Task RefreshAsync()
+    {
+        if (_busy)
+        {
+            return;
+        }
+
         _busy = true;
         UpdateStatusText.Text = Loc.T("Upd_Checking");
-        UpdateCheckButton.IsEnabled = false;
-        UpdateDownloadButton.Visibility = Visibility.Collapsed;
-        UpdateFinishButton.Visibility = Visibility.Collapsed;
-        UpdateReleaseButton.Visibility = Visibility.Collapsed;
-        AppLog.Event("update", "Manual update check requested");
+        SetButtons(check: false, download: false, finish: false, release: false);
+        SetProgress(null);
 
         try
         {
@@ -170,11 +199,45 @@ public partial class AboutWindow : Window
             _busy = false;
             ShowResult(result);
         }
+        catch (Exception ex)
+        {
+            _busy = false;
+            UpdateStatusText.Text = Loc.F("Upd_Failed", ex.Message);
+            SetButtons(check: true, download: false, finish: false, release: false);
+        }
         finally
         {
             _busy = false;
             UpdateCheckButton.IsEnabled = true;
         }
+    }
+
+    /// <summary>
+    /// A check that ran in the background (window opened, tray timer) while this dialog was
+    /// up. Raised on a worker thread, so the update hops back to the UI thread.
+    /// </summary>
+    private void OnCheckedInBackground(object? sender, UpdateCheckResult result)
+    {
+        if (_busy)
+        {
+            return;
+        }
+
+        Dispatcher.BeginInvoke(new Action(() =>
+        {
+            if (_busy)
+            {
+                return;
+            }
+
+            ShowResult(result);
+        }));
+    }
+
+    protected override void OnClosed(EventArgs e)
+    {
+        UpdateService.Checked -= OnCheckedInBackground;
+        base.OnClosed(e);
     }
 
     private async void UpdateDownload_Click(object sender, RoutedEventArgs e)
@@ -230,27 +293,43 @@ public partial class AboutWindow : Window
         }
     }
 
-    private void UpdateFinish_Click(object sender, RoutedEventArgs e)
+    private async void UpdateFinish_Click(object sender, RoutedEventArgs e)
     {
-        if (_stagedFile is null)
+        if (_busy)
         {
+            return;
+        }
+
+        // The download may come from an earlier session: a reopened dialog used to have a
+        // button that silently did nothing.
+        var staged = _stagedFile ?? UpdateService.FindStagedUpdate();
+
+        if (staged is null)
+        {
+            UpdateStatusText.Text = Loc.T("Upd_NothingStaged");
+            SetButtons(check: true, download: _result?.HasUpdate == true, finish: false, release: false);
+            AppLog.EventWarning("update", "Apply was requested but there is no downloaded update on disk");
             return;
         }
 
         var executable = UpdateService.ExecutablePath;
 
-        if (!UpdateService.TryApplyOnExit(_stagedFile, executable, out var error))
+        if (!UpdateService.TryApplyOnExit(staged, executable, out var error))
         {
             UpdateStatusText.Text = Loc.F("Upd_RestartFailed", error);
             AppLog.EventError("update", $"Could not start the replacement script: {error}");
             return;
         }
 
-        AppLog.Event("update", $"Restarting to apply {Path.GetFileName(_stagedFile)} over {executable}");
+        _busy = true;
+        UpdateStatusText.Text = Loc.T("Upd_Applying");
+        SetButtons(check: false, download: false, finish: false, release: false);
 
-        // Flush the log before the process disappears; the batch swaps the file as soon
-        // as this PID is gone and then starts the new build.
-        App.ShutdownForUpdate();
+        AppLog.Event("update", $"Restarting to apply {Path.GetFileName(staged)} over {executable}");
+
+        // Flush the log before the process disappears; the script swaps the file as soon as
+        // this process is gone and then starts the new build.
+        await App.ShutdownForUpdateAsync();
     }
 
     private void UpdateRelease_Click(object sender, RoutedEventArgs e)

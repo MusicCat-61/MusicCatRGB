@@ -196,5 +196,10 @@
     <sys:String x:Key="Wx_DirSW">SW</sys:String>
     <sys:String x:Key="Wx_DirW">W</sys:String>
     <sys:String x:Key="Wx_DirNW">NW</sys:String>
+    <!-- Applying the downloaded update -->
+    <sys:String x:Key="Upd_Applying">Installing the update… the app will close itself.</sys:String>
+    <sys:String x:Key="Upd_NothingStaged">The downloaded update file is gone — download it again.</sys:String>
+    <sys:String x:Key="Upd_ApplyFailedTitle">The update was not installed</sys:String>
+    <sys:String x:Key="Upd_ApplyFailedText" xml:space="preserve">The application file could not be replaced: {0}&#x0a;Close MusicCatRGB completely (including the tray icon) and try again.</sys:String>
 
 </ResourceDictionary>
