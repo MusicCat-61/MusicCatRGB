@@ -8,6 +8,7 @@ using System.Windows;
 using System.Windows.Interop;
 using System.Windows.Threading;
 using Microsoft.Win32;
+using MusicCat.CLVKM.Core.Updates;
 using MusicCat.CLVKM.Core.Settings;
 using MusicCat.CLVKM.UI.Localization;
 
@@ -138,6 +139,95 @@ public partial class App : System.Windows.Application
         }
 
         ShutdownMode = ShutdownMode.OnLastWindowClose;
+
+        // Not urgent: let the window and the lighting settle, then look for a new release.
+        _ = CheckForUpdatesInBackgroundAsync();
+    }
+
+    /// <summary>
+    /// Silent update check. A failure is logged and nothing else happens — the user must
+    /// never learn about a missing network through a dialog, and the manual button in the
+    /// About window is always there.
+    /// </summary>
+    private async Task CheckForUpdatesInBackgroundAsync()
+    {
+        try
+        {
+            await Task.Delay(TimeSpan.FromSeconds(6)).ConfigureAwait(true);
+
+            var result = await UpdateService.CheckAsync().ConfigureAwait(true);
+
+            if (result.HasUpdate)
+            {
+                Logging.AppLog.Event(
+                    "update",
+                    $"Update available: {result.Latest!.Display} (installed {UpdateService.CurrentVersion.Display}, {result.AssetName})");
+
+                ShowUpdateBalloon(result.Latest.Display);
+            }
+            else if (result.Status == UpdateStatus.UpToDate)
+            {
+                Logging.AppLog.Info("Update check: up to date ({Version})", UpdateService.CurrentVersion.Display);
+            }
+            else
+            {
+                Logging.AppLog.EventWarning("update", $"Update check: {result.Status} — {result.Error}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Logging.AppLog.EventWarning("update", $"Background update check failed: {ex.Message}");
+        }
+    }
+
+    private void ShowUpdateBalloon(string version)
+    {
+        try
+        {
+            _notifyIcon?.ShowBalloonTip(
+                10000,
+                Loc.T("Upd_BalloonTitle"),
+                Loc.F("Upd_BalloonText", version),
+                System.Windows.Forms.ToolTipIcon.Info);
+        }
+        catch
+        {
+            // Balloons are unsupported on some shells; the About window still works.
+        }
+    }
+
+    /// <summary>Opens the About dialog (used by the update balloon).</summary>
+    internal void ShowAboutWindow()
+    {
+        ShowWindow();
+
+        if (MainWindow is not MainWindow window)
+        {
+            return;
+        }
+
+        var about = new AboutWindow { Owner = window };
+        about.ShowDialog();
+    }
+
+    /// <summary>
+    /// Leaves the process so the detached replacement script can swap the executable.
+    /// The log is flushed first: this is the last thing this build ever writes.
+    /// </summary>
+    public static void ShutdownForUpdate()
+    {
+        IsExplicitExit = true;
+
+        if (Current is App app)
+        {
+            app._notifyIcon?.Dispose();
+            app._notifyIcon = null;
+        }
+
+        Logging.AppLog.Event("update", "Closing to apply the update and restart");
+        Logging.AppLog.Shutdown();
+
+        Current?.Shutdown();
     }
 
     private void CheckAndAskStartup()
@@ -335,6 +425,10 @@ public partial class App : System.Windows.Application
 
         _notifyIcon.Visible = true;
         SetTrayText("Tray_Ready");
+
+        // Clicking the "update available" balloon goes straight to the About dialog,
+        // where the download button lives.
+        _notifyIcon.BalloonTipClicked += (_, _) => ShowAboutWindow();
 
         var contextMenu = new System.Windows.Forms.ContextMenuStrip();
         contextMenu.Renderer = new FluentRenderer();

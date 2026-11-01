@@ -111,6 +111,25 @@
     <sys:String x:Key="About_LicenseName">MIT</sys:String>
     <sys:String x:Key="About_Version">Версия {0}</sys:String>
 
+<!-- Updates -->
+    <sys:String x:Key="Upd_Title">Обновления</sys:String>
+    <sys:String x:Key="Upd_Check">Проверить обновления</sys:String>
+    <sys:String x:Key="Upd_Checking">Проверяю GitHub…</sys:String>
+    <sys:String x:Key="Upd_UpToDate">Установлена последняя версия.</sys:String>
+    <sys:String x:Key="Upd_Available">Доступна версия {0}.</sys:String>
+    <sys:String x:Key="Upd_Download">Скачать {0}</sys:String>
+    <sys:String x:Key="Upd_Downloading">Загрузка… {0}%</sys:String>
+    <sys:String x:Key="Upd_Ready">Файл загружен в {0}. Приложение закроется, заменит себя и запустится заново.</sys:String>
+    <sys:String x:Key="Upd_Finish">Завершить обновление</sys:String>
+    <sys:String x:Key="Upd_Failed">Не удалось проверить обновления: {0}</sys:String>
+    <sys:String x:Key="Upd_DownloadFailed">Не удалось скачать: {0}</sys:String>
+    <sys:String x:Key="Upd_NoDownload">Версия {0} доступна, но в релизе нет файла для скачивания. Откройте страницу релиза и скачайте вручную.</sys:String>
+    <sys:String x:Key="Upd_NotWritable">В папку {0} нет доступа на запись, поэтому обновление нельзя установить автоматически. Перенесите MCRGB.exe туда, где запись разрешена, например в C:\MusicCatRGB.</sys:String>
+    <sys:String x:Key="Upd_OpenRelease">Открыть страницу релиза</sys:String>
+    <sys:String x:Key="Upd_RestartFailed">Не удалось завершить обновление: {0}</sys:String>
+    <sys:String x:Key="Upd_BalloonTitle">Обновление MusicCatRGB</sys:String>
+    <sys:String x:Key="Upd_BalloonText" xml:space="preserve">Доступна версия {0}.&#x0a;Откройте «О программе», чтобы установить её.</sys:String>
+
     <!-- New effects -->
     <sys:String x:Key="Anim_DayNight">Время суток</sys:String>
     <sys:String x:Key="Anim_ZoneGradient">Градиент по зонам</sys:String>

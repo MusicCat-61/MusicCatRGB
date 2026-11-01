@@ -35,6 +35,7 @@ internal static class AppLog
     private static readonly object PendingSync = new();
     private static Timer? _flushTimer;
     private static bool _initialized;
+    private static bool _shutDown;
 
     public static void Initialize()
     {
@@ -99,6 +100,53 @@ internal static class AppLog
     }
 
     /// <summary>
+    /// A tagged warning, for example <c>[update] install folder is not writable</c>.
+    /// Worth keeping separate from <see cref="Warn"/>: that one takes format arguments,
+    /// so passing a category there would silently swallow the message.
+    /// </summary>
+    public static void EventWarning(string category, string message)
+    {
+        if (!_initialized)
+        {
+            return;
+        }
+
+        try
+        {
+            Log.Warning("[{Category}] {Message}", category, message);
+        }
+        catch
+        {
+            // Ignore.
+        }
+    }
+
+    /// <summary>A tagged error, with the exception when there is one.</summary>
+    public static void EventError(string category, string message, Exception? exception = null)
+    {
+        if (!_initialized)
+        {
+            return;
+        }
+
+        try
+        {
+            if (exception is null)
+            {
+                Log.Error("[{Category}] {Message}", category, message);
+            }
+            else
+            {
+                Log.Error(exception, "[{Category}] {Message}", category, message);
+            }
+        }
+        catch
+        {
+            // Ignore.
+        }
+    }
+
+    /// <summary>
     /// Records a value that changes in bursts (colour sliders, brightness, speed…).
     /// <paramref name="describe"/> is evaluated when the burst settles, so only the final
     /// value reaches the file.
@@ -146,10 +194,14 @@ internal static class AppLog
 
     public static void Shutdown()
     {
-        if (!_initialized)
+        // The update path flushes the log before exiting and then the normal shutdown runs
+        // again; without this guard the file would end with two "stopped" lines.
+        if (!_initialized || _shutDown)
         {
             return;
         }
+
+        _shutDown = true;
 
         try
         {

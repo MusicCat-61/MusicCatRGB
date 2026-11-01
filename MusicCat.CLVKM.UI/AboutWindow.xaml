@@ -94,6 +94,40 @@
                           Foreground="{DynamicResource AccentBrush}" TextDecorations="None"><Run Text="{DynamicResource About_LicenseName}"/></Hyperlink><Run Text="."/>
             </TextBlock>
 
+            <Border Height="1" Background="{DynamicResource CardBorderBrush}" Margin="0,20,0,0"/>
+
+            <!-- Updates -->
+            <TextBlock Text="{DynamicResource Upd_Title}" FontSize="16" FontWeight="SemiBold"
+                       Foreground="{DynamicResource TextPrimaryBrush}" Margin="0,18,0,0"/>
+
+            <TextBlock x:Name="UpdateStatusText" FontSize="14.5" TextWrapping="Wrap" LineHeight="23"
+                       Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,10,0,0"/>
+
+            <!-- Download progress -->
+            <Border x:Name="UpdateProgressPanel" Visibility="Collapsed" Height="6" CornerRadius="3"
+                    Background="{DynamicResource CardBorderBrush}" Margin="0,12,0,0">
+                <Border x:Name="UpdateProgressBar" HorizontalAlignment="Left" Width="0" CornerRadius="3"
+                        Background="{DynamicResource AccentBrush}"/>
+            </Border>
+
+            <StackPanel Orientation="Horizontal" Margin="0,14,0,0">
+                <Button x:Name="UpdateCheckButton" Content="{DynamicResource Upd_Check}" Click="UpdateCheck_Click"
+                        MinWidth="180" Height="40" Cursor="Hand" Margin="0,0,10,0"
+                        Style="{StaticResource AccentButtonStyle}"/>
+
+                <Button x:Name="UpdateDownloadButton" Content="{DynamicResource Upd_Check}" Click="UpdateDownload_Click"
+                        MinWidth="180" Height="40" Cursor="Hand" Margin="0,0,10,0" Visibility="Collapsed"
+                        Style="{StaticResource AccentButtonStyle}"/>
+
+                <Button x:Name="UpdateFinishButton" Content="{DynamicResource Upd_Finish}" Click="UpdateFinish_Click"
+                        MinWidth="180" Height="40" Cursor="Hand" Margin="0,0,10,0" Visibility="Collapsed"
+                        Style="{StaticResource AccentButtonStyle}"/>
+
+                <Button x:Name="UpdateReleaseButton" Content="{DynamicResource Upd_OpenRelease}" Click="UpdateRelease_Click"
+                        MinWidth="180" Height="40" Cursor="Hand" Visibility="Collapsed"
+                        Style="{StaticResource AccentButtonStyle}"/>
+            </StackPanel>
+
             <Button Content="{DynamicResource L_Close}" Click="Close_Click" Width="132" Height="40"
                     HorizontalAlignment="Right" Margin="0,22,0,0" Cursor="Hand"
                     Style="{StaticResource AccentButtonStyle}"/>

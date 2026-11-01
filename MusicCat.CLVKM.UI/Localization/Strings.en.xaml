@@ -111,6 +111,25 @@
     <sys:String x:Key="About_LicenseName">MIT License</sys:String>
     <sys:String x:Key="About_Version">Version {0}</sys:String>
 
+<!-- Updates -->
+    <sys:String x:Key="Upd_Title">Updates</sys:String>
+    <sys:String x:Key="Upd_Check">Check for updates</sys:String>
+    <sys:String x:Key="Upd_Checking">Checking GitHub…</sys:String>
+    <sys:String x:Key="Upd_UpToDate">You have the latest version.</sys:String>
+    <sys:String x:Key="Upd_Available">Version {0} is available.</sys:String>
+    <sys:String x:Key="Upd_Download">Download {0}</sys:String>
+    <sys:String x:Key="Upd_Downloading">Downloading… {0}%</sys:String>
+    <sys:String x:Key="Upd_Ready">Downloaded to {0}. The app will close, replace itself and start again.</sys:String>
+    <sys:String x:Key="Upd_Finish">Finish update</sys:String>
+    <sys:String x:Key="Upd_Failed">Could not check for updates: {0}</sys:String>
+    <sys:String x:Key="Upd_DownloadFailed">Download failed: {0}</sys:String>
+    <sys:String x:Key="Upd_NoDownload">Version {0} is available, but the release has no downloadable file. Open the release page to get it manually.</sys:String>
+    <sys:String x:Key="Upd_NotWritable">The folder {0} is not writable, so the update cannot be installed automatically. Move MCRGB.exe somewhere you can write to, for example C:\MusicCatRGB.</sys:String>
+    <sys:String x:Key="Upd_OpenRelease">Open the release page</sys:String>
+    <sys:String x:Key="Upd_RestartFailed">Could not finish the update: {0}</sys:String>
+    <sys:String x:Key="Upd_BalloonTitle">MusicCatRGB update</sys:String>
+    <sys:String x:Key="Upd_BalloonText" xml:space="preserve">Version {0} is available.&#x0a;Open About to install it.</sys:String>
+
     <!-- New effects -->
     <sys:String x:Key="Anim_DayNight">Day / Night</sys:String>
     <sys:String x:Key="Anim_ZoneGradient">Zone Gradient</sys:String>
