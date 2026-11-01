@@ -590,6 +590,9 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     private void ToggleAnimation()
     {
+        // An explicit switch takes the keyboard back from a flash that is still holding it.
+        CancelFlashHold();
+
         if (IsAnimationRunning)
         {
             StopAnimation();
@@ -1559,15 +1562,26 @@ public partial class MainViewModel : ObservableObject
     /// <summary>Fast typing must not turn the flashes into one long glow.</summary>
     private static readonly TimeSpan FlashCooldown = TimeSpan.FromMilliseconds(90);
 
-    private static readonly TimeSpan KeypressFlashDuration = TimeSpan.FromMilliseconds(90);
-    private static readonly TimeSpan NotificationFlashDuration = TimeSpan.FromMilliseconds(420);
+    /// <summary>The effect steps aside while the user types and comes back after this pause.</summary>
+    private static readonly TimeSpan TypingHold = TimeSpan.FromSeconds(5);
+
+    /// <summary>How long a notification keeps the keyboard to itself.</summary>
+    private static readonly TimeSpan NotificationHold = TimeSpan.FromMilliseconds(700);
+
+    /// <summary>The return to the effect is a glide, never a jump.</summary>
+    private static readonly TimeSpan FlashFadeBack = TimeSpan.FromMilliseconds(350);
 
     private static readonly Random FlashRandom = new();
 
     private long _lastFlashTicks;
-    private int _flashGeneration;
+    private long _typingHoldUntilTicks;
+    private long _notificationHoldUntilTicks;
+    private bool _animationPausedForFlash;
+    private bool _endingFlashSession;
     private int _lastPaletteIndex = -1;
     private bool _updatingFlashHex;
+    private ColorRGB _lastFlashColor = ColorRGB.Black;
+    private DispatcherTimer? _flashTimer;
 
     /// <summary>
     /// Called on the UI thread for every event the watcher sends over the pipe. The switches
@@ -1579,49 +1593,64 @@ public partial class MainViewModel : ObservableObject
         switch (kind)
         {
             case WatcherEventKind.Keypress when TypingFlashEnabled:
-                FlashKeypress();
+                FlashForKeypress();
                 break;
 
             case WatcherEventKind.Notification when NotificationFlashEnabled:
-                FlashNotification();
+                FlashForNotification();
                 break;
         }
     }
 
-    private void FlashKeypress()
+    /// <summary>
+    /// A keypress: the flash owns the keyboard and the effect waits. The hold is extended on
+    /// every key, so the animation comes back five seconds after the typing stops instead of
+    /// flickering in and out between keystrokes.
+    /// </summary>
+    private void FlashForKeypress()
     {
-        if (CanFlashNow())
+        if (!CanFlash())
         {
-            _ = FlashAsync(NextKeypressColor(), KeypressFlashDuration);
+            return;
         }
-    }
 
-    private void FlashNotification()
-    {
-        if (CanFlashNow())
-        {
-            _ = FlashAsync(NotificationFlashColor, NotificationFlashDuration);
-        }
-    }
-
-    /// <summary>True when a flash may start now: ready, awake and not right after the last one.</summary>
-    private bool CanFlashNow()
-    {
-        if (!IsReady || IsAsleep || _driver is null)
-        {
-            return false;
-        }
+        BeginFlashSession();
+        Interlocked.Exchange(ref _typingHoldUntilTicks, Environment.TickCount64 + (long)TypingHold.TotalMilliseconds);
 
         var now = Environment.TickCount64;
 
         if (now - Interlocked.Read(ref _lastFlashTicks) < FlashCooldown.TotalMilliseconds)
         {
-            return false;
+            // The hold was extended above; the colour simply did not change this time.
+            return;
         }
 
         Interlocked.Exchange(ref _lastFlashTicks, now);
-        return true;
+        PaintFlash(NextKeypressColor());
     }
+
+    /// <summary>
+    /// A toast: one colour for a moment, then the effect returns on its own. A notification
+    /// neither cancels typing flashes nor is cancelled by them — each one only extends the
+    /// hold it owns, so the two can never cut each other short.
+    /// </summary>
+    private void FlashForNotification()
+    {
+        if (!CanFlash())
+        {
+            return;
+        }
+
+        BeginFlashSession();
+        Interlocked.Exchange(
+            ref _notificationHoldUntilTicks,
+            Environment.TickCount64 + (long)NotificationHold.TotalMilliseconds);
+
+        PaintFlash(NotificationFlashColor);
+    }
+
+    /// <summary>True when a flash may be shown now: the driver is ready and the keyboard awake.</summary>
+    private bool CanFlash() => IsReady && !IsAsleep && _driver is not null;
 
     /// <summary>A random palette colour that is never the same as the previous one.</summary>
     private ColorRGB NextKeypressColor()
@@ -1638,37 +1667,116 @@ public partial class MainViewModel : ObservableObject
     }
 
     /// <summary>
-    /// Paints the keyboard for a moment. With an effect running the engine draws the flash
-    /// itself and the effect comes back on its own; a static colour is restored by hand, and
-    /// a flash that was overtaken by a newer one leaves the restore to that newer flash.
+    /// Freezes the effect the first time a flash arrives — otherwise its frames would land on
+    /// top of the flash colour — and starts the timer that ends the hold.
     /// </summary>
-    private async Task FlashAsync(ColorRGB color, TimeSpan duration)
+    private void BeginFlashSession()
     {
-        if (_driver is null)
+        if (!_animationPausedForFlash && IsAnimationRunning && _animationEngine is not null)
+        {
+            _animationEngine.Pause();
+            _animationPausedForFlash = true;
+            AppLog.Event("flash", "Animation paused: a flash takes the keyboard");
+        }
+
+        if (_flashTimer is null)
+        {
+            _flashTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(120) };
+            _flashTimer.Tick += OnFlashTick;
+        }
+
+        _flashTimer.Start();
+    }
+
+    private void OnFlashTick(object? sender, EventArgs e)
+    {
+        var holdUntil = Math.Max(
+            Interlocked.Read(ref _typingHoldUntilTicks),
+            Interlocked.Read(ref _notificationHoldUntilTicks));
+
+        if (holdUntil > Environment.TickCount64)
         {
             return;
         }
 
-        var generation = Interlocked.Increment(ref _flashGeneration);
-        var painted = color.ApplyBrightness((float)(Brightness / 100.0));
+        _ = EndFlashSessionAsync();
+    }
+
+    /// <summary>
+    /// Gives the keyboard back: fades from the last flash colour to whatever should be shown
+    /// and only then lets the effect run again, so the switch reads as a breath, not a jump.
+    /// </summary>
+    private async Task EndFlashSessionAsync()
+    {
+        if (_endingFlashSession)
+        {
+            return;
+        }
+
+        _endingFlashSession = true;
 
         try
         {
-            if (IsAnimationRunning && _animationEngine is not null)
+            _flashTimer?.Stop();
+            Interlocked.Exchange(ref _typingHoldUntilTicks, 0);
+            Interlocked.Exchange(ref _notificationHoldUntilTicks, 0);
+
+            var resumeAnimation = _animationPausedForFlash;
+            _animationPausedForFlash = false;
+
+            if (_driver is null || IsAsleep)
             {
-                _animationEngine.Flash(painted, duration);
+                // While asleep the engine stays paused; the sleep timer resumes it on wake.
+                if (resumeAnimation && !IsAsleep)
+                {
+                    _animationEngine?.Resume();
+                }
+
                 return;
             }
 
-            await _driver.SetColorAsync(Zone.All, painted);
-            await Task.Delay(duration);
+            await FadeAsync(_lastFlashColor, OutputColor, (int)FlashFadeBack.TotalMilliseconds);
 
-            if (Volatile.Read(ref _flashGeneration) != generation)
+            if (resumeAnimation)
             {
-                return;
+                _animationEngine?.Resume();
+                AppLog.Event("flash", "Animation resumed after the flash");
             }
+        }
+        catch (Exception ex)
+        {
+            AppLog.Warn("Could not end the flash: {Message}", ex.Message);
+        }
+        finally
+        {
+            _endingFlashSession = false;
+        }
+    }
 
-            await _driver.SetColorAsync(Zone.All, OutputColor);
+    /// <summary>Drops the hold without painting anything — the user took control back.</summary>
+    private void CancelFlashHold()
+    {
+        _flashTimer?.Stop();
+        Interlocked.Exchange(ref _typingHoldUntilTicks, 0);
+        Interlocked.Exchange(ref _notificationHoldUntilTicks, 0);
+        _animationPausedForFlash = false;
+    }
+
+    private void PaintFlash(ColorRGB color)
+    {
+        var painted = color.ApplyBrightness((float)(Brightness / 100.0));
+        _lastFlashColor = painted;
+        _ = WriteFlashColorAsync(painted);
+    }
+
+    private async Task WriteFlashColorAsync(ColorRGB color)
+    {
+        try
+        {
+            if (_driver is not null)
+            {
+                await _driver.SetColorAsync(Zone.All, color);
+            }
         }
         catch (Exception ex)
         {
@@ -1774,6 +1882,9 @@ public partial class MainViewModel : ObservableObject
         {
             return;
         }
+
+        // The sleep timer owns the keyboard now; a pending flash hold must not fight it.
+        CancelFlashHold();
 
         _sleepTransition = true;
         _isSleeping = true;

@@ -196,6 +196,9 @@
     <sys:String x:Key="Wx_DirSW">ЮЗ</sys:String>
     <sys:String x:Key="Wx_DirW">З</sys:String>
     <sys:String x:Key="Wx_DirNW">СЗ</sys:String>
+    <!-- Closing the window while the app keeps running in the tray -->
+    <sys:String x:Key="Msg_MinimizedToTray">Приложение будет свернуто в трей и продолжит работу. Чтобы закрыть его полностью, выберите «Выход» в меню значка в трее.</sys:String>
+
     <!-- Keypress and notification flashes -->
     <sys:String x:Key="L_TypingFlash">Вспышка при наборе (случайный цвет)</sys:String>
     <sys:String x:Key="L_NotificationFlash">Вспышка при уведомлениях Windows</sys:String>

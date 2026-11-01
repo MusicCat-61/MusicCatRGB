@@ -337,9 +337,37 @@ public partial class MainWindow : Window
         }
         else
         {
-            // X button minimizes to tray.
+            // The X button hides the window instead of closing the app, which looks like the
+            // window refusing to close: say what happened and where the app went. Deferred, so
+            // the window is already gone and no dialog is opened from a Closing handler.
             e.Cancel = true;
             Hide();
+            _ = Dispatcher.BeginInvoke(new Action(ShowTrayNotice));
+        }
+    }
+
+    private bool _trayNoticeOpen;
+
+    /// <summary>
+    /// Explains that the window only goes to the tray and the lighting keeps running. Shown on
+    /// every close, and guarded so a double click cannot stack two dialogs.
+    /// </summary>
+    private void ShowTrayNotice()
+    {
+        if (_trayNoticeOpen)
+        {
+            return;
+        }
+
+        _trayNoticeOpen = true;
+
+        try
+        {
+            ModernMessageBox.ShowInfo(Loc.T("Msg_MinimizedToTray"), "MusicCatRGB");
+        }
+        finally
+        {
+            _trayNoticeOpen = false;
         }
     }
 }

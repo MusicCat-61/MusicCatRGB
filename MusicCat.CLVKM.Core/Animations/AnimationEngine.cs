@@ -16,14 +16,6 @@ public class AnimationEngine
     private CancellationTokenSource? _cts;
     private IAnimation? _currentAnimation;
 
-    /// <summary>
-    /// Colour and deadline of the transient flash (typing, a Windows notification). The
-    /// fields are read from the animation loop, so they are touched through Interlocked and
-    /// a volatile read; a frame torn in the middle would cost one odd colour, nothing else.
-    /// </summary>
-    private ColorRGB _flashColor;
-    private long _flashUntilTicks;
-
     /// <summary>Incremented on every Start; loops from older generations exit immediately.</summary>
     private int _generation;
 
@@ -74,22 +66,6 @@ public class AnimationEngine
     /// <summary>Resumes a paused loop.</summary>
     public void Resume() => _isPaused = false;
 
-    /// <summary>
-    /// Paints over the running effect for a moment — the keypress and notification flashes.
-    /// The frames keep flowing, so the effect comes back by itself when the window expires
-    /// and nothing has to be restarted.
-    /// </summary>
-    public void Flash(ColorRGB color, TimeSpan duration)
-    {
-        _flashColor = color;
-        Interlocked.Exchange(ref _flashUntilTicks, Environment.TickCount64 + (long)duration.TotalMilliseconds);
-    }
-
-    /// <summary>Ends a flash early, for example while the app is shutting down.</summary>
-    public void ClearFlash() => Interlocked.Exchange(ref _flashUntilTicks, 0L);
-
-    private bool IsFlashing() => Environment.TickCount64 < Volatile.Read(ref _flashUntilTicks);
-
     private void StopCore()
     {
         _cts?.Cancel();
@@ -134,12 +110,6 @@ public class AnimationEngine
 
                     // Apply global brightness.
                     var finalColor = frame.Color.ApplyBrightness(Brightness);
-
-                    // A flash (a keypress, a toast) paints over the effect for a moment.
-                    if (IsFlashing())
-                    {
-                        finalColor = _flashColor;
-                    }
 
                     await _writeLock.WaitAsync(token).ConfigureAwait(false);
                     try
