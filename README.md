@@ -4,7 +4,7 @@
 [![Download](https://img.shields.io/badge/download-MCRGB.exe-2ea44f?style=flat-square)](https://github.com/MusicCat-61/MusicCatRGB/releases/latest/download/MCRGB.exe)
 [![CI](https://github.com/MusicCat-61/MusicCatRGB/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/MusicCat-61/MusicCatRGB/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](LICENSE)
-[![Version](https://img.shields.io/badge/version-1.0.7.3-4CC2FF?style=flat-square)](https://github.com/MusicCat-61/MusicCatRGB/releases/tag/v1.0.7.3)
+[![Version](https://img.shields.io/badge/version-1.0.8.0-4CC2FF?style=flat-square)](https://github.com/MusicCat-61/MusicCatRGB/releases/tag/v1.0.8.0)
 [![Platform](https://img.shields.io/badge/platform-Windows%2010%20%7C%2011-0078D6?style=flat-square)](#)
 [![.NET](https://img.shields.io/badge/.NET-10-512BD4?style=flat-square)](https://dotnet.microsoft.com/download)
 
@@ -115,9 +115,12 @@ Both switches live in the title bar: `EN | RU` for the interface language and th
 1. Download [**`MCRGB.exe`**](https://github.com/MusicCat-61/MusicCatRGB/releases/latest/download/MCRGB.exe) — one self-contained file, no installer and no .NET runtime required.
 2. Keep it in a permanent folder, for example `C:\MusicCatRGB`.
 3. Run it as administrator — the app needs it to talk to the keyboard driver.
-4. On the first run accept **Service Mode** to create a scheduled task, so Windows starts the app with the saved lighting.
+4. On the first run the app first checks whether the machine fits: a Clevo/Monster board (or a Tongfang rebrand), the `InsydeDCHU.dll` driver and the Control Center with `FnKey.exe`. When nothing matches it says so honestly instead of offering an autostart for a feature that cannot work.
+5. If the machine fits, accept **Service Mode** to create a scheduled task, so Windows starts the app with the saved lighting and no UAC prompt. It is asked once; declining is remembered too.
 
 > The original Control Center (`FnKey.exe`) should be running: MusicCatRGB relies on the drivers it initialises.
+
+The state of that task is shown at the bottom of the device card: a green dot with "task registered", or a red one with "no task". If the task was removed (a cleanup tool, an antivirus, moving the executable), a **Fix** button appears next to it and recreates the task for the current path. The check runs again whenever the window is opened, so a missing task is not left unnoticed.
 
 The X in the title bar does not close the app: the window goes to the tray, a short note says so, and the lighting keeps running. **Exit** in the tray icon menu is what really closes it.
 
@@ -181,8 +184,8 @@ or run `publish.bat` to get a self-contained folder in `Build_Output`.
 Pushing a version tag builds and publishes the app — the [release workflow](.github/workflows/release.yml) publishes a self-contained single-file `MCRGB.exe` (win-x64) on `windows-latest`, stamps the tag into its file version and attaches the executable plus its SHA-256 checksum to a GitHub release with generated notes. The download is about 75 MB: on the first start the bundle unpacks its runtime into `%TEMP%\.net\MCRGB` and reuses it afterwards.
 
 ```powershell
-git tag v1.0.7.3
-git push origin v1.0.7.3
+git tag v1.0.8.0
+git push origin v1.0.8.0
 ```
 
 Every push to `main` runs the [CI workflow](.github/workflows/ci.yml), which only compiles the solution — no tag, no release.

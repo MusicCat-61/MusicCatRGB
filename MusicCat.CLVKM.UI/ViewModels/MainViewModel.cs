@@ -119,6 +119,79 @@ public partial class MainViewModel : ObservableObject
     /// <summary>Raised when either flash is switched, so the watcher process can follow.</summary>
     public event EventHandler? FlashSettingsChanged;
 
+    // --- Logon task (Task Scheduler) ------------------------------------------------------
+
+    /// <summary>True when the Task Scheduler really holds a task for this executable.</summary>
+    [ObservableProperty] private bool _startupTaskRegistered;
+
+    /// <summary>Localized one-line state of that task, shown next to the flash checkboxes.</summary>
+    [ObservableProperty] private string _startupTaskStatus = string.Empty;
+
+    /// <summary>True when the task is missing or points somewhere else — the fix button shows.</summary>
+    public bool NeedsStartupTaskFix => !StartupTaskRegistered;
+
+    /// <summary>
+    /// Re-reads the task state. It shells out to schtasks (~50 ms), so it runs off the UI thread
+    /// and writes the properties when it is done.
+    /// </summary>
+    public async Task RefreshStartupTaskAsync()
+    {
+        var executable = Environment.ProcessPath;
+
+        var state = await Task.Run(
+            () => Core.Platform.StartupTask.Query(Core.AppPaths.StartupTaskName, executable, out _));
+
+        StartupTaskRegistered = state == Core.Platform.StartupTaskState.Registered;
+
+        StartupTaskStatus = state switch
+        {
+            Core.Platform.StartupTaskState.Registered => Loc.T("L_StartupTaskOk"),
+            Core.Platform.StartupTaskState.Missing => Loc.T("L_StartupTaskMissing"),
+            Core.Platform.StartupTaskState.PointsElsewhere => Loc.T("L_StartupTaskElsewhere"),
+            _ => Loc.T("L_StartupTaskUnknown")
+        };
+
+        OnPropertyChanged(nameof(NeedsStartupTaskFix));
+    }
+
+    /// <summary>
+    /// Recreates the logon task. Registration is idempotent (<c>/f</c>), so this also repairs a
+    /// task that still points at an executable the app no longer lives in.
+    /// </summary>
+    [RelayCommand]
+    private async Task FixStartupTask()
+    {
+        var executable = Environment.ProcessPath;
+
+        if (string.IsNullOrEmpty(executable))
+        {
+            return;
+        }
+
+        var error = string.Empty;
+
+        var created = await Task.Run(() =>
+        {
+            var ok = Core.Platform.StartupTask.TryRegister(Core.AppPaths.StartupTaskName, executable, out var message);
+            error = message;
+            return ok;
+        });
+
+        if (created)
+        {
+            _currentSettings.IsStartupEnabled = true;
+            SaveSettings();
+            AppLog.Event("autostart", "Logon task created from the main window");
+        }
+        else
+        {
+            AppLog.EventWarning("autostart", $"Logon task could not be created: {error}");
+            StartupTaskStatus = Loc.T("L_StartupTaskFixFailed");
+        }
+
+        await RefreshStartupTaskAsync();
+    }
+
     private static readonly TimeSpan SleepTimeout = TimeSpan.FromMinutes(5);
     private DispatcherTimer? _idleTimer;
     private bool _isSleeping;

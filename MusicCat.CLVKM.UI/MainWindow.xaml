@@ -635,6 +635,47 @@
                             <Slider Minimum="0.5" Maximum="5" Value="{Binding NotificationFlashSeconds}"
                                     IsSnapToTickEnabled="True" TickFrequency="0.1" Margin="0,2,0,0"/>
                         </StackPanel>
+
+                        <!-- Whether Windows really starts the app at logon, with a way back -->
+                        <Border Height="1" Background="{DynamicResource CardBorderBrush}" Margin="0,14,0,10"/>
+
+                        <TextBlock Text="{DynamicResource L_StartupTask}" Style="{StaticResource SectionLabelStyle}"
+                                   Margin="0,0,0,6"/>
+
+                        <DockPanel>
+                            <Button DockPanel.Dock="Right" Content="{DynamicResource L_StartupTaskFix}"
+                                    Command="{Binding FixStartupTaskCommand}" Height="28" Padding="14,0"
+                                    Margin="10,0,0,0" VerticalAlignment="Center">
+                                <Button.Style>
+                                    <Style TargetType="Button" BasedOn="{StaticResource SubtleButtonStyle}">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding NeedsStartupTaskFix}" Value="False">
+                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
+                            </Button>
+
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <Ellipse Width="9" Height="9" VerticalAlignment="Center">
+                                    <Ellipse.Style>
+                                        <Style TargetType="Ellipse">
+                                            <Setter Property="Fill" Value="#FFE0574C"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding StartupTaskRegistered}" Value="True">
+                                                    <Setter Property="Fill" Value="#FF4ADE80"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Ellipse.Style>
+                                </Ellipse>
+
+                                <TextBlock Text="{Binding StartupTaskStatus}" FontSize="13.5" Margin="8,0,0,0"
+                                           VerticalAlignment="Center" TextWrapping="Wrap"
+                                           Foreground="{DynamicResource TextTertiaryBrush}"/>
+                            </StackPanel>
+                        </DockPanel>
                     </StackPanel>
                 </Border>
 

@@ -141,13 +141,9 @@ public partial class App : System.Windows.Application
         }
 
         // The pre-1.0.6 task points at the old executable name; it is dead weight now.
-        DeleteStartupTask(Core.AppPaths.LegacyStartupTaskName);
+        Core.Platform.StartupTask.TryDelete(Core.AppPaths.LegacyStartupTaskName);
 
-        if (!startInTray)
-        {
-            CheckAndAskStartup();
-        }
-        else if (startupSettings.IsStartupEnabled)
+        if (startInTray && startupSettings.IsStartupEnabled)
         {
             // Started by the logon task: repoint it at this executable in case it was renamed.
             SyncStartupTask();
@@ -180,6 +176,118 @@ public partial class App : System.Windows.Application
         StartPeriodicUpdateChecks();
         StartFlashWatcher();
         _ = CheckForUpdatesAfterStartupAsync();
+
+        // The first run asks about the machine and the logon task; after that the window simply
+        // shows whether the task is still there.
+        await ShowStartupTaskStateAsync();
+
+        if (!startInTray)
+        {
+            await RunFirstRunAsync();
+        }
+    }
+
+    /// <summary>Mirrors the real task state into the window; cheap, so it runs on every show.</summary>
+    private static async Task ShowStartupTaskStateAsync()
+    {
+        if (Current?.MainWindow?.DataContext is ViewModels.MainViewModel viewModel)
+        {
+            await viewModel.RefreshStartupTaskAsync();
+        }
+    }
+
+    /// <summary>
+    /// Runs once: is this a machine the app can drive, and does the user want the logon task?
+    ///
+    /// The compatibility answers come first, because offering an autostart on a laptop of another
+    /// make would promise a feature that cannot work. The flag that remembers "already asked"
+    /// lives in the settings, so declining is remembered too — the old code asked again on every
+    /// launch.
+    /// </summary>
+    private async Task RunFirstRunAsync()
+    {
+        var settings = SettingsManager.Load();
+
+        if (settings.FirstRunCompleted)
+        {
+            return;
+        }
+
+        SetTrayText("Tray_Checking");
+
+        Core.Platform.CompatibilityReport report;
+
+        try
+        {
+            report = await Task.Run(() => Core.Platform.CompatibilityCheck.Run());
+        }
+        catch
+        {
+            report = Core.Platform.CompatibilityReport.Unknown;
+        }
+
+        SetTrayText("Tray_Ready");
+
+        Logging.AppLog.Event(
+            "compat",
+            $"First run on «{report.BoardDisplay}»: clevo={report.BoardLooksClevo}, driver={report.DriverLoadable}, " +
+            $"controlCenter={report.ControlCenterRunning}/{report.ControlCenterInstalled}, compatible={report.IsCompatible}");
+
+        if (report.IsClearlyIncompatible)
+        {
+            ModernMessageBox.ShowInfo(
+                Loc.F("Msg_CompatFailed", report.BoardDisplay),
+                Loc.T("Msg_CompatTitle"));
+
+            CompleteFirstRun(settings, startupEnabled: false);
+            return;
+        }
+
+        var state = await Task.Run(
+            () => Core.Platform.StartupTask.Query(Core.AppPaths.StartupTaskName, Environment.ProcessPath, out _));
+
+        if (state == Core.Platform.StartupTaskState.Registered)
+        {
+            CompleteFirstRun(settings, startupEnabled: true);
+            return;
+        }
+
+        // The task is gone even though the user agreed to it once, or it was never set up.
+        var question = settings.IsStartupEnabled ? Loc.T("Msg_StartupRepair") : Loc.T("Msg_ServiceMode");
+
+        if (!ModernMessageBox.Show(question, Loc.T("Msg_ServiceModeTitle")))
+        {
+            CompleteFirstRun(settings, startupEnabled: false);
+            return;
+        }
+
+        var created = await Task.Run(
+            () => Core.Platform.StartupTask.TryRegister(
+                Core.AppPaths.StartupTaskName,
+                Environment.ProcessPath ?? string.Empty,
+                out var error)
+                ? (string.Empty)
+                : error);
+
+        if (created.Length > 0)
+        {
+            Logging.AppLog.EventWarning("autostart", $"Logon task could not be created: {created}");
+            ModernMessageBox.ShowInfo(Loc.T("Msg_StartupFailed"), Loc.T("Msg_ServiceModeTitle"));
+        }
+        else
+        {
+            Logging.AppLog.Event("autostart", "Logon task created on the first run");
+        }
+
+        CompleteFirstRun(settings, startupEnabled: created.Length == 0);
+        await ShowStartupTaskStateAsync();
+    }
+
+    private static void CompleteFirstRun(AppSettings settings, bool startupEnabled)
+    {
+        settings.FirstRunCompleted = true;
+        settings.IsStartupEnabled = startupEnabled;
+        SettingsManager.Save(settings);
     }
 
     /// <summary>
@@ -257,6 +365,10 @@ public partial class App : System.Windows.Application
     /// </summary>
     internal void OnMainWindowShown()
     {
+        // The task may have been removed (or repaired) while the window was hidden, so the
+        // status line is re-read every time it comes back.
+        _ = ShowStartupTaskStateAsync();
+
         // The window is shown while the startup check is still waiting for the app to
         // settle; that check owns this moment, so this one would only duplicate it.
         if (_startupCheckSettling)
@@ -516,44 +628,12 @@ public partial class App : System.Windows.Application
         watchdog.Start();
     }
 
-    private void CheckAndAskStartup()
-    {
-        try
-        {
-            bool isConfigured = SettingsManager.Load().IsStartupEnabled;
-
-            if (isConfigured)
-            {
-                return;
-            }
-
-            bool enable = ModernMessageBox.Show(
-                Loc.T("Msg_ServiceMode"),
-                Loc.T("Msg_ServiceModeTitle"));
-
-            if (!enable)
-            {
-                return;
-            }
-
-            RegisterStartup();
-
-            var settings = SettingsManager.Load();
-            settings.IsStartupEnabled = true;
-            SettingsManager.Save(settings);
-        }
-        catch
-        {
-            // Never block startup because of the optional auto-start helper.
-        }
-    }
-
     public static void RemoveDataAndStartup()
     {
         try
         {
-            DeleteStartupTask(Core.AppPaths.StartupTaskName);
-            DeleteStartupTask(Core.AppPaths.LegacyStartupTaskName);
+            Core.Platform.StartupTask.TryDelete(Core.AppPaths.StartupTaskName);
+            Core.Platform.StartupTask.TryDelete(Core.AppPaths.LegacyStartupTaskName);
 
             // Legacy registry entry cleanup.
             try
@@ -589,24 +669,6 @@ public partial class App : System.Windows.Application
         catch (Exception ex)
         {
             ModernMessageBox.ShowInfo(Loc.F("Msg_CleanupError", ex.Message), Loc.T("Msg_ErrorTitle"));
-        }
-    }
-
-    private static void DeleteStartupTask(string taskName)
-    {
-        try
-        {
-            Process.Start(new ProcessStartInfo
-            {
-                FileName = "schtasks",
-                Arguments = $"/delete /tn \"{taskName}\" /f",
-                UseShellExecute = false,
-                CreateNoWindow = true
-            })?.WaitForExit();
-        }
-        catch
-        {
-            // The task may not exist.
         }
     }
 
@@ -656,30 +718,19 @@ public partial class App : System.Windows.Application
 
     private void RegisterStartup()
     {
-        try
+        var executable = Environment.ProcessPath ?? Process.GetCurrentProcess().MainModule?.FileName;
+
+        if (string.IsNullOrEmpty(executable))
         {
-            string exePath = Process.GetCurrentProcess().MainModule?.FileName ?? string.Empty;
-            if (string.IsNullOrEmpty(exePath))
-            {
-                return;
-            }
-
-            // Scheduled task so the app can start elevated at logon without a UAC prompt.
-            // /f makes this idempotent: re-registering repoints an existing task at the
-            // current executable, which is what keeps autostart working after a rename.
-            string cmd = $"/create /tn \"{Core.AppPaths.StartupTaskName}\" /tr \"'\\\"{exePath}\\\"' --tray\" /sc onlogon /rl HIGHEST /f";
-
-            Process.Start(new ProcessStartInfo
-            {
-                FileName = "schtasks",
-                Arguments = cmd,
-                UseShellExecute = true,
-                CreateNoWindow = true
-            })?.WaitForExit();
+            return;
         }
-        catch
+
+        // The task is the only way to start the app elevated at logon without a UAC prompt;
+        // re-registering is idempotent, which is what repairs a task that points at an old
+        // executable after the app was moved or renamed.
+        if (!Core.Platform.StartupTask.TryRegister(Core.AppPaths.StartupTaskName, executable, out var error))
         {
-            // Optional feature.
+            Logging.AppLog.EventWarning("autostart", $"Logon task could not be created: {error}");
         }
     }
 

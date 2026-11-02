@@ -199,6 +199,19 @@
     <!-- Closing the window while the app keeps running in the tray -->
     <sys:String x:Key="Msg_MinimizedToTray">Приложение будет свернуто в трей и продолжит работу. Чтобы закрыть его полностью, выберите «Выход» в меню значка в трее.</sys:String>
 
+    <!-- Logon task and first-run checks -->
+    <sys:String x:Key="L_StartupTask">Автозапуск (Планировщик задач)</sys:String>
+    <sys:String x:Key="L_StartupTaskOk">задача добавлена — приложение стартует при входе</sys:String>
+    <sys:String x:Key="L_StartupTaskMissing">задачи нет — приложение не запустится при входе</sys:String>
+    <sys:String x:Key="L_StartupTaskElsewhere">задача указывает на другой файл — её надо пересоздать</sys:String>
+    <sys:String x:Key="L_StartupTaskUnknown">состояние задачи прочитать не удалось</sys:String>
+    <sys:String x:Key="L_StartupTaskFix">Исправить</sys:String>
+    <sys:String x:Key="L_StartupTaskFixFailed">не удалось создать задачу — подробности в журнале</sys:String>
+    <sys:String x:Key="Msg_StartupRepair" xml:space="preserve">Задача автозапуска пропала: Windows больше не запускает приложение при входе.&#x0a;&#x0a;Восстановить задачу?</sys:String>
+    <sys:String x:Key="Msg_StartupFailed" xml:space="preserve">Не удалось создать задачу автозапуска.&#x0a;&#x0a;Попробуйте запустить приложение от имени администратора — планировщик требует повышенных прав.</sys:String>
+    <sys:String x:Key="Msg_CompatTitle">Совместимость</sys:String>
+    <sys:String x:Key="Msg_CompatFailed" xml:space="preserve">Похоже, это не ноутбук Clevo/Monster: плата «{0}» не опознана, драйвер InsydeDCHU.dll не найден, Control Center (FnKey.exe) не установлен.&#x0a;&#x0a;Приложение запустится, но подсветка на такой машине вряд ли заработает.</sys:String>
+
     <!-- Keypress and notification flashes -->
     <sys:String x:Key="L_TypingFlash">Вспышка при наборе (случайный цвет)</sys:String>
     <sys:String x:Key="L_NotificationFlash">Вспышка при уведомлениях Windows</sys:String>

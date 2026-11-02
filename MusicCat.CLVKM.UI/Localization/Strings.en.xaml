@@ -199,6 +199,19 @@
     <!-- Closing the window while the app keeps running in the tray -->
     <sys:String x:Key="Msg_MinimizedToTray">The app will be minimised to the tray and keep running. To close it completely, choose Exit from the tray icon menu.</sys:String>
 
+    <!-- Logon task and first-run checks -->
+    <sys:String x:Key="L_StartupTask">Autostart (Task Scheduler)</sys:String>
+    <sys:String x:Key="L_StartupTaskOk">task registered — the app starts at logon</sys:String>
+    <sys:String x:Key="L_StartupTaskMissing">no task — the app will not start at logon</sys:String>
+    <sys:String x:Key="L_StartupTaskElsewhere">the task points at another file — it has to be recreated</sys:String>
+    <sys:String x:Key="L_StartupTaskUnknown">the task state could not be read</sys:String>
+    <sys:String x:Key="L_StartupTaskFix">Fix</sys:String>
+    <sys:String x:Key="L_StartupTaskFixFailed">the task could not be created — see the log</sys:String>
+    <sys:String x:Key="Msg_StartupRepair" xml:space="preserve">The autostart task is gone: Windows no longer starts the app at logon.&#x0a;&#x0a;Recreate it?</sys:String>
+    <sys:String x:Key="Msg_StartupFailed" xml:space="preserve">The autostart task could not be created.&#x0a;&#x0a;Try starting the app as administrator — the Task Scheduler needs elevated rights.</sys:String>
+    <sys:String x:Key="Msg_CompatTitle">Compatibility</sys:String>
+    <sys:String x:Key="Msg_CompatFailed" xml:space="preserve">This does not look like a Clevo/Monster laptop: the board «{0}» is not recognised, the InsydeDCHU.dll driver is missing and the Control Center (FnKey.exe) is not installed.&#x0a;&#x0a;The app will start, but the lighting will most likely not work on this machine.</sys:String>
+
     <!-- Keypress and notification flashes -->
     <sys:String x:Key="L_TypingFlash">Flash on every keystroke (random colour)</sys:String>
     <sys:String x:Key="L_NotificationFlash">Flash on Windows notifications</sys:String>

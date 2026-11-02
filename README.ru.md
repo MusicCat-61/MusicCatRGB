@@ -4,7 +4,7 @@
 [![Download](https://img.shields.io/badge/download-MCRGB.exe-2ea44f?style=flat-square)](https://github.com/MusicCat-61/MusicCatRGB/releases/latest/download/MCRGB.exe)
 [![CI](https://github.com/MusicCat-61/MusicCatRGB/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/MusicCat-61/MusicCatRGB/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](LICENSE)
-[![Version](https://img.shields.io/badge/version-1.0.7.3-4CC2FF?style=flat-square)](https://github.com/MusicCat-61/MusicCatRGB/releases/tag/v1.0.7.3)
+[![Version](https://img.shields.io/badge/version-1.0.8.0-4CC2FF?style=flat-square)](https://github.com/MusicCat-61/MusicCatRGB/releases/tag/v1.0.8.0)
 [![Platform](https://img.shields.io/badge/platform-Windows%2010%20%7C%2011-0078D6?style=flat-square)](#)
 [![.NET](https://img.shields.io/badge/.NET-10-512BD4?style=flat-square)](https://dotnet.microsoft.com/download)
 
@@ -115,9 +115,12 @@ MusicCatRGB — форк проекта [GutsV](https://github.com/gutsv-project
 1. Скачайте [**`MCRGB.exe`**](https://github.com/MusicCat-61/MusicCatRGB/releases/latest/download/MCRGB.exe) — один самодостаточный файл, установщик и .NET Runtime не нужны.
 2. Положите его в постоянную папку, например `C:\MusicCatRGB`.
 3. Запустите от имени администратора — иначе не будет доступа к драйверу клавиатуры.
-4. При первом запуске согласитесь на **режим службы**: приложение создаст задачу в Планировщике, чтобы Windows поднимала его с сохранённой подсветкой.
+4. При первом запуске приложение сначала проверяет, подходит ли машина: плата Clevo/Monster (или Tongfang и их перепродажи), драйвер `InsydeDCHU.dll` и Control Center с `FnKey.exe`. Если ничего не совпало, оно честно предупредит, что подсветка вряд ли заработает, и не будет предлагать автозапуск.
+5. Если машина подходит — согласитесь на **режим службы**: приложение создаст задачу в Планировщике, чтобы Windows поднимала его с сохранённой подсветкой без запроса UAC. Спрашивают один раз; отказ тоже запоминается.
 
 > Желательно, чтобы оригинальный Control Center (`FnKey.exe`) был запущен: MusicCatRGB опирается на драйверы, которые тот инициализирует.
+
+Состояние задачи видно в карточке устройства, внизу: зелёная точка и «задача добавлена» либо красная и «задачи нет». Если задачу убрали (очистка, антивирус, перенос файла в другую папку), рядом появляется кнопка **«Исправить»** — она пересоздаёт задачу с текущим путём. Проверка повторяется при каждом открытии окна, так что пропажа не останется незамеченной.
 
 Крестик в заголовке окна не закрывает приложение: оно сворачивается в трей, о чём сразу показывается подсказка, а подсветка продолжает работать. Полностью закрывает программа **«Выход»** в меню значка в трее.
 
@@ -181,8 +184,8 @@ dotnet build MusicCat.CLVKM.slnx -c Release
 Пуш тега запускает сборку и публикацию: [workflow](.github/workflows/release.yml) собирает самодостаточный однофайловый `MCRGB.exe` под `win-x64` на `windows-latest`, проставляет ему версию из тега и прикрепляет исполняемый файл вместе с контрольной суммой SHA-256 к релизу с автоматически составленным списком изменений. Скачивание — около 75 МБ: при первом запуске бандл распаковывает среду выполнения в `%TEMP%\.net\MCRGB` и дальше переиспользует её.
 
 ```powershell
-git tag v1.0.7.3
-git push origin v1.0.7.3
+git tag v1.0.8.0
+git push origin v1.0.8.0
 ```
 
 Каждый пуш в `main` запускает [CI workflow](.github/workflows/ci.yml) — только сборку решения, без тега и релиза.

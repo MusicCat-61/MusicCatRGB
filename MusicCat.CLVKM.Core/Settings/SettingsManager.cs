@@ -12,6 +12,12 @@ public class AppSettings
     public string? LastAnimation { get; set; }
     public double Brightness { get; set; } = 100;
     public bool IsStartupEnabled { get; set; } = false;
+
+    /// <summary>
+    /// Set once the first-run questions (compatibility and the logon task) have been asked, so
+    /// a user who declined is not asked again on every launch.
+    /// </summary>
+    public bool FirstRunCompleted { get; set; }
     public bool IsAnimationActive { get; set; } = false;
     public double AnimationSpeed { get; set; } = 1.0;
 
